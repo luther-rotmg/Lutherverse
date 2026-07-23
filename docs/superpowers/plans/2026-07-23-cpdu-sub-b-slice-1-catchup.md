@@ -1,8 +1,8 @@
 # Sub-B Slice 1: v2.1 → v2.5 engine and tuning catchup
 
-**Date:** 2026-07-23  
-**Status:** execution plan  
-**Design source:** `docs/superpowers/specs/2026-07-22-cpdu-sub-b-upstream-sync-design.md`  
+**Date:** 2026-07-23
+**Status:** execution plan
+**Design source:** `docs/superpowers/specs/2026-07-22-cpdu-sub-b-upstream-sync-design.md`
 **Previous slice:** Slice 0 at `a4519786780a4853fb0f7e36d097bf83b5ce08bf`
 
 ## Objective
