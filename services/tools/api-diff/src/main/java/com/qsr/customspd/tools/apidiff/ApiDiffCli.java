@@ -93,16 +93,31 @@ public final class ApiDiffCli {
     /**
      * Reads and parses a file's surface at a ref. A file that does not
      * exist at that ref (e.g. it was added or removed by the range) is
-     * treated as an empty surface rather than an error.
+     * treated as an empty surface rather than an error. A genuine
+     * Git/blob/process failure (bad ref, git not found, etc.) is
+     * propagated to the caller, making the CLI exit non-zero.
      */
     private static JavaSurface surfaceAt(String ref, String path) throws IOException {
         String source;
         try {
             source = GitBlobReader.read(ref, path);
-        } catch (IOException notFound) {
-            return new JavaSurface(List.of());
+        } catch (IOException e) {
+            if (isPathNotFound(e)) {
+                return new JavaSurface(List.of());
+            }
+            throw e;
         }
         return JavaSurfaceExtractor.extract(path, source);
+    }
+
+    /**
+     * Returns {@code true} if the exception from {@link GitBlobReader}
+     * indicates a genuinely absent path rather than a process/ref failure.
+     * git-show exits 128 for a missing file with a message containing
+     * "does not exist in".
+     */
+    private static boolean isPathNotFound(IOException e) {
+        return e.getMessage() != null && e.getMessage().contains("does not exist in");
     }
 
     private static String describe(JavaSurface.Symbol symbol) {
