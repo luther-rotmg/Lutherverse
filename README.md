@@ -87,7 +87,7 @@ Every substantive commit updates this section. It's the accurate current state, 
 | Sub | Name | Status | Notes |
 |---|---|---|---|
 | A | Fork infrastructure | ✅ done | This repo. Attribution, docs, branch rename `margarita` to `main`. |
-| B | Upstream sync (CPD to SPD v3.3.8) | 🟡 planning | Bring the game engine current with Evan's latest. Merge-in-slices strategy. |
+| B | Upstream sync (CPD to SPD v3.3.8) | 🟡 Slice 1 active | Slice 0 foundation shipped; engine/tuning catchup is being classified and integrated. |
 | C | Broad modding-platform API | ⏳ next | Java-hook API on top of CPD's JSON-manifest framework: cutscenes, dialogue, dual-wield, story flags, biome swapping, NPC insertion. |
 | D | God Mode addon | ⏳ | Top-tier starter gear. Flagged as "cheat" in coop lobby. |
 | E | Hard Mode addon | ⏳ | Balance tuning. Coop-fair. |
@@ -144,7 +144,7 @@ If you use or modify this code, your derivative work has to also be GPL-3.0. Tho
 |---|---|
 | **Android** | Supported. See build instructions below. |
 | **Desktop** (Windows / macOS / Linux) | Supported. See build instructions below. |
-| **iOS** | Not supported. QSR removed the `ios/` directory from CPD in May 2023, so there is no iOS code in this repo. The `:ios` entry in `settings.gradle` is a leftover pointing at nothing. Sub-B or a follow-up either deletes the entry or resurrects iOS from SPD upstream if it becomes a goal. |
+| **iOS** | Not supported. QSR removed the `ios/` directory from CPD in May 2023, and Slice 0 removed its stale `settings.gradle` entry. iOS remains deferred indefinitely. |
 
 ---
 

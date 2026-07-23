@@ -12,6 +12,12 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 
 Work-in-progress on `main` since the fork base (`cpd-sync-base-2025-08-15`, CPD commit `c97fb83`).
 
+### Sub-B Slice 1: planning and reconciliation
+
+- Added the just-in-time Slice 1 implementation plan. It pins the exact SPD v2.1.0→v2.5.4 range (1,209 commits), makes the overlapping Slice 1 engine/tuning versus Slice 2 feature boundary an explicit hunk-level classification manifest, and prohibits a direct tag merge or wholesale cherry-pick.
+- Reconciled Slice 0 promises against the shipped tree. The bidirectional package-namespace transformer is absent and is now the first Slice 1 prerequisite. Existing acceptance evidence is recorded honestly: pack smoke structurally validates 29 manifests, Android smoke proves PID survival rather than title-screen arrival, and the save bridge has synthetic routing tests rather than a real 10-turn fixture roundtrip.
+- Refreshed PROJECT-STATUS and README roadmap/iOS text to reflect Slice 0 completion and active Slice 1 work.
+
 ### Added — Sub-A (Fork infrastructure)
 
 - Public GitHub fork of QuasiStellar/custom-pixel-dungeon at [luther-rotmg/CustomPixelDungeonUltimate](https://github.com/luther-rotmg/CustomPixelDungeonUltimate) created 2026-07-21

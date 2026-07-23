@@ -2,7 +2,7 @@
 
 *Snapshot of where Lutherverse (repo: `CustomPixelDungeonUltimate`) is right now. Updated in the same commit as any substantive work — treat as ground truth for near-term state.*
 
-**Last update:** 2026-07-21
+**Last update:** 2026-07-23
 **Current tip:** `main` at the tip of this commit (run `git log -1 main` for the exact SHA; this file is updated in every substantive commit).
 
 ---
@@ -11,7 +11,7 @@
 
 **Sub-A (Fork infrastructure)** is shipped. Seven commits landed on `main` and pushed to origin. Both build paths verified green (Android APK 22.8 MB, Desktop JAR 45.9 MB). Final whole-branch review completed with one blocker (a "Dark Souls Mode" leak in the public roadmap table) plus four documentation mediums plus a small tail of nits; all fixed in the same commit that added this line.
 
-**Sub-B (Upstream sync to SPD v3.3.8)** Slice 0 is shipped; Slice 1 is next. Full design spec at [docs/superpowers/specs/2026-07-22-cpdu-sub-b-upstream-sync-design.md](docs/superpowers/specs/2026-07-22-cpdu-sub-b-upstream-sync-design.md). Slice 0 implementation plan at [docs/superpowers/plans/2026-07-22-cpdu-sub-b-slice-0-foundation.md](docs/superpowers/plans/2026-07-22-cpdu-sub-b-slice-0-foundation.md). Eight architectural decisions locked during the 2026-07-22 brainstorm: Cleric first-class + Vault first-class + full 30-pack green-gate + DSL freeze + save bridge + iOS deferred + SPD tilemap edits win + 14 slices with sub-splits. Total estimate 252-328 tasks across 14 slices. Slice 0 scaffolded the shared infrastructure (bridge, tooling, smoke-boot); Slices 1-7 plans get authored just-in-time as each slice begins.
+**Sub-B (Upstream sync to SPD v3.3.8)** Slice 0 is shipped; Slice 1 planning and prerequisite recovery are active. Full design spec at [docs/superpowers/specs/2026-07-22-cpdu-sub-b-upstream-sync-design.md](docs/superpowers/specs/2026-07-22-cpdu-sub-b-upstream-sync-design.md). Slice 1 implementation plan at [docs/superpowers/plans/2026-07-23-cpdu-sub-b-slice-1-catchup.md](docs/superpowers/plans/2026-07-23-cpdu-sub-b-slice-1-catchup.md). Reconciliation found that the package-namespace transformer promised for Slice 0 is absent and that the Slice 1/Slice 2 boundary requires hunk-level classification across 1,209 upstream commits. Those are now explicit Slice 1 prerequisites. Eight architectural decisions remain locked: Cleric first-class + Vault first-class + full marketplace green-gate + DSL freeze + save bridge + iOS deferred + SPD tilemap edits win + 14 slices with sub-splits.
 
 ---
 
@@ -20,7 +20,7 @@
 | Sub | Name | Status | Blockers / Notes |
 |---|---|---|---|
 | A | Fork infrastructure | ✅ shipped | Seven commits on origin, both builds verified, final review clean after one fix commit. |
-| B | Upstream sync (CPD → SPD v3.3.8) | 🟡 Slice 0 shipped, Slice 1 next | 14 slices total. Slice 0 scaffolds bridge + tools + smoke-boot. |
+| B | Upstream sync (CPD → SPD v3.3.8) | 🟡 Slice 1 active | Plan drafted; namespace transformer + classification manifest are first gates. |
 | C | Broad modding-platform API | ⚪ not started | Blocked on Sub-B ship |
 | D | God Mode addon | ⚪ | Blocked on Sub-C |
 | E | Hard Mode addon | ⚪ | Blocked on Sub-C |
@@ -34,6 +34,11 @@
 ---
 
 ## Recent activity
+
+**2026-07-23 (Sub-B Slice 1 planning):**
+- Reconciled the approved design against Git history and found the exact upstream range: 1,209 commits from SPD v2.1.0 to v2.5.4.
+- Authored the just-in-time Slice 1 plan with an explicit engine-vs-feature classification manifest and prerequisite tooling recovery.
+- Audited Slice 0 gates: current pack smoke is a 29-pack structural manifest check, Android smoke is a PID-alive check, and the real save-roundtrip harness remains future work.
 
 **2026-07-22 (Sub-B Slice 0 execution session):**
 - Sub-B Slice 0 shipped: `services/tools/{api-diff,pack-smoke,smoke-boot}/` + `SPD-classes/src/main/java/com/watabou/utils/BundleBridge*` + SLICE-TEMPLATE.md + `:ios` cleanup.
@@ -70,7 +75,7 @@
 
 ## Awaiting LO input
 
-- **Sub-B Slice 0 execution** — plan at [docs/superpowers/plans/2026-07-22-cpdu-sub-b-slice-0-foundation.md](docs/superpowers/plans/2026-07-22-cpdu-sub-b-slice-0-foundation.md). Ready to run when LO greenlights. Suggested execution: subagent-driven-development (one PR-worth, ~15 tasks, ~1-2 sessions of work).
+- **No immediate input required.** Slice 1 is authorized for autonomous execution under the repository's beads-pipeline and review rules.
 - **Ultimate vision re-brainstorm** — LO explicitly deferred to "after Sub-B ships". Vision wave 1+2 already captured in frontier memory.
 
 ---
