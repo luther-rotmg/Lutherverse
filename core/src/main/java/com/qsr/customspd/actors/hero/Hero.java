@@ -44,6 +44,7 @@ import com.qsr.customspd.actors.buffs.Berserk;
 import com.qsr.customspd.actors.buffs.Bless;
 import com.qsr.customspd.actors.buffs.Buff;
 import com.qsr.customspd.actors.buffs.Burning;
+import com.qsr.customspd.actors.buffs.Charm;
 import com.qsr.customspd.actors.buffs.Combo;
 import com.qsr.customspd.actors.buffs.Drowsy;
 import com.qsr.customspd.actors.buffs.Foresight;
@@ -125,7 +126,6 @@ import com.qsr.customspd.items.weapon.SpiritBow;
 import com.qsr.customspd.items.weapon.Weapon;
 import com.qsr.customspd.items.weapon.melee.Flail;
 import com.qsr.customspd.items.weapon.melee.MagesStaff;
-import com.qsr.customspd.items.weapon.melee.MeleeWeapon;
 import com.qsr.customspd.items.weapon.melee.Quarterstaff;
 import com.qsr.customspd.items.weapon.melee.RoundShield;
 import com.qsr.customspd.items.weapon.melee.Sai;
@@ -138,6 +138,7 @@ import com.qsr.customspd.levels.Terrain;
 import com.qsr.customspd.levels.features.Chasm;
 import com.qsr.customspd.levels.features.LevelTransition;
 import com.qsr.customspd.levels.traps.Trap;
+import com.qsr.customspd.mechanics.Ballistica;
 import com.qsr.customspd.mechanics.ShadowCaster;
 import com.qsr.customspd.messages.Messages;
 import com.qsr.customspd.assets.GeneralAsset;
@@ -481,7 +482,7 @@ public class Hero extends Char {
 		}
 
 		if (buff(Scimitar.SwordDance.class) != null){
-			accuracy *= 1.25f;
+			accuracy *= 1.50f;
 		}
 		
 		if (!RingOfForce.fightingUnarmed(this)) {
@@ -1224,7 +1225,13 @@ public class Hero extends Char {
 
 		enemy = action.target;
 
-		if (enemy.isAlive() && canAttack( enemy ) && !isCharmedBy( enemy ) && enemy.invisible == 0) {
+		if (isCharmedBy( enemy )){
+			GLog.w( Messages.get(Charm.class, "cant_attack"));
+			ready();
+			return false;
+		}
+
+		if (enemy.isAlive() && canAttack( enemy ) && enemy.invisible == 0) {
 
 			if (heroClass != HeroClass.DUELIST
 					&& hasTalent(Talent.AGGRESSIVE_BARRIER)
@@ -1432,8 +1439,10 @@ public class Hero extends Char {
 					newMob = true;
 				}
 
-				if (!mindVisionEnemies.contains(m) && QuickSlotButton.autoAim(m) != -1){
-					if (target == null){
+				//only do a simple check for mind visioned enemies, better performance
+				if ((!mindVisionEnemies.contains(m) && QuickSlotButton.autoAim(m) != -1)
+						|| (mindVisionEnemies.contains(m) && new Ballistica( pos, m.pos, Ballistica.PROJECTILE ).collisionPos == m.pos)) {
+					if (target == null) {
 						target = m;
 					} else if (distance(target) > distance(m)) {
 						target = m;
@@ -2014,18 +2023,6 @@ public class Hero extends Char {
 
 		if (hit && heroClass == HeroClass.DUELIST && wasEnemy){
 			Buff.affect( this, Sai.ComboStrikeTracker.class).addHit();
-		}
-
-		RingOfForce.BrawlersStance brawlStance = buff(RingOfForce.BrawlersStance.class);
-		if (brawlStance != null && brawlStance.hitsLeft() > 0){
-			MeleeWeapon.Charger charger = Buff.affect(this, MeleeWeapon.Charger.class);
-			charger.partialCharge -= RingOfForce.BrawlersStance.HIT_CHARGE_USE;
-			while (charger.partialCharge < 0) {
-				charger.charges--;
-				charger.partialCharge++;
-			}
-			BuffIndicator.refreshHero();
-			Item.updateQuickslot();
 		}
 
 		curAction = null;
