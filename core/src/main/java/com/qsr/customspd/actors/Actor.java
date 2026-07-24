@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import com.qsr.customspd.Statistics;
 import com.qsr.customspd.actors.blobs.Blob;
 import com.qsr.customspd.actors.buffs.Buff;
 import com.qsr.customspd.actors.mobs.Mob;
+import com.watabou.noosa.Game;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.SparseArray;
@@ -229,7 +230,7 @@ public abstract class Actor implements Bundlable {
 	}
 
 	public static int curActorPriority() {
-		return current != null ? current.actPriority : DEFAULT;
+		return current != null ? current.actPriority : HERO_PRIO;
 	}
 	
 	public static boolean keepActorThreadAlive = true;
@@ -242,7 +243,7 @@ public abstract class Actor implements Bundlable {
 		do {
 			
 			current = null;
-			if (!interrupted) {
+			if (!interrupted && !Game.switchingScene()) {
 				float earliest = Float.MAX_VALUE;
 
 				for (Actor actor : all) {
@@ -321,7 +322,7 @@ public abstract class Actor implements Bundlable {
 	}
 	
 	public static void addDelayed( Actor actor, float delay ) {
-		add( actor, now + delay );
+		add( actor, now + Math.max(delay, 0) );
 	}
 	
 	private static synchronized void add( Actor actor, float time ) {
