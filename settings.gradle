@@ -16,4 +16,5 @@ include ':services'
     include ':services:news:shatteredNews'
     //tools
     include ':services:tools:api-diff'
+    include ':services:tools:namespace-transform'
     include ':services:tools:pack-smoke'
