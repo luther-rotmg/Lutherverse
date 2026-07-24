@@ -561,6 +561,9 @@ public abstract class Level implements Bundlable {
 	}
 
 	public LevelTransition getTransition(LevelTransition.Type type){
+		if (transitions.isEmpty()){
+			return null;
+		}
 		for (LevelTransition transition : transitions){
 			//if we don't specify a type, prefer to return any entrance
 			if (type == null &&
@@ -570,7 +573,7 @@ public abstract class Level implements Bundlable {
 				return transition;
 			}
 		}
-		return (type == null && !transitions.isEmpty() ? transitions.get(0) : null);
+		return type != null ? getTransition(null) : transitions.get(0);
 	}
 
 	public LevelTransition getTransition(LevelTransition.Type type, String destination){
