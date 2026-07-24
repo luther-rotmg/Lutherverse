@@ -166,6 +166,20 @@ Verification:
 - Slice 2 headline features are absent from Slice 1 batches.
 - The manifest checksum is recorded in the plan execution log.
 
+### Phase 1 execution log
+
+- Inventory: 1,209 commits in the locked five release bands; SHA-256
+  `5E2C48162D39E6D1B2A76B1BD801E88910FC474AC0BB993FF41C793BFC65FF19`.
+- Frontier ledger: 448 reviews (411 required and 37 samples); SHA-256
+  `119B943254154E82AC2B4DF7D207197E65F553D290123C4C8C9A2921A065DC9F`.
+- Provisional classification: 6,107 data rows; SHA-256
+  `18817F122941D7EB0986488C9D1EA459F7C9211CD3827B1203254E92C7536B50`.
+- Final classification: 6,083 data rows, 1,209 ordered commit summaries,
+  90 mixed partitions, and 1,427 explicit override details; SHA-256
+  `8A160B5DA743E3794BCC1DB65926754BFD7F7696A056360453447BEB17142F63`.
+- Independent validation confirmed complete mixed partitions, exact override
+  evidence, reviewed-summary prefixes, and zero `needs-frontier-review` rows.
+
 ## Phase 2 — Integrate cold and framework batches
 
 ### Task 8: Import namespace-normalized Watabou cold zones
