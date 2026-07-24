@@ -512,7 +512,7 @@ public class Hero extends Char {
 
 		if (buff(Talent.RestoredAgilityTracker.class) != null){
 			if (pointsInTalent(Talent.RESTORED_AGILITY) == 1){
-				evasion *= 4f;
+				evasion *= 3f;
 			} else if (pointsInTalent(Talent.RESTORED_AGILITY) == 2){
 				return INFINITE_EVASION;
 			}
@@ -550,8 +550,8 @@ public class Hero extends Char {
 			return Messages.get(RoundShield.GuardTracker.class, "guarded");
 		}
 
-		if (buff(MonkEnergy.MonkAbility.Focus.FocusActivation.class) != null){
-			buff(MonkEnergy.MonkAbility.Focus.FocusActivation.class).detach();
+		if (buff(MonkEnergy.MonkAbility.Focus.FocusBuff.class) != null){
+			buff(MonkEnergy.MonkAbility.Focus.FocusBuff.class).detach();
 			if (sprite != null && sprite.visible) {
 				Sample.INSTANCE.play(Assets.Sounds.HIT_PARRY, 1, Random.Float(0.96f, 1.05f));
 			}
@@ -1289,9 +1289,9 @@ public class Hero extends Char {
 			wep = belongings.attackingWeapon();
 		}
 
-		if (wep != null) damage = wep.proc( this, enemy, damage );
-
 		damage = Talent.onAttackProc( this, enemy, damage );
+
+		if (wep != null) damage = wep.proc( this, enemy, damage );
 		
 		switch (subClass) {
 		case SNIPER:
@@ -1516,7 +1516,8 @@ public class Hero extends Char {
 				}
 				if (walkingToVisibleTrapInFog
 						&& Dungeon.level.traps.get(target) != null
-						&& Dungeon.level.traps.get(target).visible){
+						&& Dungeon.level.traps.get(target).visible
+						&& Dungeon.level.traps.get(target).active){
 					return false;
 				}
 			}
@@ -1608,6 +1609,15 @@ public class Hero extends Char {
 			fieldOfView = new boolean[Dungeon.level.length()];
 			Dungeon.level.updateFieldOfView( this, fieldOfView );
 		}
+
+		if (!Dungeon.level.visited[cell] && !Dungeon.level.mapped[cell]
+				&& Dungeon.level.traps.get(cell) != null
+				&& Dungeon.level.traps.get(cell).visible
+				&& Dungeon.level.traps.get(cell).active) {
+			walkingToVisibleTrapInFog = true;
+		} else {
+			walkingToVisibleTrapInFog = false;
+		}
 		
 		Char ch = Actor.findChar( cell );
 		Heap heap = Dungeon.level.heaps.get( cell );
@@ -1655,13 +1665,6 @@ public class Hero extends Char {
 			curAction = new HeroAction.LvlTransition( cell );
 			
 		}  else {
-			
-			if (!Dungeon.level.visited[cell] && !Dungeon.level.mapped[cell]
-					&& Dungeon.level.traps.get(cell) != null && Dungeon.level.traps.get(cell).visible) {
-				walkingToVisibleTrapInFog = true;
-			} else {
-				walkingToVisibleTrapInFog = false;
-			}
 			
 			curAction = new HeroAction.Move( cell );
 			lastAction = null;
@@ -1715,6 +1718,12 @@ public class Hero extends Char {
 		boolean levelUp = false;
 		while (this.exp >= maxExp()) {
 			this.exp -= maxExp();
+
+			if (buff(Talent.WandPreservationCounter.class) != null
+				&& pointsInTalent(Talent.WAND_PRESERVATION) == 2){
+				buff(Talent.WandPreservationCounter.class).detach();
+			}
+
 			if (lvl < MAX_LEVEL) {
 				lvl++;
 				levelUp = true;
