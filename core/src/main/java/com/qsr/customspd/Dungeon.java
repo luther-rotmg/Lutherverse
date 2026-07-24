@@ -26,10 +26,12 @@ import com.qsr.customspd.actors.Char;
 import com.qsr.customspd.actors.buffs.Amok;
 import com.qsr.customspd.actors.buffs.AscensionChallenge;
 import com.qsr.customspd.actors.buffs.Awareness;
+import com.qsr.customspd.actors.buffs.Dread;
 import com.qsr.customspd.actors.buffs.Light;
 import com.qsr.customspd.actors.buffs.MagicalSight;
 import com.qsr.customspd.actors.buffs.MindVision;
 import com.qsr.customspd.actors.buffs.RevealedArea;
+import com.qsr.customspd.actors.buffs.Terror;
 import com.qsr.customspd.actors.hero.Hero;
 import com.qsr.customspd.actors.hero.Talent;
 import com.qsr.customspd.actors.hero.abilities.huntress.SpiritHawk;
@@ -899,6 +901,8 @@ public class Dungeon {
 			BArray.and( passable, Dungeon.level.openSpace, passable );
 		}
 
+		ch.modifyPassable(passable);
+
 		if (chars) {
 			for (Char c : Actor.chars()) {
 				if (vis[c.pos]) {
@@ -919,7 +923,7 @@ public class Dungeon {
 	public static int findStep(Char ch, int to, boolean[] pass, boolean[] visible, boolean chars ) {
 
 		if (Dungeon.level.adjacent( ch.pos, to )) {
-			return Actor.findChar( to ) == null && (pass[to] || Dungeon.level.avoid[to]) ? to : -1;
+			return Actor.findChar( to ) == null && pass[to] ? to : -1;
 		}
 
 		return PathFinder.getStep( ch.pos, to, findPassable(ch, pass, visible, chars) );
@@ -927,16 +931,21 @@ public class Dungeon {
 	}
 	
 	public static int flee( Char ch, int from, boolean[] pass, boolean[] visible, boolean chars ) {
-		//only consider chars impassable if our retreat path runs into them
 		boolean[] passable = findPassable(ch, pass, visible, false, true);
 		passable[ch.pos] = true;
 
-		int step = PathFinder.getStepBack( ch.pos, from, passable );
-		while (step != -1 && Actor.findChar(step) != null && chars){
-			passable[step] = false;
-			step = PathFinder.getStepBack( ch.pos, from, passable );
+		//only consider other chars impassable if our retreat step may collide with them
+		if (chars) {
+			for (Char c : Actor.chars()) {
+				if (c.pos == from || Dungeon.level.adjacent(c.pos, ch.pos)) {
+					passable[c.pos] = false;
+				}
+			}
 		}
-		return step;
+
+		//chars affected by terror have a shorter lookahead and can't approach the fear source
+		boolean canApproachFromPos = ch.buff(Terror.class) == null && ch.buff(Dread.class) == null;
+		return PathFinder.getStepBack( ch.pos, from, canApproachFromPos ? 8 : 4, passable, canApproachFromPos );
 		
 	}
 
