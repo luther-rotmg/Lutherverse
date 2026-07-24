@@ -248,33 +248,144 @@ public class NamespaceTransformerTest {
     }
 
     @Test
-    void testPreservationOfTextOutsideNamespace() throws IOException {
+    void testLineCommentNamespaceNotReplaced() throws IOException {
+        // Namespace in line comments must be preserved byte-for-byte
         Path spdPath = inputDir.resolve("com/shatteredpixel/shatteredpixeldungeon");
         Files.createDirectories(spdPath);
-
-        // String that contains the namespace in various contexts
-        String content = "// This is a comment about com.shatteredpixel.shatteredpixeldungeon usage\n"
+        String content = "// com.shatteredpixel.shatteredpixeldungeon is the original\n"
             + "package com.shatteredpixel.shatteredpixeldungeon;\n"
-            + "// Note: using com.shatteredpixel.shatteredpixeldungeon here too\n"
-            + "/**\n"
-            + " * Uses com.shatteredpixel.shatteredpixeldungeon.items.Item\n"
-            + " */\n"
+            + "// referenced from com.shatteredpixel.shatteredpixeldungeon\n"
             + "public class Test {}";
-
-        Files.writeString(spdPath.resolve("Test.java"), content);
+        Files.writeString(spdPath.resolve("Comments.java"), content);
 
         NamespaceTransformer transformer = new NamespaceTransformer(NamespaceTransformer.Direction.SPD_TO_CPD);
         transformer.transform(inputDir, outputDir);
 
-        String result = Files.readString(outputDir.resolve("com/qsr/customspd/Test.java"));
-        String expected = "// This is a comment about com.qsr.customspd usage\n"
-            + "package com.qsr.customspd;\n"
-            + "// Note: using com.qsr.customspd here too\n"
-            + "/**\n"
-            + " * Uses com.qsr.customspd.items.Item\n"
-            + " */\n"
-            + "public class Test {}";
-        assertEquals(expected, result);
+        String result = Files.readString(outputDir.resolve("com/qsr/customspd/Comments.java"));
+        // Code tokens are transformed
+        assertTrue(result.contains("package com.qsr.customspd;"), "package declaration should be transformed");
+        // Line comment content is preserved verbatim
+        assertTrue(result.contains("// com.shatteredpixel.shatteredpixeldungeon is the original"),
+            "line comment namespace should not be replaced");
+        assertTrue(result.contains("// referenced from com.shatteredpixel.shatteredpixeldungeon"),
+            "line comment namespace should not be replaced");
+    }
+
+    @Test
+    void testBlockCommentNamespaceNotReplaced() throws IOException {
+        // Namespace in block/Javadoc comments must be preserved byte-for-byte
+        Path spdPath = inputDir.resolve("com/shatteredpixel/shatteredpixeldungeon");
+        Files.createDirectories(spdPath);
+        String content = "/* com.shatteredpixel.shatteredpixeldungeon in block */\n"
+            + "package com.shatteredpixel.shatteredpixeldungeon;\n"
+            + "/** Javadoc: uses com.shatteredpixel.shatteredpixeldungeon.items */\n"
+            + "public class Test {\n"
+            + " /* nested /* com.shatteredpixel.shatteredpixeldungeon */ }\n"
+            + "}";
+        Files.writeString(spdPath.resolve("BlockComments.java"), content);
+
+        NamespaceTransformer transformer = new NamespaceTransformer(NamespaceTransformer.Direction.SPD_TO_CPD);
+        transformer.transform(inputDir, outputDir);
+
+        String result = Files.readString(outputDir.resolve("com/qsr/customspd/BlockComments.java"));
+        assertTrue(result.contains("package com.qsr.customspd;"), "package declaration should be transformed");
+        assertTrue(result.contains("/* com.shatteredpixel.shatteredpixeldungeon in block */"),
+            "block comment namespace should not be replaced");
+        assertTrue(result.contains("/** Javadoc: uses com.shatteredpixel.shatteredpixeldungeon.items */"),
+            "javadoc comment namespace should not be replaced");
+        // Nested block comment — the first */ ends the outer comment,
+        // so after that everything is code again
+        assertTrue(result.contains("/* nested /* com.shatteredpixel.shatteredpixeldungeon */"),
+            "nested block comment content should not be replaced");
+    }
+
+    @Test
+    void testStringLiteralNamespaceNotReplaced() throws IOException {
+        // Namespace in string literals must be preserved byte-for-byte
+        Path spdPath = inputDir.resolve("com/shatteredpixel/shatteredpixeldungeon");
+        Files.createDirectories(spdPath);
+        String content = "package com.shatteredpixel.shatteredpixeldungeon;\n"
+            + "public class Config {\n"
+            + "    String ref = \"com.shatteredpixel.shatteredpixeldungeon.items.Item\";\n"
+            + "    String path = \"com/shatteredpixel/shatteredpixeldungeon/\";\n"
+            + "    String escaped = \"com.shatteredpixel.shatteredpixeldungeon\\\"test\";\n"
+            + "}";
+        Files.writeString(spdPath.resolve("Strings.java"), content);
+
+        NamespaceTransformer transformer = new NamespaceTransformer(NamespaceTransformer.Direction.SPD_TO_CPD);
+        transformer.transform(inputDir, outputDir);
+
+        String result = Files.readString(outputDir.resolve("com/qsr/customspd/Strings.java"));
+        assertTrue(result.contains("package com.qsr.customspd;"), "package declaration should be transformed");
+        assertTrue(result.contains("\"com.shatteredpixel.shatteredpixeldungeon.items.Item\""),
+            "string literal namespace should not be replaced");
+        assertTrue(result.contains("\"com/shatteredpixel/shatteredpixeldungeon/\""),
+            "string literal with slash should not be replaced");
+    }
+
+    @Test
+    void testCharLiteralNamespaceNotReplaced() throws IOException {
+        // Namespace adjacent to char literals must not cause issues
+        Path spdPath = inputDir.resolve("com/shatteredpixel/shatteredpixeldungeon");
+        Files.createDirectories(spdPath);
+        // Char literals containing dots and letters
+        String content = "package com.shatteredpixel.shatteredpixeldungeon;\n"
+            + "public class Test {\n"
+            + "    char dot = '.';\n"
+            + "    char quote = '\\'';\n"
+            + "}";
+        Files.writeString(spdPath.resolve("Chars.java"), content);
+
+        NamespaceTransformer transformer = new NamespaceTransformer(NamespaceTransformer.Direction.SPD_TO_CPD);
+        transformer.transform(inputDir, outputDir);
+
+        String result = Files.readString(outputDir.resolve("com/qsr/customspd/Chars.java"));
+        assertTrue(result.contains("package com.qsr.customspd;"), "package declaration should be transformed");
+        assertTrue(result.contains("char dot = '.';"), "char literal should be preserved");
+        assertTrue(result.contains("char quote = '\\'';"), "escaped char literal should be preserved");
+    }
+
+    @Test
+    void testKotlinTripleQuotedStringNotReplaced() throws IOException {
+        // Namespace in Kotlin triple-quoted strings must be preserved byte-for-byte
+        Path cpdPath = inputDir.resolve("com/qsr/customspd");
+        Files.createDirectories(cpdPath);
+        String content = "package com.qsr.customspd\n"
+            + "val doc = \"\"\"\n"
+            + "  Reference: com.qsr.customspd.items.Item\n"
+            + "  Also: com.qsr.customspd\n"
+            + "\"\"\"\n"
+            + "class Foo";
+        Files.writeString(cpdPath.resolve("TripleQuote.kt"), content);
+
+        NamespaceTransformer transformer = new NamespaceTransformer(NamespaceTransformer.Direction.CPD_TO_SPD);
+        transformer.transform(inputDir, outputDir);
+
+        String result = Files.readString(outputDir.resolve("com/shatteredpixel/shatteredpixeldungeon/TripleQuote.kt"));
+        // package is transformed
+        assertTrue(result.contains("package com.shatteredpixel.shatteredpixeldungeon"),
+            "package declaration should be transformed");
+        // Triple-quoted string content is preserved
+        assertTrue(result.contains("com.qsr.customspd.items.Item"),
+            "triple-quoted string namespace should not be replaced");
+        assertTrue(result.contains("com.qsr.customspd"),
+            "triple-quoted string namespace should not be replaced");
+    }
+
+    @Test
+    void testTxtFileCopiedUnchanged() throws IOException {
+        Path spdPath = inputDir.resolve("com/shatteredpixel/shatteredpixeldungeon");
+        Files.createDirectories(spdPath);
+        String txtContent = "The namespace com.shatteredpixel.shatteredpixeldungeon appears in this text.\n"
+            + "So does com.qsr.customspd";
+        Files.writeString(spdPath.resolve("readme.txt"), txtContent);
+
+        NamespaceTransformer transformer = new NamespaceTransformer(NamespaceTransformer.Direction.SPD_TO_CPD);
+        transformer.transform(inputDir, outputDir);
+
+        Path expectedFile = outputDir.resolve("com/qsr/customspd/readme.txt");
+        String result = Files.readString(expectedFile);
+        assertEquals(txtContent, result, ".txt file should be copied byte-for-byte unchanged");
     }
 
     @Test

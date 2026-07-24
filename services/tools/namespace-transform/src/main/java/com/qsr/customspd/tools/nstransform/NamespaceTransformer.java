@@ -129,6 +129,12 @@ public final class NamespaceTransformer {
     }
 
     private void transformTextFile(Path source, Path destination) throws IOException {
+        String name = source.getFileName().toString().toLowerCase();
+        // Non-Java/Kotlin text files are copied byte-for-byte without content replacement
+        if (!name.endsWith(".java") && !name.endsWith(".kt")) {
+            Files.copy(source, destination);
+            return;
+        }
         String content = Files.readString(source);
         String transformed = transformContent(content);
         Files.writeString(destination, transformed);
@@ -147,7 +153,106 @@ public final class NamespaceTransformer {
         StringBuilder result = new StringBuilder();
         int i = 0;
         while (i < content.length()) {
-            // Check if we're at the start of the namespace
+            // --- Lexical state machine ---
+            char c = content.charAt(i);
+
+            // Line comment: skip until newline
+            if (c == '/' && i + 1 < content.length() && content.charAt(i + 1) == '/') {
+                int end = content.indexOf('\n', i);
+                if (end == -1) {
+                    end = content.length();
+                } else {
+                    end = end + 1; // include newline
+                }
+                result.append(content, i, end);
+                i = end;
+                continue;
+            }
+
+            // Block/Javadoc comment: skip until */
+            if (c == '/' && i + 1 < content.length() && content.charAt(i + 1) == '*') {
+                int end = content.indexOf("*/", i + 2);
+                if (end == -1) {
+                    end = content.length();
+                } else {
+                    end = end + 2; // include */
+                }
+                result.append(content, i, end);
+                i = end;
+                continue;
+            }
+
+            // Character literal: skip until closing quote (handle escapes)
+            if (c == '\'') {
+                result.append(c);
+                i++;
+                while (i < content.length()) {
+                    char cc = content.charAt(i);
+                    result.append(cc);
+                    if (cc == '\\') {
+                        // skip escaped char
+                        i++;
+                        if (i < content.length()) {
+                            result.append(content.charAt(i));
+                            i++;
+                        }
+                    } else if (cc == '\'') {
+                        i++;
+                        break;
+                    } else {
+                        i++;
+                    }
+                }
+                continue;
+            }
+
+            // String literal: skip until closing quote (handle escapes)
+            if (c == '"') {
+                // Check for Kotlin triple-quoted string """..."""
+                if (i + 2 < content.length()
+                        && content.charAt(i + 1) == '"'
+                        && content.charAt(i + 2) == '"') {
+                    // Kotlin triple-quoted string
+                    result.append("\"\"\"");
+                    i += 3;
+                    while (i < content.length()) {
+                        if (i + 2 < content.length()
+                                && content.charAt(i) == '"'
+                                && content.charAt(i + 1) == '"'
+                                && content.charAt(i + 2) == '"') {
+                            result.append("\"\"\"");
+                            i += 3;
+                            break;
+                        }
+                        result.append(content.charAt(i));
+                        i++;
+                    }
+                } else {
+                    // Normal string literal
+                    result.append(c);
+                    i++;
+                    while (i < content.length()) {
+                        char cc = content.charAt(i);
+                        result.append(cc);
+                        if (cc == '\\') {
+                            // skip escaped char
+                            i++;
+                            if (i < content.length()) {
+                                result.append(content.charAt(i));
+                                i++;
+                            }
+                        } else if (cc == '"') {
+                            i++;
+                            break;
+                        } else {
+                            i++;
+                        }
+                    }
+                }
+                continue;
+            }
+
+            // --- Normal code context: check for namespace token ---
             if (startsWith(content, i, fromNamespace)) {
                 // Verify this is a complete token:
                 // 1. Preceded by non-namespace-part character (or start of string)
@@ -212,15 +317,14 @@ public final class NamespaceTransformer {
             }
         }
 
-        // Read first few bytes to detect binary content
-        byte[] buffer = new byte[512];
+        // Read file content once for binary detection
+        byte[] content;
         try {
-            int read = Files.readAllBytes(path).length;
-            if (read == 0) {
+            content = Files.readAllBytes(path);
+            if (content.length == 0) {
                 return false; // Empty files are text
             }
             // If file contains null bytes, it's binary
-            byte[] content = Files.readAllBytes(path);
             for (byte b : content) {
                 if (b == 0) {
                     return true;

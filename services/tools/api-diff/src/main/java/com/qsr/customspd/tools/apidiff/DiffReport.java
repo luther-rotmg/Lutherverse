@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,7 +34,7 @@ public record DiffReport(List<Removed> removed, List<Added> added, List<Signatur
         // Compare each name group: if no overloads, the existing simple
         // matching works (signature change detected via equals).
         // If there are overloads, disambiguate by full identity.
-        Set<String> allNames = new HashSet<>(beforeByName.keySet());
+        Set<String> allNames = new LinkedHashSet<>(beforeByName.keySet());
         allNames.addAll(afterByName.keySet());
 
         for (String name : allNames) {
@@ -89,7 +89,8 @@ public record DiffReport(List<Removed> removed, List<Added> added, List<Signatur
     }
 
     private static String fullKey(JavaSurface.Symbol symbol) {
-        return symbol.typeName() + "#" + symbol.signature();
+        return symbol.typeName() + "#" + symbol.signature() + ":"
+                + symbol.returnType() + ":" + symbol.visibility();
     }
 
     /**

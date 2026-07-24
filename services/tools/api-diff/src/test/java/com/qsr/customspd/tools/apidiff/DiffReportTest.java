@@ -105,4 +105,32 @@ class DiffReportTest {
                 new JavaSurface.Symbol("com.example.Foo", "bar(int)", "public", "void"),
                 new JavaSurface.Symbol("com.example.Foo", "bar(long)", "public", "void"))));
     }
+
+    @Test
+    void reportsReturnTypeChangeToOneOverload() {
+        JavaSurface before = new JavaSurface(List.of(
+                new JavaSurface.Symbol("com.example.Foo", "bar(int)", "public", "int"),
+                new JavaSurface.Symbol("com.example.Foo", "bar(String)", "public", "void")));
+        JavaSurface after = new JavaSurface(List.of(
+                new JavaSurface.Symbol("com.example.Foo", "bar(int)", "public", "long"),
+                new JavaSurface.Symbol("com.example.Foo", "bar(String)", "public", "void")));
+
+        DiffReport report = DiffReport.compare(before, after);
+
+        assertEquals(1, report.signatureChanged().size());
+        assertEquals("int", report.signatureChanged().get(0).before().returnType());
+        assertEquals("long", report.signatureChanged().get(0).after().returnType());
+    }
+
+    @Test
+    void preservesSourceOrderAcrossMemberGroups() {
+        JavaSurface before = new JavaSurface(List.of(
+                new JavaSurface.Symbol("com.example.Foo", "z()", "public", "void"),
+                new JavaSurface.Symbol("com.example.Foo", "a()", "public", "void")));
+
+        DiffReport report = DiffReport.compare(before, new JavaSurface(List.of()));
+
+        assertEquals(List.of("z()", "a()"), report.removed().stream()
+                .map(removed -> removed.symbol().signature()).toList());
+    }
 }
