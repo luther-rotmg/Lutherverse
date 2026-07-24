@@ -77,8 +77,10 @@ import com.qsr.customspd.actors.hero.Talent;
 import com.qsr.customspd.actors.hero.abilities.duelist.Challenge;
 import com.qsr.customspd.actors.hero.abilities.rogue.DeathMark;
 import com.qsr.customspd.actors.hero.abilities.warrior.Endure;
+import com.qsr.customspd.actors.mobs.Brute;
 import com.qsr.customspd.actors.mobs.Elemental;
 import com.qsr.customspd.actors.mobs.Tengu;
+import com.qsr.customspd.actors.mobs.YogDzewa;
 import com.qsr.customspd.actors.mobs.npcs.MirrorImage;
 import com.qsr.customspd.actors.mobs.npcs.PrismaticImage;
 import com.qsr.customspd.effects.particles.ShadowParticle;
@@ -93,6 +95,7 @@ import com.qsr.customspd.items.scrolls.ScrollOfRetribution;
 import com.qsr.customspd.items.scrolls.ScrollOfTeleportation;
 import com.qsr.customspd.items.scrolls.exotic.ScrollOfChallenge;
 import com.qsr.customspd.items.scrolls.exotic.ScrollOfPsionicBlast;
+import com.qsr.customspd.items.stones.StoneOfAggression;
 import com.qsr.customspd.items.wands.WandOfFireblast;
 import com.qsr.customspd.items.wands.WandOfFrost;
 import com.qsr.customspd.items.wands.WandOfLightning;
@@ -102,6 +105,7 @@ import com.qsr.customspd.items.weapon.enchantments.Blazing;
 import com.qsr.customspd.items.weapon.enchantments.Grim;
 import com.qsr.customspd.items.weapon.enchantments.Kinetic;
 import com.qsr.customspd.items.weapon.enchantments.Shocking;
+import com.qsr.customspd.items.weapon.melee.MeleeWeapon;
 import com.qsr.customspd.items.weapon.melee.Sickle;
 import com.qsr.customspd.items.weapon.missiles.MissileWeapon;
 import com.qsr.customspd.items.weapon.missiles.darts.ShockingDart;
@@ -114,6 +118,7 @@ import com.qsr.customspd.plants.Earthroot;
 import com.qsr.customspd.plants.Swiftthistle;
 import com.qsr.customspd.scenes.GameScene;
 import com.qsr.customspd.sprites.CharSprite;
+import com.qsr.customspd.sprites.MobSprite;
 import com.qsr.customspd.utils.BArray;
 import com.qsr.customspd.utils.GLog;
 import com.watabou.noosa.audio.Sample;
@@ -247,7 +252,8 @@ public abstract class Char extends Actor {
 		}
 
 		//can't swap places if one char has restricted movement
-		if (rooted || c.rooted || buff(Vertigo.class) != null || c.buff(Vertigo.class) != null){
+		if (paralysed > 0 || c.paralysed > 0 || rooted || c.rooted
+				|| buff(Vertigo.class) != null || c.buff(Vertigo.class) != null){
 			return true;
 		}
 
@@ -359,9 +365,6 @@ public abstract class Char extends Actor {
 
 				if (h.buff(MonkEnergy.MonkAbility.UnarmedAbilityTracker.class) != null){
 					dr = 0;
-				} else if (h.subClass == HeroSubClass.MONK) {
-					//3 turns with standard attack delay
-					Buff.prolong(h, MonkEnergy.MonkAbility.JustHitTracker.class, 4f);
 				}
 			}
 
@@ -417,6 +420,17 @@ public abstract class Char extends Actor {
 			if ( buff(Weakness.class) != null ){
 				dmg *= 0.67f;
 			}
+
+			//characters influenced by aggression deal 1/2 damage to bosses
+			if ( enemy.buff(StoneOfAggression.Aggression.class) != null
+					&& enemy.alignment == alignment
+					&& (Char.hasProp(enemy, Property.BOSS) || Char.hasProp(enemy, Property.MINIBOSS))){
+				dmg *= 0.5f;
+				//yog-dzewa specifically takes 1/4 damage
+				if (enemy instanceof YogDzewa){
+					dmg *= 0.5f;
+				}
+			}
 			
 			int effectiveDamage = enemy.defenseProc( this, Math.round(dmg) );
 			//do not trigger on-hit logic if defenseProc returned a negative value
@@ -455,6 +469,9 @@ public abstract class Char extends Actor {
 
 			if (enemy.isAlive() && enemy.alignment != alignment && prep != null && prep.canKO(enemy)){
 				enemy.HP = 0;
+				if (enemy.buff(Brute.BruteRage.class) != null){
+					enemy.buff(Brute.BruteRage.class).detach();
+				}
 				if (!enemy.isAlive()) {
 					enemy.die(this);
 				} else {
@@ -467,12 +484,15 @@ public abstract class Char extends Actor {
 				}
 			}
 
-			Talent.CombinedLethalityTriggerTracker combinedLethality = buff(Talent.CombinedLethalityTriggerTracker.class);
-			if (combinedLethality != null){
+			Talent.CombinedLethalityAbilityTracker combinedLethality = buff(Talent.CombinedLethalityAbilityTracker.class);
+			if (combinedLethality != null && this instanceof Hero && ((Hero) this).belongings.attackingWeapon() instanceof MeleeWeapon && combinedLethality.weapon != ((Hero) this).belongings.attackingWeapon()){
 				if ( enemy.isAlive() && enemy.alignment != alignment && !Char.hasProp(enemy, Property.BOSS)
-						&& !Char.hasProp(enemy, Property.MINIBOSS) && this instanceof Hero &&
+						&& !Char.hasProp(enemy, Property.MINIBOSS) &&
 						(enemy.HP/(float)enemy.HT) <= 0.4f*((Hero)this).pointsInTalent(Talent.COMBINED_LETHALITY)/3f) {
 					enemy.HP = 0;
+					if (enemy.buff(Brute.BruteRage.class) != null){
+						enemy.buff(Brute.BruteRage.class).detach();
+					}
 					if (!enemy.isAlive()) {
 						enemy.die(this);
 					} else {
@@ -481,7 +501,7 @@ public abstract class Char extends Actor {
 						DeathMark.processFearTheReaper(enemy);
 					}
 					if (enemy.sprite != null) {
-						enemy.sprite.showStatus(CharSprite.NEGATIVE, Messages.get(Talent.CombinedLethalityTriggerTracker.class, "executed"));
+						enemy.sprite.showStatus(CharSprite.NEGATIVE, Messages.get(Talent.CombinedLethalityAbilityTracker.class, "executed"));
 					}
 				}
 				combinedLethality.detach();
@@ -546,10 +566,8 @@ public abstract class Char extends Actor {
 			acuStat = INFINITE_ACCURACY;
 		}
 
-		if (defender.buff(MonkEnergy.MonkAbility.Focus.FocusBuff.class) != null && !magic){
+		if (defender.buff(MonkEnergy.MonkAbility.Focus.FocusBuff.class) != null){
 			defStat = INFINITE_EVASION;
-			defender.buff(MonkEnergy.MonkAbility.Focus.FocusBuff.class).detach();
-			Buff.affect(defender, MonkEnergy.MonkAbility.Focus.FocusActivation.class, 0);
 		}
 
 		//if accuracy or evasion are large enough, treat them as infinite.
@@ -585,12 +603,6 @@ public abstract class Char extends Actor {
 		return 0;
 	}
 
-	//used for damage and blocking calculations, normally just calls NormalIntRange
-	// but may be affected by things that specifically impact combat number ranges
-	public static int combatRoll(int min, int max ){
-		return Random.NormalIntRange( min, max );
-	}
-	
 	public int defenseSkill( Char enemy ) {
 		return 0;
 	}
@@ -603,7 +615,7 @@ public abstract class Char extends Actor {
 		int dr = 0;
 
 		Barkskin bark = buff(Barkskin.class);
-		if (bark != null)   dr += combatRoll( 0 , bark.level() );
+		if (bark != null)   dr += Random.NormalIntRange( 0 , bark.level() );
 
 		return dr;
 	}
@@ -749,7 +761,7 @@ public abstract class Char extends Actor {
 		
 		//TODO improve this when I have proper damage source logic
 		if (AntiMagic.RESISTS.contains(src.getClass()) && buff(ArcaneArmor.class) != null){
-			dmg -= combatRoll(0, buff(ArcaneArmor.class).level());
+			dmg -= Random.NormalIntRange(0, buff(ArcaneArmor.class).level());
 			if (dmg < 0) dmg = 0;
 		}
 
@@ -843,7 +855,12 @@ public abstract class Char extends Actor {
 	
 	public void die( Object src ) {
 		destroy();
-		if (src != Chasm.class) sprite.die();
+		if (src != Chasm.class) {
+			sprite.die();
+			if (!flying && Dungeon.level != null && sprite instanceof MobSprite && Dungeon.level.map[pos] == Terrain.CHASM){
+				((MobSprite) sprite).fall();
+			}
+		}
 	}
 
 	//we cache this info to prevent having to call buff(...) in isAlive.
