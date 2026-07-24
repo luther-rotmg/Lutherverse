@@ -203,6 +203,10 @@ public class PathFinder {
 		return mins;
 	}
 
+	public static int getStepBack( int cur, int from, boolean[] passable ) {
+		return getStepBack( cur, from, 5, passable, true );
+	}
+
 	private static boolean buildDistanceMap( int from, int to, boolean[] passable ) {
 		
 		if (from == to) {
