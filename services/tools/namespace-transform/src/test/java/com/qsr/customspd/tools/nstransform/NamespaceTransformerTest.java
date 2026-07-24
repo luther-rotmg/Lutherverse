@@ -12,22 +12,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class NamespaceTransformerTest {
-
     @TempDir
     Path tempDir;
-
     private Path inputDir;
     private Path outputDir;
-
     @BeforeEach
     void setup() throws IOException {
         inputDir = tempDir.resolve("input");
         outputDir = tempDir.resolve("output");
         Files.createDirectories(inputDir);
     }
-
     private Path spdDir() throws IOException {
         Path p = inputDir.resolve("com/shatteredpixel/shatteredpixeldungeon");
         Files.createDirectories(p);
@@ -48,7 +43,7 @@ public class NamespaceTransformerTest {
         return new NamespaceTransformer(NamespaceTransformer.Direction.CPD_TO_SPD);
     }
 
-@Test
+    @Test
     void testSpdToCpdPathTransformation() throws IOException {
         write(spdDir(), "Foo.java", "class Foo {}");
         spdToCpd().transform(inputDir, outputDir);
@@ -110,6 +105,14 @@ public class NamespaceTransformerTest {
         assertTrue(Files.exists(cpd.resolve("levels/Level.java")));
         assertTrue(Files.exists(cpd.resolve("items/Item.java")));
         assertTrue(Files.exists(cpd.resolve("items/armor/Plate.java")));
+    }
+    @Test
+    void testNamespacePathSegmentBelowSourceRoot() throws IOException {
+        Path source = inputDir.resolve("core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/Foo.java");
+        Files.createDirectories(source.getParent());
+        Files.writeString(source, "package com.shatteredpixel.shatteredpixeldungeon;");
+        spdToCpd().transform(inputDir, outputDir);
+        assertTrue(Files.exists(outputDir.resolve("core/src/main/java/com/qsr/customspd/Foo.java")));
     }
     @Test
     void testBinaryBytePreservation() throws IOException {

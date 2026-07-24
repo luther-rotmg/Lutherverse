@@ -4,10 +4,7 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -122,10 +119,9 @@ public final class NamespaceTransformer {
         String fromPath = (direction == Direction.SPD_TO_CPD) ? SPD_PATH : CPD_PATH;
         String toPath = (direction == Direction.SPD_TO_CPD) ? CPD_PATH : SPD_PATH;
 
-        if (relativePath.startsWith(fromPath + "/")) {
-            return toPath + "/" + relativePath.substring(fromPath.length() + 1);
-        }
-        return relativePath;
+        String wrapped = "/" + relativePath + "/";
+        String transformed = wrapped.replace("/" + fromPath + "/", "/" + toPath + "/");
+        return transformed.substring(1, transformed.length() - 1);
     }
 
     private void transformTextFile(Path source, Path destination) throws IOException {
@@ -267,7 +263,7 @@ public final class NamespaceTransformer {
                     char afterChar = content.charAt(i + fromNamespace.length());
                     // Valid if followed by: dot, space, semicolon, punctuation, etc.
                     // Invalid if followed by: letter, digit, underscore, or slash
-                    validAfter = (afterChar == '.') || 
+                    validAfter = (afterChar == '.') ||
                         (!Character.isLetterOrDigit(afterChar) && afterChar != '_' && afterChar != '/');
                 }
 
