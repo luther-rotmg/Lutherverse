@@ -55,6 +55,7 @@ public record DiffReport(List<Removed> removed, List<Added> added, List<Signatur
                 }
             } else {
                 // Overloads: match by full identity (typeName + full signature).
+                // First, remove exact before/after matches.
                 Set<String> beforeFullKeys = beforeSyms.stream()
                         .map(DiffReport::fullKey)
                         .collect(Collectors.toSet());
@@ -62,13 +63,22 @@ public record DiffReport(List<Removed> removed, List<Added> added, List<Signatur
                         .map(DiffReport::fullKey)
                         .collect(Collectors.toSet());
 
-                for (JavaSurface.Symbol sym : beforeSyms) {
-                    if (!afterFullKeys.contains(fullKey(sym))) {
+                // Collect unmatched symbols on each side.
+                List<JavaSurface.Symbol> unmatchedBefore = beforeSyms.stream()
+                        .filter(sym -> !afterFullKeys.contains(fullKey(sym)))
+                        .collect(Collectors.toList());
+                List<JavaSurface.Symbol> unmatchedAfter = afterSyms.stream()
+                        .filter(sym -> !beforeFullKeys.contains(fullKey(sym)))
+                        .collect(Collectors.toList());
+
+                // If exactly one unmatched member on each side, report as SignatureChanged.
+                if (unmatchedBefore.size() == 1 && unmatchedAfter.size() == 1) {
+                    changedList.add(new SignatureChanged(unmatchedBefore.get(0), unmatchedAfter.get(0)));
+                } else {
+                    for (JavaSurface.Symbol sym : unmatchedBefore) {
                         removedList.add(new Removed(sym));
                     }
-                }
-                for (JavaSurface.Symbol sym : afterSyms) {
-                    if (!beforeFullKeys.contains(fullKey(sym))) {
+                    for (JavaSurface.Symbol sym : unmatchedAfter) {
                         addedList.add(new Added(sym));
                     }
                 }

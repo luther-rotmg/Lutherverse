@@ -70,15 +70,39 @@ class DiffReportTest {
 
         DiffReport report = DiffReport.compare(before, after);
 
-        // bar(int) was removed (or changed to bar(long)).
-        // With overloads, the overload identity is by full signature,
-        // so bar(int) is reported as removed and bar(long) as added.
-        assertEquals(1, report.removed().size());
-        assertEquals(1, report.added().size());
+        // bar(int) changed to bar(long); no removed/added since exactly one
+        // unmatched on each side, reported as SignatureChanged instead.
+        assertEquals(0, report.removed().size());
+        assertEquals(0, report.added().size());
+        assertEquals(1, report.signatureChanged().size());
 
-        assertTrue(report.removed().contains(
-                new DiffReport.Removed(new JavaSurface.Symbol("com.example.Foo", "bar(int)", "public", "void"))));
-        assertTrue(report.added().contains(
-                new DiffReport.Added(new JavaSurface.Symbol("com.example.Foo", "bar(long)", "public", "void"))));
+        assertTrue(report.signatureChanged().contains(new DiffReport.SignatureChanged(
+                new JavaSurface.Symbol("com.example.Foo", "bar(int)", "public", "void"),
+                new JavaSurface.Symbol("com.example.Foo", "bar(long)", "public", "void"))));
+    }
+
+    @Test
+    void reportsOneSignatureChangedWhenOneOverloadUnchanged() {
+        // Two overloads, one unchanged and one signature-changed.
+        JavaSurface before = new JavaSurface(List.of(
+                new JavaSurface.Symbol("com.example.Foo", "bar(int)", "public", "void"),
+                new JavaSurface.Symbol("com.example.Foo", "bar(String)", "public", "void")
+        ));
+        JavaSurface after = new JavaSurface(List.of(
+                new JavaSurface.Symbol("com.example.Foo", "bar(long)", "public", "void"),
+                new JavaSurface.Symbol("com.example.Foo", "bar(String)", "public", "void")
+        ));
+
+        DiffReport report = DiffReport.compare(before, after);
+
+        // bar(String) is identical on both sides - should be excluded.
+        // bar(int) → bar(long) is the only unmatched pair → SignatureChanged.
+        assertEquals(0, report.removed().size());
+        assertEquals(0, report.added().size());
+        assertEquals(1, report.signatureChanged().size());
+
+        assertTrue(report.signatureChanged().contains(new DiffReport.SignatureChanged(
+                new JavaSurface.Symbol("com.example.Foo", "bar(int)", "public", "void"),
+                new JavaSurface.Symbol("com.example.Foo", "bar(long)", "public", "void"))));
     }
 }
