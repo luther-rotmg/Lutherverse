@@ -28,6 +28,7 @@ import com.qsr.customspd.actors.blobs.Electricity;
 import com.qsr.customspd.actors.blobs.ToxicGas;
 import com.qsr.customspd.actors.buffs.Adrenaline;
 import com.qsr.customspd.actors.buffs.AllyBuff;
+import com.qsr.customspd.actors.buffs.Amok;
 import com.qsr.customspd.actors.buffs.ArcaneArmor;
 import com.qsr.customspd.actors.buffs.AscensionChallenge;
 import com.qsr.customspd.actors.buffs.Barkskin;
@@ -61,6 +62,7 @@ import com.qsr.customspd.actors.buffs.Paralysis;
 import com.qsr.customspd.actors.buffs.Poison;
 import com.qsr.customspd.actors.buffs.Preparation;
 import com.qsr.customspd.actors.buffs.ShieldBuff;
+import com.qsr.customspd.actors.buffs.Sleep;
 import com.qsr.customspd.actors.buffs.Slow;
 import com.qsr.customspd.actors.buffs.SnipersMark;
 import com.qsr.customspd.actors.buffs.Speed;
@@ -376,7 +378,10 @@ public abstract class Char extends Actor {
 				dmg = damageRoll();
 			}
 
-			dmg = Math.round(dmg*dmgMulti);
+			dmg = dmg*dmgMulti;
+
+			//flat damage bonus is affected by multipliers
+			dmg += dmgBonus;
 
 			Berserk berserk = buff(Berserk.class);
 			if (berserk != null) dmg = berserk.damageFactor(dmg);
@@ -390,9 +395,6 @@ public abstract class Char extends Actor {
 			}
 
 			dmg *= AscensionChallenge.statModifier(this);
-
-			//flat damage bonus is applied after positive multipliers, but before negative ones
-			dmg += dmgBonus;
 
 			//friendly endure
 			Endure.EndureTracker endure = buff(Endure.EndureTracker.class);
@@ -582,6 +584,12 @@ public abstract class Char extends Actor {
 	public int attackSkill( Char target ) {
 		return 0;
 	}
+
+	//used for damage and blocking calculations, normally just calls NormalIntRange
+	// but may be affected by things that specifically impact combat number ranges
+	public static int combatRoll(int min, int max ){
+		return Random.NormalIntRange( min, max );
+	}
 	
 	public int defenseSkill( Char enemy ) {
 		return 0;
@@ -595,7 +603,7 @@ public abstract class Char extends Actor {
 		int dr = 0;
 
 		Barkskin bark = buff(Barkskin.class);
-		if (bark != null)   dr += Random.NormalIntRange( 0 , bark.level() );
+		if (bark != null)   dr += combatRoll( 0 , bark.level() );
 
 		return dr;
 	}
@@ -667,10 +675,6 @@ public abstract class Char extends Actor {
 			return;
 		}
 
-		for (ChampionEnemy buff : buffs(ChampionEnemy.class)){
-			dmg = (int) Math.ceil(dmg * buff.damageTakenFactor());
-		}
-
 		if (!(src instanceof LifeLink) && buff(LifeLink.class) != null){
 			HashSet<LifeLink> links = buffs(LifeLink.class);
 			for (LifeLink link : links.toArray(new LifeLink[0])){
@@ -715,7 +719,27 @@ public abstract class Char extends Actor {
 		if (alignment != Alignment.ALLY && this.buff(DeathMark.DeathMarkTracker.class) != null){
 			dmg *= 1.25f;
 		}
-		
+
+		if (buff(Sickle.HarvestBleedTracker.class) != null){
+			buff(Sickle.HarvestBleedTracker.class).detach();
+
+			if (!isImmune(Bleeding.class)){
+				Bleeding b = buff(Bleeding.class);
+				if (b == null){
+					b = new Bleeding();
+				}
+				b.announced = false;
+				b.set(dmg, Sickle.HarvestBleedTracker.class);
+				b.attachTo(this);
+				sprite.showStatus(CharSprite.WARNING, Messages.titleCase(b.name()) + " " + (int)b.level());
+				return;
+			}
+		}
+
+		for (ChampionEnemy buff : buffs(ChampionEnemy.class)){
+			dmg = (int) Math.ceil(dmg * buff.damageTakenFactor());
+		}
+
 		Class<?> srcClass = src.getClass();
 		if (isImmune( srcClass )) {
 			dmg = 0;
@@ -725,27 +749,8 @@ public abstract class Char extends Actor {
 		
 		//TODO improve this when I have proper damage source logic
 		if (AntiMagic.RESISTS.contains(src.getClass()) && buff(ArcaneArmor.class) != null){
-			dmg -= Random.NormalIntRange(0, buff(ArcaneArmor.class).level());
+			dmg -= combatRoll(0, buff(ArcaneArmor.class).level());
 			if (dmg < 0) dmg = 0;
-		}
-
-		if (buff(Sickle.HarvestBleedTracker.class) != null){
-			if (isImmune(Bleeding.class)){
-				sprite.showStatus(CharSprite.POSITIVE, Messages.titleCase(Messages.get(this, "immune")));
-				buff(Sickle.HarvestBleedTracker.class).detach();
-				return;
-			}
-
-			Bleeding b = buff(Bleeding.class);
-			if (b == null){
-				b = new Bleeding();
-			}
-			b.announced = false;
-			b.set(dmg*buff(Sickle.HarvestBleedTracker.class).bleedFactor, Sickle.HarvestBleedTracker.class);
-			b.attachTo(this);
-			sprite.showStatus(CharSprite.WARNING, Messages.titleCase(b.name()) + " " + (int)b.level());
-			buff(Sickle.HarvestBleedTracker.class).detach();
-			return;
 		}
 
 		if (buff( Paralysis.class ) != null) {
@@ -1125,7 +1130,12 @@ public abstract class Char extends Actor {
 		ELECTRIC ( new HashSet<Class>( Arrays.asList(WandOfLightning.class, Shocking.class, Potential.class, Electricity.class, ShockingDart.class, Elemental.ShockElemental.class )),
 				new HashSet<Class>()),
 		LARGE,
-		IMMOVABLE;
+		IMMOVABLE ( new HashSet<Class>(),
+				new HashSet<Class>( Arrays.asList(Vertigo.class) )),
+		//A character that acts in an unchanging manner. immune to AI state debuffs or stuns/slows
+		STATIC( new HashSet<Class>(),
+				new HashSet<Class>( Arrays.asList(AllyBuff.class, Dread.class, Terror.class, Amok.class, Charm.class, Sleep.class,
+									Paralysis.class, Frost.class, Chill.class, Slow.class, Speed.class) ));
 		
 		private HashSet<Class> resistances;
 		private HashSet<Class> immunities;
