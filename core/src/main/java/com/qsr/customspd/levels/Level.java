@@ -35,10 +35,12 @@ import com.qsr.customspd.actors.blobs.WellWater;
 import com.qsr.customspd.actors.buffs.Awareness;
 import com.qsr.customspd.actors.buffs.Blindness;
 import com.qsr.customspd.actors.buffs.Buff;
+import com.qsr.customspd.actors.buffs.Burning;
 import com.qsr.customspd.actors.buffs.ChampionEnemy;
 import com.qsr.customspd.actors.buffs.LockedFloor;
 import com.qsr.customspd.actors.buffs.MagicalSight;
 import com.qsr.customspd.actors.buffs.MindVision;
+import com.qsr.customspd.actors.buffs.Ooze;
 import com.qsr.customspd.actors.buffs.PinCushion;
 import com.qsr.customspd.actors.buffs.RevealedArea;
 import com.qsr.customspd.actors.buffs.Shadows;
@@ -63,8 +65,10 @@ import com.qsr.customspd.items.Stylus;
 import com.qsr.customspd.items.Torch;
 import com.qsr.customspd.items.artifacts.TalismanOfForesight;
 import com.qsr.customspd.items.artifacts.TimekeepersHourglass;
+import com.qsr.customspd.items.bombs.Bomb;
 import com.qsr.customspd.items.potions.PotionOfStrength;
 import com.qsr.customspd.items.scrolls.ScrollOfUpgrade;
+import com.qsr.customspd.items.scrolls.exotic.ScrollOfChallenge;
 import com.qsr.customspd.items.stones.StoneOfEnchantment;
 import com.qsr.customspd.items.stones.StoneOfIntuition;
 import com.qsr.customspd.items.wands.WandOfRegrowth;
@@ -233,8 +237,7 @@ public abstract class Level implements Bundlable {
 								break;
 							case 3:
 								feeling = Feeling.DARK;
-								addItemToSpawn(new Torch());
-								viewDistance = Math.round(viewDistance/2f);
+								viewDistance = Math.round(5*viewDistance/8f);
 								break;
 							case 4:
 								feeling = Feeling.LARGE;
@@ -444,8 +447,9 @@ public abstract class Level implements Bundlable {
 		}
 
 		feeling = bundle.getEnum( FEELING, Feeling.class );
-		if (feeling == Feeling.DARK)
-			viewDistance = Math.round(viewDistance/2f);
+		if (feeling == Feeling.DARK) {
+			viewDistance = Math.round(5 * viewDistance / 8f);
+		}
 
 		if (bundle.contains( "mobs_to_spawn" )) {
 			for (Class<? extends Mob> mob : bundle.getClassArray("mobs_to_spawn")) {
@@ -608,9 +612,11 @@ public abstract class Level implements Bundlable {
 		Swiftthistle.TimeBubble timeBubble = Dungeon.hero.buff(Swiftthistle.TimeBubble.class);
 		if (timeBubble != null) timeBubble.disarmPresses();
 
-		//iron stomach does not persist through chasm falling
+		//iron stomach and challenge arena do not persist between floors
 		Talent.WarriorFoodImmunity foodImmune = Dungeon.hero.buff(Talent.WarriorFoodImmunity.class);
 		if (foodImmune != null) foodImmune.detach();
+		ScrollOfChallenge.ChallengeArena arena = Dungeon.hero.buff(ScrollOfChallenge.ChallengeArena.class);
+		if (arena != null) arena.detach();
 	}
 
 	public void seal(){
@@ -632,7 +638,14 @@ public abstract class Level implements Bundlable {
 	public ArrayList<Item> getItemsToPreserveFromSealedResurrect(){
 		ArrayList<Item> items = new ArrayList<>();
 		for (Heap h : heaps.valueList()){
-			if (h.type == Heap.Type.HEAP) items.addAll(h.items);
+			if (h.type == Heap.Type.HEAP) {
+				for (Item i : h.items){
+					if (i instanceof Bomb){
+						((Bomb) i).fuse = null;
+					}
+					items.add(i);
+				}
+			}
 		}
 		for (Mob m : mobs){
 			for (PinCushion b : m.buffs(PinCushion.class)){
@@ -1119,6 +1132,16 @@ public abstract class Level implements Bundlable {
 
 		if (!ch.flying){
 
+			//we call act here instead of detach in case the debuffs haven't managed to deal dmg once yet
+			if (map[ch.pos] == Terrain.WATER){
+				if (ch.buff(Burning.class) != null){
+					ch.buff(Burning.class).act();
+				}
+				if (ch.buff(Ooze.class) != null){
+					ch.buff(Ooze.class).act();
+				}
+			}
+
 			if ( (map[ch.pos] == Terrain.GRASS || map[ch.pos] == Terrain.EMBERS)
 					&& ch == Dungeon.hero && Dungeon.hero.hasTalent(Talent.REJUVENATING_STEPS)
 					&& ch.buff(Talent.RejuvenatingStepsCooldown.class) == null){
@@ -1252,7 +1275,7 @@ public abstract class Level implements Bundlable {
 		int cy = c.pos / width();
 		
 		boolean sighted = c.buff( Blindness.class ) == null && c.buff( Shadows.class ) == null
-						&& c.buff( TimekeepersHourglass.timeStasis.class ) == null && c.isAlive();
+						&& c.isAlive();
 		if (sighted) {
 			boolean[] blocking = null;
 
