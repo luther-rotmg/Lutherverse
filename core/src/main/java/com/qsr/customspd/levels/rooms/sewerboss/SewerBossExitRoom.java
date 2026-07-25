@@ -28,7 +28,7 @@ import com.qsr.customspd.levels.Terrain;
 import com.qsr.customspd.levels.features.LevelTransition;
 import com.qsr.customspd.levels.painters.Painter;
 import com.qsr.customspd.levels.rooms.Room;
-import com.qsr.customspd.levels.rooms.standard.ExitRoom;
+import com.qsr.customspd.levels.rooms.standard.exit.ExitRoom;
 import com.qsr.customspd.tiles.CustomTilemap;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.Tilemap;

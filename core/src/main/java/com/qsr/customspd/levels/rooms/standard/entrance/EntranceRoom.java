@@ -19,7 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-package com.qsr.customspd.levels.rooms.standard;
+package com.qsr.customspd.levels.rooms.standard.entrance;
 
 import com.qsr.customspd.Dungeon;
 import com.qsr.customspd.SPDSettings;
@@ -31,11 +31,17 @@ import com.qsr.customspd.levels.Terrain;
 import com.qsr.customspd.levels.features.LevelTransition;
 import com.qsr.customspd.levels.painters.Painter;
 import com.qsr.customspd.levels.rooms.Room;
+import com.qsr.customspd.levels.rooms.standard.StandardRoom;
 import com.watabou.utils.Point;
 import com.watabou.utils.Random;
 
 public class EntranceRoom extends StandardRoom {
-	
+
+	@Override
+	public boolean isEntrance() {
+		return true;
+	}
+
 	@Override
 	public int minWidth() {
 		return Math.max(super.minWidth(), 5);
@@ -116,7 +122,7 @@ public class EntranceRoom extends StandardRoom {
 	@Override
 	public boolean connect(Room room) {
 		//cannot connect to exit, otherwise works normally
-		if (room instanceof ExitRoom)   return false;
+		if (room.isExit())   return false;
 		else                            return super.connect(room);
 	}
 	

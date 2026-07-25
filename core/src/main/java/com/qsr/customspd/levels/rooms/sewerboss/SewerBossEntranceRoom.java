@@ -26,7 +26,7 @@ import com.qsr.customspd.levels.Terrain;
 import com.qsr.customspd.levels.features.LevelTransition;
 import com.qsr.customspd.levels.painters.Painter;
 import com.qsr.customspd.levels.rooms.Room;
-import com.qsr.customspd.levels.rooms.standard.EntranceRoom;
+import com.qsr.customspd.levels.rooms.standard.entrance.EntranceRoom;
 
 public class SewerBossEntranceRoom extends EntranceRoom {
 

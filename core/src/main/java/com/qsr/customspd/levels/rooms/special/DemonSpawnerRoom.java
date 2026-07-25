@@ -30,7 +30,6 @@ import com.qsr.customspd.levels.Level;
 import com.qsr.customspd.levels.Terrain;
 import com.qsr.customspd.levels.painters.Painter;
 import com.qsr.customspd.levels.rooms.Room;
-import com.qsr.customspd.levels.rooms.standard.EntranceRoom;
 import com.qsr.customspd.tiles.CustomTilemap;
 import com.watabou.noosa.Tilemap;
 import com.watabou.utils.Point;
@@ -62,7 +61,7 @@ public class DemonSpawnerRoom extends SpecialRoom {
 	@Override
 	public boolean connect(Room room) {
 		//cannot connect to entrance, otherwise works normally
-		if (room instanceof EntranceRoom) return false;
+		if (room.isEntrance()) return false;
 		else                              return super.connect(room);
 	}
 

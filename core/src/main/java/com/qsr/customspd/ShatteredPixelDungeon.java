@@ -44,6 +44,13 @@ public class ShatteredPixelDungeon extends Game {
 	public ShatteredPixelDungeon(PlatformSupport platform, TileMapCompiler compiler) {
 		super( sceneClass == null ? WelcomeScene.class : sceneClass, platform );
 		tileMapCompiler = compiler;
+
+		com.watabou.utils.Bundle.addAlias(
+				com.qsr.customspd.levels.rooms.standard.entrance.EntranceRoom.class,
+				"com.qsr.customspd.levels.rooms.standard.EntranceRoom" );
+		com.watabou.utils.Bundle.addAlias(
+				com.qsr.customspd.levels.rooms.standard.exit.ExitRoom.class,
+				"com.qsr.customspd.levels.rooms.standard.ExitRoom" );
 	}
 	
 	@Override

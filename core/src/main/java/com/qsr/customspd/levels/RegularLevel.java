@@ -70,8 +70,8 @@ import com.qsr.customspd.levels.rooms.special.MagicalFireRoom;
 import com.qsr.customspd.levels.rooms.special.PitRoom;
 import com.qsr.customspd.levels.rooms.special.ShopRoom;
 import com.qsr.customspd.levels.rooms.special.SpecialRoom;
-import com.qsr.customspd.levels.rooms.standard.EntranceRoom;
-import com.qsr.customspd.levels.rooms.standard.ExitRoom;
+import com.qsr.customspd.levels.rooms.standard.entrance.EntranceRoom;
+import com.qsr.customspd.levels.rooms.standard.exit.ExitRoom;
 import com.qsr.customspd.levels.rooms.standard.StandardRoom;
 import com.qsr.customspd.levels.traps.BlazingTrap;
 import com.qsr.customspd.levels.traps.BurningTrap;
@@ -890,9 +890,9 @@ public abstract class RegularLevel extends Level {
 		rooms = new ArrayList<>( (Collection<Room>) ((Collection<?>) bundle.getCollection( "rooms" )) );
 		for (Room r : rooms) {
 			r.onLevelLoad( this );
-			if (r instanceof EntranceRoom ){
+			if (r.isEntrance()){
 				roomEntrance = r;
-			} else if (r instanceof ExitRoom ){
+			} else if (r.isExit()){
 				roomExit = r;
 			}
 		}

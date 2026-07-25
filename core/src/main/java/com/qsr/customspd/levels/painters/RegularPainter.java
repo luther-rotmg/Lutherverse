@@ -31,7 +31,6 @@ import com.qsr.customspd.levels.Terrain;
 import com.qsr.customspd.levels.rooms.Room;
 import com.qsr.customspd.levels.rooms.connection.ConnectionRoom;
 import com.qsr.customspd.levels.rooms.special.SpecialRoom;
-import com.qsr.customspd.levels.rooms.standard.EntranceRoom;
 import com.qsr.customspd.levels.rooms.standard.StandardRoom;
 import com.qsr.customspd.levels.traps.Trap;
 import com.watabou.noosa.Game;
@@ -250,7 +249,7 @@ public abstract class RegularPainter extends Painter {
 
 					//entrance doors on floor 1 are hidden during tutorial
 					//entrance doors on floor 2 are hidden if the player hasn't picked up 2nd guidebook page
-					if (r instanceof EntranceRoom || n instanceof EntranceRoom){
+					if (r.isEntrance() || n.isEntrance()){
 						if ((Dungeon.depth == 1 && SPDSettings.intro())
 							|| (Dungeon.depth == 2 && !Document.ADVENTURERS_GUIDE.isPageFound(Document.GUIDE_SEARCHING))) {
 							d.type = Room.Door.Type.HIDDEN;

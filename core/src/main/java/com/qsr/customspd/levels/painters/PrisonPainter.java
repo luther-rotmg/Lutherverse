@@ -25,7 +25,7 @@ import com.qsr.customspd.actors.mobs.npcs.Wandmaker;
 import com.qsr.customspd.levels.Level;
 import com.qsr.customspd.levels.Terrain;
 import com.qsr.customspd.levels.rooms.Room;
-import com.qsr.customspd.levels.rooms.standard.EntranceRoom;
+import com.qsr.customspd.levels.rooms.standard.entrance.EntranceRoom;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
