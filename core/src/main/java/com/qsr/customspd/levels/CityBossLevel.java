@@ -194,6 +194,8 @@ public class CityBossLevel extends Level {
 		Painter.fill(this, end.left+5, end.bottom+1, 5, 1, Terrain.EMPTY);
 		Painter.fill(this, end.left+6, end.bottom+2, 3, 1, Terrain.EMPTY);
 
+		impShop.paint(this);
+
 		new CityPainter().paint(this, null);
 
 		//pillars last, no deco on these

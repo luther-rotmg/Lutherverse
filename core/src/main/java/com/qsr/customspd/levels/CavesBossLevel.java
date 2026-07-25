@@ -171,6 +171,18 @@ public class CavesBossLevel extends Level {
 		customVisuals.setRect(0, 12, width(), 27);
 		customTiles.add(customVisuals);
 
+		//ensures that all pylons can be reached without stepping over water or wires
+		boolean[] pass = new boolean[length];
+		for (int i = 0; i < length; i++){
+			pass[i] = map[i] == Terrain.EMPTY || map[i] == Terrain.EMPTY_SP || map[i] == Terrain.EMPTY_DECO;
+		}
+		PathFinder.buildDistanceMap(16 + 25*width(), pass);
+		for (int i : pylonPositions){
+			if (PathFinder.distance[i] == Integer.MAX_VALUE){
+				return false;
+			}
+		}
+
 		return true;
 
 	}
@@ -807,7 +819,7 @@ public class CavesBossLevel extends Level {
 						Char ch = Actor.findChar(cell);
 						if (ch != null && !(ch instanceof DM300) && !ch.flying) {
 							Sample.INSTANCE.play( Assets.Sounds.LIGHTNING );
-							ch.damage( Random.NormalIntRange(6, 12), Electricity.class);
+							ch.damage( Random.NormalIntRange(6, 12), new Electricity());
 							ch.sprite.flash();
 
 							if (ch == Dungeon.hero){
@@ -878,7 +890,7 @@ public class CavesBossLevel extends Level {
 		public void use( BlobEmitter emitter ) {
 			super.use( emitter );
 			energySourceSprite = null;
-			emitter.pour(DIRECTED_SPARKS, 0.125f);
+			emitter.pour(DIRECTED_SPARKS, 0.08f);
 		}
 
 	}
