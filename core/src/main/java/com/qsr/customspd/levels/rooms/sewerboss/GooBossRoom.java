@@ -24,6 +24,7 @@ package com.qsr.customspd.levels.rooms.sewerboss;
 import com.qsr.customspd.assets.Asset;
 import com.qsr.customspd.assets.GeneralAsset;
 import com.qsr.customspd.levels.Level;
+import com.qsr.customspd.levels.rooms.Room;
 import com.qsr.customspd.levels.rooms.standard.StandardRoom;
 import com.qsr.customspd.tiles.CustomTilemap;
 import com.watabou.noosa.Image;
@@ -39,7 +40,7 @@ public abstract class GooBossRoom extends StandardRoom {
 	}
 
 	@Override
-	public boolean canMerge(Level l, Point p, int mergeTerrain) {
+	public boolean canMerge(Level l, Room other, Point p, int mergeTerrain) {
 		return false;
 	}
 

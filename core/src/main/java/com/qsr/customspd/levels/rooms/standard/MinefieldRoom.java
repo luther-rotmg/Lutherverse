@@ -24,6 +24,7 @@ package com.qsr.customspd.levels.rooms.standard;
 import com.qsr.customspd.levels.Level;
 import com.qsr.customspd.levels.Terrain;
 import com.qsr.customspd.levels.painters.Painter;
+import com.qsr.customspd.levels.rooms.Room;
 import com.qsr.customspd.levels.traps.ExplosiveTrap;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Point;
@@ -37,7 +38,7 @@ public class MinefieldRoom extends StandardRoom {
 	}
 
 	@Override
-	public boolean canMerge(Level l, Point p, int mergeTerrain) {
+	public boolean canMerge(Level l, Room other, Point p, int mergeTerrain) {
 		int cell = l.pointToCell(pointInside(p, 1));
 		return l.map[cell] == Terrain.EMPTY;
 	}

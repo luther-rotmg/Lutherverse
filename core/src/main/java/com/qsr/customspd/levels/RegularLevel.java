@@ -82,6 +82,7 @@ import com.qsr.customspd.levels.traps.FrostTrap;
 import com.qsr.customspd.levels.traps.PitfallTrap;
 import com.qsr.customspd.levels.traps.Trap;
 import com.qsr.customspd.levels.traps.WornDartTrap;
+import com.qsr.customspd.mechanics.ShadowCaster;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Point;
 import com.watabou.utils.Random;
@@ -235,7 +236,7 @@ public abstract class RegularLevel extends Level {
 
 		ArrayList<Room> stdRooms = new ArrayList<>();
 		for (Room room : rooms) {
-			if (room instanceof StandardRoom && room != roomEntrance) {
+			if (room instanceof StandardRoom) {
 				for (int i = 0; i < ((StandardRoom) room).sizeCat.roomValue; i++) {
 					stdRooms.add(room);
 				}
@@ -243,6 +244,10 @@ public abstract class RegularLevel extends Level {
 		}
 		Random.shuffle(stdRooms);
 		Iterator<Room> stdRoomIter = stdRooms.iterator();
+
+		boolean[] entranceFOV = new boolean[length()];
+		Point c = cellToPoint(entrance());
+		ShadowCaster.castShadow(c.x, c.y, width(), entranceFOV, losBlocking, 8);
 
 		while (mobsToSpawn > 0) {
 			Mob mob = createMob();
@@ -258,6 +263,7 @@ public abstract class RegularLevel extends Level {
 				mob.pos = pointToCell(roomToSpawn.random());
 				tries--;
 			} while (tries >= 0 && (findMob(mob.pos) != null
+					|| entranceFOV[mob.pos] || (roomToSpawn.isEntrance() && distance(entrance(), mob.pos) <= 5)
 					|| !passable[mob.pos]
 					|| solid[mob.pos]
 					|| !roomToSpawn.canPlaceCharacter(cellToPoint(mob.pos), this)
@@ -278,6 +284,7 @@ public abstract class RegularLevel extends Level {
 						mob.pos = pointToCell(roomToSpawn.random());
 						tries--;
 					} while (tries >= 0 && (findMob(mob.pos) != null
+							|| entranceFOV[mob.pos] || (roomToSpawn.isEntrance() && distance(entrance(), mob.pos) <= 5)
 							|| !passable[mob.pos]
 							|| solid[mob.pos]
 							|| !roomToSpawn.canPlaceCharacter(cellToPoint(mob.pos), this)

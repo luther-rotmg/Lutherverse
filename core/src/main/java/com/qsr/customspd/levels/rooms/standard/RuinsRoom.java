@@ -24,6 +24,7 @@ package com.qsr.customspd.levels.rooms.standard;
 import com.qsr.customspd.levels.Level;
 import com.qsr.customspd.levels.Terrain;
 import com.qsr.customspd.levels.painters.Painter;
+import com.qsr.customspd.levels.rooms.Room;
 import com.watabou.utils.Point;
 
 public class RuinsRoom extends PatchRoom {
@@ -34,7 +35,7 @@ public class RuinsRoom extends PatchRoom {
 	}
 
 	@Override
-	public boolean canMerge(Level l, Point p, int mergeTerrain) {
+	public boolean canMerge(Level l, Room other, Point p, int mergeTerrain) {
 		return true;
 	}
 
