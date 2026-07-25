@@ -339,7 +339,7 @@ ca1a8a50f2ae53e17ed70e15090526b01d474f65	commit	all	slice1	provisional: cold cod
 04d3105a1b7905fe8bb1474f744e06cc12961d88	commit	all	slice2	reviewed: Reviewed as deferred Slice 2 feature work: buffed salt cube, regen loss now equalizes out.	slice2-feature
 3c57614a743c7efb9d163fc8cb29f02049bf9e0f	commit	all	slice2	reviewed: Reviewed as deferred Slice 2 feature work: fixed ratmog rats not adding entries to the bestiary.	slice2-feature
 9d3d35a8c7d6453790578d112e0db2936023bc39	commit	all	slice1	reviewed: Reviewed as Slice 1 engine or tuning work: fixed new fullscreen-remembering code not actually triggering.	platform-review
-f16299966946e7c5a2b7917bec14f4166ff5b7e7	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
+f16299966946e7c5a2b7917bec14f4166ff5b7e7	commit	all	slice1	reclassified 2026-07-25 (frontier, Task 15 kpn re-spec): entrance/exit room cluster member, misfiled as cold-code with an unreviewed provisional reason. Touches levels/rooms/standard/entrance|exit and is core levelgen, not a Watabou cold zone. Prior reason: provisional: cold code (general engine/tuning)	hotspot-level
 63c36166ebeda443ce340bf470d37bd03cfe19ad	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
 eab0cd3a3e8be5511498cb23885884d059da81d7	commit	all	slice2	reviewed: Reviewed as deferred Slice 2 feature work: jumping toward a distant well not clears that landmark entry.	slice2-feature
 fc6964c15bcebe8716b48592f9392253d54c30e0	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
@@ -458,7 +458,7 @@ d6c79d38e9874b16055eeb20f138e27f743b9f72	commit	all	slice1	provisional: cold cod
 d7b2f461e899badfa6de8a39014ca4c51f2aef61	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
 52eb5704ebc3cbfe491e3158b56441bb7e932ab5	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
 491e478aa919d6cef71defd5659bb2546bcd62c7	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
-6c849e85bb8886565bce4d882be870ca97acb858	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
+6c849e85bb8886565bce4d882be870ca97acb858	commit	all	slice1	reclassified 2026-07-25 (frontier, Task 15 kpn re-spec): entrance/exit room cluster member, misfiled as cold-code with an unreviewed provisional reason. Touches levels/rooms/standard/entrance|exit and is core levelgen, not a Watabou cold zone. Prior reason: provisional: cold code (general engine/tuning)	hotspot-level
 13600537848fd7200c4a1d8839ef88bde79b2dec	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
 5567195a138a807577bc5d78fc06d6d0a1b60163	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
 76972e358c347140a4b6b1f9399cbcd7f7f54baa	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
@@ -2028,7 +2028,7 @@ c67dc832715f8210ffd0ae52f829c7feffcc6ee5	path	core/src/main/java/com/shatteredpi
 cb18c1eee19caa3195ae609101e9fdc3ad9a25d9	commit	all	slice1	reviewed: Immutable diff is Slice 1 engine, crash-fix, platform-neutral framework, or tuning work with no deferred feature hunk: v2.4.0: made enemy spawn logic near entrances a bit more strict	hotspot-level
 995d84e53a19254bc3dacdd461f90247d9277e11	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
 6f9542499611a04b2a0a241aeb4c0b9724c67b69	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
-388d21363cfae5b57489a671289cfff717fa2b3b	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
+388d21363cfae5b57489a671289cfff717fa2b3b	commit	all	slice1	reclassified 2026-07-25 (frontier, Task 15 kpn re-spec): entrance/exit room cluster member, misfiled as cold-code with an unreviewed provisional reason. Touches levels/rooms/standard/entrance|exit and is core levelgen, not a Watabou cold zone. Prior reason: provisional: cold code (general engine/tuning)	hotspot-level
 c9a3819d5aead2ff0b09f8011cfc8ffec1cdcf2e	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
 27b3c9c797e620dd67169955efc0e8f41bfdc87d	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
 1e59e2b424c74b1b0e3b8b141113677230d674ca	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
@@ -2141,7 +2141,7 @@ c9a3819d5aead2ff0b09f8011cfc8ffec1cdcf2e	commit	all	slice1	provisional: cold cod
 605bdde4d3e4564606a6d5f1b749e41edc0d77d6	path	core/src/main/assets/messages/windows/windows_ru.properties	slice1	reviewed: override -	cold-code
 605bdde4d3e4564606a6d5f1b749e41edc0d77d6	path	core/src/main/assets/messages/windows/windows_zh.properties	slice1	reviewed: override -	cold-code
 605bdde4d3e4564606a6d5f1b749e41edc0d77d6	path	core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/ui/changelist/v2_X_Changes.java	excluded	reviewed: override -	excluded-upstream-docs
-05e1a1873663a403b7be33556c8786fee2340ac4	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
+05e1a1873663a403b7be33556c8786fee2340ac4	commit	all	slice1	reclassified 2026-07-25 (frontier, Task 15 kpn re-spec): entrance/exit room cluster member, misfiled as cold-code with an unreviewed provisional reason. Touches levels/rooms/standard/entrance|exit and is core levelgen, not a Watabou cold zone. Prior reason: provisional: cold code (general engine/tuning)	hotspot-level
 d39a9b7709585d56b45f59c1fba410da348ad00f	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
 5459819120cd772e37439bd96bef5b6a371a9958	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
 969610dfd48f253c3fc78dd8ce374d6f8dc3b83e	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
@@ -2358,7 +2358,7 @@ eeca547cc47da33519a9437433b353f104bdeaf8	commit	all	slice1	provisional: cold cod
 20cd08c32afedd7e1b8eba7dcfd5d0a174ce5b0b	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
 395448ffcb2e763defe2361d057d1f52f4f8cc53	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
 466ca870d4427dba279d64742632a60c24ca8923	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
-089042015b4919f4f4be408244433f35305bb3de	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
+089042015b4919f4f4be408244433f35305bb3de	commit	all	slice1	reclassified 2026-07-25 (frontier, Task 15 kpn re-spec): entrance/exit room cluster member, misfiled as cold-code with an unreviewed provisional reason. Touches levels/rooms/standard/entrance|exit and is core levelgen, not a Watabou cold zone. Prior reason: provisional: cold code (general engine/tuning)	hotspot-level
 f542c7438e7e3d3b7d0aa361c483c58ebf70fcdf	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
 c173c603f1a4d61ff5e6a5a567e66917951264b4	commit	all	slice1	reviewed: Immutable diff is Slice 1 engine, crash-fix, platform-neutral framework, or tuning work with no deferred feature hunk: v2.4.0: fixed static chars not being immune to ai state debuffs	hotspot-char
 dd9026ee245f80fcc951ba0a7f7f916859750ece	commit	all	mixed	reviewed: PetrifiedSeed behavior is deferred Slice 2; the independent fractional dew-drop probability correction in HighGrass remains Slice 1 tuning.	frontier-mixed
@@ -2383,7 +2383,7 @@ abfcd685801fb14a89ff82aab81d0cd060720728	path	build.gradle	slice1	reviewed: over
 abfcd685801fb14a89ff82aab81d0cd060720728	path	core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/ui/changelist/v2_X_Changes.java	excluded	reviewed: override -	excluded-upstream-docs
 f6e82d0e45107989a1f4c376b6b7702f1be757a2	commit	all	slice1	reviewed: Immutable diff is Slice 1 engine, crash-fix, platform-neutral framework, or tuning work with no deferred feature hunk: v2.4.0: lifelink damage now shows the correct damage icon	hotspot-char
 90ae232be54228cdb4373ce768d081e4cf22719b	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
-6238774c86caa63954d40b358545a0e6e22750c0	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
+6238774c86caa63954d40b358545a0e6e22750c0	commit	all	slice1	reclassified 2026-07-25 (frontier, Task 15 kpn re-spec): entrance/exit room cluster member, misfiled as cold-code with an unreviewed provisional reason. Touches levels/rooms/standard/entrance|exit and is core levelgen, not a Watabou cold zone. Prior reason: provisional: cold code (general engine/tuning)	hotspot-level
 54367bae2bc37f505acacf1218cbcd44d4bae4fd	commit	all	slice1	reviewed: Immutable diff is Slice 1 engine, crash-fix, platform-neutral framework, or tuning work with no deferred feature hunk: v2.4.0: standardized chars being immune to ai state or stun/slow debuffs	hotspot-char
 3bae46d77df9fc575ea15222aca65d18f6f29b68	commit	all	excluded	reviewed: Immutable diff is iOS-only or upstream-only documentation and is excluded: v2.4.0: added a privacy manifest for iOS	excluded-ios
 35421913541bcb2cfdedc99dcf5e194712b68688	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
@@ -2392,7 +2392,7 @@ fe7a58f675d5edea23415abb7fd7d9fa3873c123	commit	all	slice2	reviewed: Immutable d
 2763cf42ca71fce0e4e942721d9db6509306daf3	path	build.gradle	slice1	reviewed: override -	build-review
 2763cf42ca71fce0e4e942721d9db6509306daf3	path	core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/scenes/WelcomeScene.java	excluded	reviewed: override -	excluded-upstream-docs
 2763cf42ca71fce0e4e942721d9db6509306daf3	path	core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/ui/changelist/v2_X_Changes.java	excluded	reviewed: override -	excluded-upstream-docs
-757051d8e7c44ee6a8ee6f2e8d7838d414d93a3a	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
+757051d8e7c44ee6a8ee6f2e8d7838d414d93a3a	commit	all	slice1	reclassified 2026-07-25 (frontier, Task 15 kpn re-spec): entrance/exit room cluster member, misfiled as cold-code with an unreviewed provisional reason. Touches levels/rooms/standard/entrance|exit and is core levelgen, not a Watabou cold zone. Prior reason: provisional: cold code (general engine/tuning)	hotspot-level
 28628a31be362bd6f56b6a7b7e5de85fbb502b14	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
 da5cb1ceb51dc1e69a04f05246cc8978d781028e	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
 8c6cc98a1dc2937d6e315b00db55109dbe8808ac	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
@@ -2408,7 +2408,7 @@ e279e3c26decc5dbda941858962cca6756e6ec9e	path	core/src/main/assets/messages/item
 21a0cf9e8769c2b353027a76d2c80f66245f8aad	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
 2330217c0fc2f27f6bebb2bfa07f96ee2337f3a7	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
 7e256333f4751f61910117b190fb3f04ba0cd092	commit	all	slice1	reviewed: Immutable diff is Slice 1 engine, crash-fix, platform-neutral framework, or tuning work with no deferred feature hunk: v2.4.0: added an entrance/exit variant for each region	hotspot-level
-792f681c88a6bde1a1cfb0490d84f5aa7a0841c1	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
+792f681c88a6bde1a1cfb0490d84f5aa7a0841c1	commit	all	slice1	reclassified 2026-07-25 (frontier, Task 15 kpn re-spec): entrance/exit room cluster member, misfiled as cold-code with an unreviewed provisional reason. Touches levels/rooms/standard/entrance|exit and is core levelgen, not a Watabou cold zone. Prior reason: provisional: cold code (general engine/tuning)	hotspot-level
 cc80f8a391baeaa03290a63ba4808bbaf3ab57cb	commit	all	slice1	reviewed: Immutable diff is Slice 1 engine, crash-fix, platform-neutral framework, or tuning work with no deferred feature hunk: v2.4.0: improve behavior for existing entrance/exit rooms	hotspot-dungeon,hotspot-level
 769c459aa7a91e1725882f0064c43c9c70da3d59	commit	all	slice1	reviewed: Immutable diff is Slice 1 engine, crash-fix, platform-neutral framework, or tuning work with no deferred feature hunk: v2.4.0: refactored entrance and exit rooms to be more extensible	hotspot-level
 898f756a071e26accff02773f05103f077a70085	commit	all	slice1	provisional: cold code (general engine/tuning)	cold-code
