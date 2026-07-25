@@ -1500,6 +1500,7 @@ public abstract class Level implements Bundlable {
 			case Terrain.EMPTY:
 			case Terrain.EMPTY_SP:
 			case Terrain.EMPTY_DECO:
+			case Terrain.CUSTOM_DECO_EMPTY:
 			case Terrain.SECRET_TRAP:
 				return Messages.get(Level.class, "floor_name");
 			case Terrain.GRASS:
@@ -1515,6 +1516,7 @@ public abstract class Level implements Bundlable {
 			case Terrain.OPEN_DOOR:
 				return Messages.get(Level.class, "open_door_name");
 			case Terrain.ENTRANCE:
+			case Terrain.ENTRANCE_SP:
 				return Messages.get(Level.class, "entrace_name");
 			case Terrain.EXIT:
 				return Messages.get(Level.class, "exit_name");
@@ -1536,8 +1538,6 @@ public abstract class Level implements Bundlable {
 				return Messages.get(Level.class, "locked_exit_name");
 			case Terrain.UNLOCKED_EXIT:
 				return Messages.get(Level.class, "unlocked_exit_name");
-			case Terrain.SIGN:
-				return Messages.get(Level.class, "sign_name");
 			case Terrain.WELL:
 				return Messages.get(Level.class, "well_name");
 			case Terrain.EMPTY_WELL:
@@ -1564,6 +1564,7 @@ public abstract class Level implements Bundlable {
 			case Terrain.WATER:
 				return Messages.get(Level.class, "water_desc");
 			case Terrain.ENTRANCE:
+			case Terrain.ENTRANCE_SP:
 				return Messages.get(Level.class, "entrance_desc");
 			case Terrain.EXIT:
 			case Terrain.UNLOCKED_EXIT:
@@ -1581,8 +1582,6 @@ public abstract class Level implements Bundlable {
 				return Messages.get(Level.class, "locked_exit_desc");
 			case Terrain.BARRICADE:
 				return Messages.get(Level.class, "barricade_desc");
-			case Terrain.SIGN:
-				return Messages.get(Level.class, "sign_desc");
 			case Terrain.INACTIVE_TRAP:
 				return Messages.get(Level.class, "inactive_trap_desc");
 			case Terrain.STATUE:
