@@ -35,6 +35,16 @@ public class ChasmRoom extends PatchRoom {
 	}
 
 	@Override
+	public int minHeight() {
+		return Math.max(5, super.minHeight());
+	}
+
+	@Override
+	public int minWidth() {
+		return Math.max(5, super.minWidth());
+	}
+
+	@Override
 	public void merge(Level l, Room other, Rect merge, int mergeTerrain) {
 		if (mergeTerrain == Terrain.EMPTY
 				&& (other instanceof ChasmRoom || other instanceof PlatformRoom)){
