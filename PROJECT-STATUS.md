@@ -2,7 +2,7 @@
 
 *Snapshot of where Lutherverse (repo: `CustomPixelDungeonUltimate`) is right now. Updated in the same commit as any substantive work — treat as ground truth for near-term state.*
 
-**Last update:** 2026-07-23
+**Last update:** 2026-07-25
 **Current tip:** `main` at the tip of this commit (run `git log -1 main` for the exact SHA; this file is updated in every substantive commit).
 
 ---
@@ -11,7 +11,11 @@
 
 **Sub-A (Fork infrastructure)** is shipped. Seven commits landed on `main` and pushed to origin. Both build paths verified green (Android APK 22.8 MB, Desktop JAR 45.9 MB). Final whole-branch review completed with one blocker (a "Dark Souls Mode" leak in the public roadmap table) plus four documentation mediums plus a small tail of nits; all fixed in the same commit that added this line.
 
-**Sub-B (Upstream sync to SPD v3.3.8)** Slice 0 is shipped; Slice 1 planning and prerequisite recovery are active. Full design spec at [docs/superpowers/specs/2026-07-22-cpdu-sub-b-upstream-sync-design.md](docs/superpowers/specs/2026-07-22-cpdu-sub-b-upstream-sync-design.md). Slice 1 implementation plan at [docs/superpowers/plans/2026-07-23-cpdu-sub-b-slice-1-catchup.md](docs/superpowers/plans/2026-07-23-cpdu-sub-b-slice-1-catchup.md). Reconciliation found that the package-namespace transformer promised for Slice 0 is absent and that the Slice 1/Slice 2 boundary requires hunk-level classification across 1,209 upstream commits. Those are now explicit Slice 1 prerequisites. Eight architectural decisions remain locked: Cleric first-class + Vault first-class + full marketplace green-gate + DSL freeze + save bridge + iOS deferred + SPD tilemap edits win + 14 slices with sub-splits.
+**Sub-B (Upstream sync to SPD v3.3.8)** Slice 0 is shipped; Slice 1 is in execution, Phase 3. Full design spec at [docs/superpowers/specs/2026-07-22-cpdu-sub-b-upstream-sync-design.md](docs/superpowers/specs/2026-07-22-cpdu-sub-b-upstream-sync-design.md). Slice 1 implementation plan at [docs/superpowers/plans/2026-07-23-cpdu-sub-b-slice-1-catchup.md](docs/superpowers/plans/2026-07-23-cpdu-sub-b-slice-1-catchup.md). Eight architectural decisions remain locked: Cleric first-class + Vault first-class + full marketplace green-gate + DSL freeze + save bridge + iOS deferred + SPD tilemap edits win + 14 slices with sub-splits.
+
+Phase 3 has landed Tasks 11–14 (Actor, Char, Hero, Dungeon) and most of Task 15 (Level and generator), including the full entrance/exit room cluster. Sixteen dependency-deferred clusters from Tasks 11–14 remain open as epics, tracked in beads.
+
+> **⚠ Slice 1 is materially larger than this plan states.** A 2026-07-25 audit found 730 in-range commits sitting in the manifest's `cold-code` batch with unreviewed `provisional:` reasons from Task 6. Machine triage classified **541 of them as unintegrated Slice 1 candidates** — roughly nine times the size of Task 15's own 63-commit scope. They are area-bucketed (`triaged-item` 181, `triaged-mob` 123, `triaged-ui` 83, `triaged-level` 64, `triaged-misc` 55, `triaged-buff` 35) so Tasks 16–20 can consume them, but **that triage is not the reviewed manifest the plan's acceptance block requires.** "Slice 1 candidate" means the symbols resolve against CPDU, not that the hunks apply; the conditional-music cluster is the counterexample where every class existed and the change was still architecturally superseded. Expect the 541 to shrink under hunk review, and expect Tasks 16–20 to re-estimate upward regardless.
 
 ---
 
@@ -20,7 +24,7 @@
 | Sub | Name | Status | Blockers / Notes |
 |---|---|---|---|
 | A | Fork infrastructure | ✅ shipped | Seven commits on origin, both builds verified, final review clean after one fix commit. |
-| B | Upstream sync (CPD → SPD v3.3.8) | 🟡 Slice 1 active | Plan drafted; namespace transformer + classification manifest are first gates. |
+| B | Upstream sync (CPD → SPD v3.3.8) | 🟡 Slice 1 Phase 3 | Tasks 11–14 done, Task 15 mostly done. 541 unintegrated Slice 1 commits found hiding in `cold-code`; Slice 1 needs re-estimation. |
 | C | Broad modding-platform API | ⚪ not started | Blocked on Sub-B ship |
 | D | God Mode addon | ⚪ | Blocked on Sub-C |
 | E | Hard Mode addon | ⚪ | Blocked on Sub-C |
@@ -34,6 +38,16 @@
 ---
 
 ## Recent activity
+
+**2026-07-25 (Sub-B Slice 1 Phase 3 execution):**
+- **Task 15 (Level and generator)** — 6 beads run; boss-level fixes, Level v2.5 state/load fixes, and levelgen challenge RNG isolation integrated. Two beads were verified no-ops (CPDU had already superseded the behavior).
+- **Entrance/exit room cluster complete** — 13 in-range commits across 4 reviewed waves: the `EntranceRoom`/`ExitRoom` package move with `Bundle.addAlias` save-compat, 6 new region standard rooms, 20 entrance/exit variants, the `canMerge(Level, Room, Point, int)` signature migration across 14 definitions, and 7 refinement commits.
+- **Manifest audit** — 730 unreviewed `provisional:` rows triaged to zero (see the warning above). Separately, 30 mining/quest commits were reclassified to Slice 2, and 8 entrance/exit commits were rescued from `cold-code`.
+- **Group 15A resolved as superseded** — CPDU has no `Dungeon.branch`; its `levelName` layout graph generalizes upstream's depth+branch model. `de6878cef` was already integrated and its manifest row was stale.
+- **Conditional-music cluster deferred** (`cpdu-15l`) — blocked on absent TENSE/FINALE audio assets *and* an open design question: CPDU drives music from pack config via `CustomLevel.playLevelMusic`, so upstream's hardcoded conditional track selection may belong in pack config rather than level code. That touches the frozen DSL and needs LO's call.
+- **Bead validate gate was never running.** The dispatcher parses `validate:` from `acceptance_criteria`/`notes` (never `description`), requires it to start its own line, and requires a bare allowlisted first token — so `.\gradlew.bat` was rejected on both counts. Every bead through Task 14 closed on frontier diff review alone with the compile gate silently skipped. Fixed with `.beads/validate-core.ps1`; all Task 15E beads gated green.
+- Note `core:test` is `NO-SOURCE` — core has no tests, so **compilation is the only mechanical gate** for core-only changes. `SPD-classes:test` is where tests actually live.
+- Pipeline: 14 beads dispatched, 14 succeeded on attempt 1, no failures, timeouts, or re-dispatches.
 
 **2026-07-23 (Sub-B Slice 1 planning):**
 - Reconciled the approved design against Git history and found the exact upstream range: 1,209 commits from SPD v2.1.0 to v2.5.4.
@@ -75,7 +89,9 @@
 
 ## Awaiting LO input
 
-- **No immediate input required.** Slice 1 is authorized for autonomous execution under the repository's beads-pipeline and review rules.
+- **Slice 1 scope decision.** The 541 triaged commits mean Slice 1 is roughly an order of magnitude larger than planned. Options: review and integrate them inside Slice 1, split them into a Slice 1b, or push the non-engine areas to a later slice. Task 25's re-estimation should not be the first time this is confronted.
+- **Conditional music as pack config** (`cpdu-15l`). Should amulet-obtained / quest-active track selection become a pack-config surface rather than hardcoded level code? Landing upstream's form would hardcode what CPDU deliberately made configurable, and would not apply to configured dungeons at all. Touches the frozen DSL.
+- Otherwise Slice 1 remains authorized for autonomous execution under the repository's beads-pipeline and review rules.
 - **Ultimate vision re-brainstorm** — LO explicitly deferred to "after Sub-B ships". Vision wave 1+2 already captured in frontier memory.
 
 ---
