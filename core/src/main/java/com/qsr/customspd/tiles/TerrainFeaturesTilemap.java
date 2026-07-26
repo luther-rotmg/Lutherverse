@@ -84,6 +84,7 @@ public class TerrainFeaturesTilemap extends DungeonTilemap {
 		else if (Dungeon.level instanceof CityLevel || Dungeon.level instanceof CityBossLevel) stage = 3;
 		else if (Dungeon.level instanceof HallsLevel || Dungeon.level instanceof HallsBossLevel || Dungeon.level instanceof LastLevel) stage = 4;
 		else stage = 1;
+		stage = Math.min(stage, 4);
 		if (tile == Terrain.HIGH_GRASS){
 			return 9 + 16*stage + (DungeonTileSheet.tileVariance[pos] >= 50 ? 1 : 0);
 		} else if (tile == Terrain.FURROWED_GRASS){
@@ -91,7 +92,7 @@ public class TerrainFeaturesTilemap extends DungeonTilemap {
 		} else if (tile == Terrain.GRASS) {
 			return 13 + 16*stage + (DungeonTileSheet.tileVariance[pos] >= 50 ? 1 : 0);
 		} else if (tile == Terrain.EMBERS) {
-			return 9 * (16*5) + (DungeonTileSheet.tileVariance[pos] >= 50 ? 1 : 0);
+			return 9 + (16*5) + (DungeonTileSheet.tileVariance[pos] >= 50 ? 1 : 0);
 		}
 
 		return -1;
