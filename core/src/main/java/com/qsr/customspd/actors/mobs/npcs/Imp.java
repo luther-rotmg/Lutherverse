@@ -35,6 +35,7 @@ import com.qsr.customspd.items.rings.Ring;
 import com.qsr.customspd.journal.Notes;
 import com.qsr.customspd.levels.CityLevel;
 import com.qsr.customspd.levels.Level;
+import com.qsr.customspd.levels.Terrain;
 import com.qsr.customspd.messages.Messages;
 import com.qsr.customspd.scenes.GameScene;
 import com.qsr.customspd.sprites.ImpSprite;
@@ -62,15 +63,15 @@ public class Imp extends NPC {
 			die(null);
 			return true;
 		}
-		if (!Quest.given && Dungeon.level.visited[pos]) {
-			if (!seenBefore) {
-				yell( Messages.get(this, "hey", Messages.titleCase(Dungeon.hero.name()) ) );
-			}
-			Notes.add( Notes.Landmark.IMP );
+	if (!Quest.given && Dungeon.level.visited[pos]) {
+		Notes.add( Notes.Landmark.IMP );
+		if (!seenBefore && Dungeon.level.heroFOV[pos]) {
+			yell(Messages.get(this, "hey", Messages.titleCase(Dungeon.hero.name())));
 			seenBefore = true;
-		} else {
-			seenBefore = false;
 		}
+	} else {
+		seenBefore = false;
+	}
 		
 		return super.act();
 	}
@@ -203,19 +204,23 @@ public class Imp extends NPC {
 			}
 		}
 		
-		public static void spawn( Level level ) {
-			Imp npc = new Imp();
-			do {
-				npc.pos = level.randomRespawnCell( npc );
-			} while (
-					npc.pos == -1 ||
-					level.heaps.get( npc.pos ) != null ||
-					level.traps.get( npc.pos) != null ||
-					level.findMob( npc.pos ) != null ||
-					//The imp doesn't move, so he cannot obstruct a passageway
-					!(level.passable[npc.pos + PathFinder.CIRCLE4[0]] && level.passable[npc.pos + PathFinder.CIRCLE4[2]]) ||
-					!(level.passable[npc.pos + PathFinder.CIRCLE4[1]] && level.passable[npc.pos + PathFinder.CIRCLE4[3]]));
-			level.mobs.add( npc );
+	public static void spawn( Level level ) {
+		Imp npc = new Imp();
+		int tries = 30;
+		do {
+			npc.pos = level.randomRespawnCell( npc );
+			tries--;
+		} while (
+				npc.pos == -1 ||
+				//visibility issues on these tiles, try to avoid them
+				(tries > 0 && level.map[ npc.pos ] == Terrain.EMPTY_SP) ||
+				level.heaps.get( npc.pos ) != null ||
+				level.traps.get( npc.pos) != null ||
+				level.findMob( npc.pos ) != null ||
+				//don't place the imp against solid terrain
+				!level.passable[npc.pos + PathFinder.CIRCLE4[0]] || !level.passable[npc.pos + PathFinder.CIRCLE4[1]] ||
+				!level.passable[npc.pos + PathFinder.CIRCLE4[2]] || !level.passable[npc.pos + PathFinder.CIRCLE4[3]]);
+		level.mobs.add( npc );
 
 			spawned = true;
 
@@ -235,7 +240,7 @@ public class Imp extends NPC {
 				given = false;
 				
 				do {
-					reward = (Ring)Generator.randomUsingDefaults( Generator.Category.RING );
+					reward = (Ring)Generator.random( Generator.Category.RING );
 				} while (reward.cursed);
 				reward.upgrade( 2 );
 				reward.cursed = true;

@@ -63,8 +63,11 @@ public class Ghost extends NPC {
 		spriteClass = GhostSprite.class;
 		
 		flying = true;
-		
+
 		state = WANDERING;
+
+		//not actually large of course, but this makes the ghost stick to the exit room
+		properties.add(Property.LARGE);
 	}
 
 	@Override
@@ -89,7 +92,7 @@ public class Ghost extends NPC {
 	
 	@Override
 	public float speed() {
-		return Quest.processed() ? 2f : 0.5f;
+		return 0.5f;
 	}
 	
 	@Override
@@ -314,7 +317,7 @@ public class Ghost extends NPC {
 				}
 				//50%:tier2, 30%:tier3, 15%:tier4, 5%:tier5
 				int wepTier = Random.chances(new float[]{0, 0, 10, 6, 3, 1});
-				weapon = (Weapon) Generator.randomUsingDefaults(Generator.wepTiers[wepTier - 1]);
+				weapon = (Weapon) Generator.random(Generator.wepTiers[wepTier - 1]);
 
 				//clear weapon's starting properties
 				weapon.level(0);
@@ -336,11 +339,16 @@ public class Ghost extends NPC {
 			weapon.upgrade(itemLevel);
 			armor.upgrade(itemLevel);
 
-			//10% to be enchanted. We store it separately so enchant status isn't revealed early
-			if (Random.Int(10) == 0){
-				enchant = Weapon.Enchantment.random();
-				glyph = Armor.Glyph.random();
-			}
+		//20% base chance to be enchanted. We store it separately so enchant status isn't revealed early
+		//we generate first so that the outcome doesn't affect the number of RNG rolls
+		enchant = Weapon.Enchantment.random();
+		glyph = Armor.Glyph.random();
+
+		float enchantRoll = Random.Float();
+		if (enchantRoll > 0.20f){
+			enchant = null;
+			glyph = null;
+		}
 		}
 		
 		public static void process() {

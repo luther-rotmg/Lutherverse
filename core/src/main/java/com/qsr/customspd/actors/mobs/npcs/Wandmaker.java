@@ -34,6 +34,7 @@ import com.qsr.customspd.items.quest.Embers;
 import com.qsr.customspd.items.wands.Wand;
 import com.qsr.customspd.journal.Notes;
 import com.qsr.customspd.levels.Level;
+import com.qsr.customspd.levels.Terrain;
 import com.qsr.customspd.levels.rooms.Room;
 import com.qsr.customspd.levels.rooms.special.MassGraveRoom;
 import com.qsr.customspd.levels.rooms.special.RotGardenRoom;
@@ -289,38 +290,40 @@ public class Wandmaker extends NPC {
 				
 				questRoomSpawned = false;
 				
-				Wandmaker npc = new Wandmaker();
-				boolean validPos;
-				//Do not spawn wandmaker on the entrance, a trap, or in front of a door.
-				do {
-					validPos = true;
-					npc.pos = level.pointToCell(room.random());
-					if (npc.pos == level.entrance()){
+			Wandmaker npc = new Wandmaker();
+			boolean validPos;
+			//Do not spawn wandmaker on the entrance, in front of a door, or on bad terrain.
+			do {
+				validPos = true;
+				npc.pos = level.pointToCell(room.random((room.width() > 6 && room.height() > 6) ? 2 : 1));
+				if (npc.pos == level.entrance()){
+					validPos = false;
+				}
+				for (Point door : room.connected.values()){
+					if (level.trueDistance( npc.pos, level.pointToCell( door ) ) <= 1){
 						validPos = false;
 					}
-					for (Point door : room.connected.values()){
-						if (level.trueDistance( npc.pos, level.pointToCell( door ) ) <= 1){
-							validPos = false;
-						}
-					}
-					if (level.traps.get(npc.pos) != null){
-						validPos = false;
-					}
-				} while (!validPos);
+				}
+			if (level.traps.get(npc.pos) != null
+					|| !level.passable[npc.pos]
+					|| level.map[npc.pos] == Terrain.EMPTY_SP){
+				validPos = false;
+			}
+			} while (!validPos);
 				level.mobs.add( npc );
 
 				spawned = true;
 
-				given = false;
-				wand1 = (Wand) Generator.randomUsingDefaults(Generator.Category.WAND);
-				wand1.cursed = false;
-				wand1.upgrade();
+			given = false;
+			wand1 = (Wand) Generator.random(Generator.Category.WAND);
+			wand1.cursed = false;
+			wand1.upgrade();
 
-				do {
-					wand2 = (Wand) Generator.randomUsingDefaults(Generator.Category.WAND);
-				} while (wand2.getClass().equals(wand1.getClass()));
-				wand2.cursed = false;
-				wand2.upgrade();
+			do {
+				wand2 = (Wand) Generator.random(Generator.Category.WAND);
+			} while (wand2.getClass() == wand1.getClass());
+			wand2.cursed = false;
+			wand2.upgrade();
 				
 			}
 		}

@@ -24,10 +24,14 @@ package com.qsr.customspd.actors.mobs.npcs;
 import com.qsr.customspd.Dungeon;
 import com.qsr.customspd.ShatteredPixelDungeon;
 import com.qsr.customspd.Statistics;
+import com.qsr.customspd.actors.Actor;
 import com.qsr.customspd.actors.Char;
+import com.qsr.customspd.actors.blobs.Blob;
 import com.qsr.customspd.actors.buffs.AscensionChallenge;
+import com.qsr.customspd.actors.buffs.BlobImmunity;
 import com.qsr.customspd.actors.buffs.Buff;
 import com.qsr.customspd.effects.CellEmitter;
+import com.qsr.customspd.effects.Speck;
 import com.qsr.customspd.effects.particles.ElmoParticle;
 import com.qsr.customspd.items.Heap;
 import com.qsr.customspd.items.Item;
@@ -35,6 +39,7 @@ import com.qsr.customspd.items.armor.Armor;
 import com.qsr.customspd.journal.Notes;
 import com.qsr.customspd.messages.Messages;
 import com.qsr.customspd.scenes.GameScene;
+import com.qsr.customspd.scenes.PixelScene;
 import com.qsr.customspd.sprites.ItemSprite;
 import com.qsr.customspd.sprites.ShopkeeperSprite;
 import com.qsr.customspd.utils.GLog;
@@ -44,9 +49,11 @@ import com.qsr.customspd.windows.WndTitledMessage;
 import com.qsr.customspd.windows.WndTradeItem;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.Image;
+import com.qsr.customspd.utils.BArray;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
+import com.watabou.utils.PathFinder;
 
 import java.util.ArrayList;
 
@@ -61,6 +68,8 @@ public class Shopkeeper extends NPC {
 	public static int MAX_BUYBACK_HISTORY = 3;
 	public ArrayList<Item> buybackItems = new ArrayList<>();
 
+	private int turnsSinceHarmed = -1;
+
 	@Override
 	protected boolean act() {
 
@@ -68,6 +77,9 @@ public class Shopkeeper extends NPC {
 			Notes.add(Notes.Landmark.SHOP);
 		}
 
+		if (turnsSinceHarmed >= 0){
+			turnsSinceHarmed ++;
+		}
 
 		sprite.turnTo( pos, Dungeon.hero.pos );
 		spend( TICK );
@@ -76,22 +88,83 @@ public class Shopkeeper extends NPC {
 	
 	@Override
 	public void damage( int dmg, Object src ) {
-		flee();
+		processHarm();
 	}
 	
 	@Override
 	public boolean add( Buff buff ) {
-		if (super.add(buff)) {
-			flee();
-			return true;
+		if (buff.type == Buff.buffType.NEGATIVE){
+			processHarm();
 		}
 		return false;
+	}
+
+	public void processHarm(){
+
+		//do nothing if the shopkeeper is out of the hero's FOV
+		if (!Dungeon.level.heroFOV[pos]){
+			return;
+		}
+
+		if (turnsSinceHarmed == -1){
+			turnsSinceHarmed = 0;
+			yell(Messages.get(this, "warn"));
+
+			//use a new actor as we can't clear the gas while we're in the middle of processing it
+			Actor.add(new Actor() {
+				{
+					actPriority = VFX_PRIO;
+				}
+
+				@Override
+				protected boolean act() {
+					//cleanses all harmful blobs in the shop
+					ArrayList<Blob> blobs = new ArrayList<>();
+					for (Class c : new BlobImmunity().immunities()){
+						Blob b = Dungeon.level.blobs.get(c);
+						if (b != null && b.volume > 0){
+							blobs.add(b);
+						}
+					}
+
+					PathFinder.buildDistanceMap( pos, BArray.not( Dungeon.level.solid, null ), 4 );
+
+					for (int i=0; i < Dungeon.level.length(); i++) {
+						if (PathFinder.distance[i] < Integer.MAX_VALUE) {
+
+							boolean affected = false;
+							for (Blob blob : blobs) {
+								if (blob.cur[i] > 0) {
+									blob.clear(i);
+									affected = true;
+								}
+							}
+
+							if (affected && Dungeon.level.heroFOV[i]) {
+								CellEmitter.get( i ).burst( Speck.factory( Speck.DISCOVER ), 2 );
+							}
+
+						}
+					}
+					Actor.remove(this);
+					return true;
+				}
+			});
+
+		//There is a 1 turn buffer before more damage/debuffs make the shopkeeper flee
+		//This is mainly to prevent stacked effects from causing an instant flee
+		} else if (turnsSinceHarmed >= 1) {
+			flee();
+		}
 	}
 	
 	public void flee() {
 		destroy();
 
 		Notes.remove(Notes.Landmark.SHOP);
+
+		GLog.newLine();
+		GLog.n(Messages.get(this, "flee"));
 
 		if (sprite != null) {
 			sprite.killAndErase();
@@ -167,15 +240,16 @@ public class Shopkeeper extends NPC {
 		Game.runOnRenderThread(new Callback() {
 			@Override
 			public void call() {
-				String[] options = new String[2+ buybackItems.size()];
-				int i = 0;
-				options[i++] = Messages.get(Shopkeeper.this, "sell");
-				options[i++] = Messages.get(Shopkeeper.this, "talk");
-				for (Item item : buybackItems){
-					options[i] = Messages.get(Heap.class, "for_sale", item.value(), Messages.titleCase(item.title()));
-					if (options[i].length() > 26) options[i] = options[i].substring(0, 23) + "...";
-					i++;
-				}
+			String[] options = new String[2+ buybackItems.size()];
+			int maxLen = PixelScene.landscape() ? 30 : 25;
+			int i = 0;
+			options[i++] = Messages.get(Shopkeeper.this, "sell");
+			options[i++] = Messages.get(Shopkeeper.this, "talk");
+			for (Item item : buybackItems){
+				options[i] = Messages.get(Heap.class, "for_sale", item.value(), Messages.titleCase(item.title()));
+				if (options[i].length() > maxLen) options[i] = options[i].substring(0, maxLen-3) + "...";
+				i++;
+			}
 				GameScene.show(new WndOptions(sprite(), Messages.titleCase(name()), description(), options){
 					@Override
 					protected void onSelect(int index) {
@@ -240,10 +314,13 @@ public class Shopkeeper extends NPC {
 
 	public static String BUYBACK_ITEMS = "buyback_items";
 
+	public static String TURNS_SINCE_HARMED = "turns_since_harmed";
+
 	@Override
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
 		bundle.put(BUYBACK_ITEMS, buybackItems);
+		bundle.put(TURNS_SINCE_HARMED, turnsSinceHarmed);
 	}
 
 	@Override
@@ -255,5 +332,6 @@ public class Shopkeeper extends NPC {
 				buybackItems.add((Item) i);
 			}
 		}
+		turnsSinceHarmed = bundle.contains(TURNS_SINCE_HARMED) ? bundle.getInt(TURNS_SINCE_HARMED) : -1;
 	}
 }
