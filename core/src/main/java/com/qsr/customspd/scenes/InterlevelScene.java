@@ -98,6 +98,8 @@ public class InterlevelScene extends PixelScene {
 	private static Exception error = null;
 	private float waitingTime;
 
+	private int dots = 0;
+
 	public static int lastRegion = -1;
 
 	{
@@ -340,6 +342,22 @@ public class InterlevelScene extends PixelScene {
 		super.update();
 
 		waitingTime += Game.elapsed;
+
+		if (mode != Mode.FALL && dots != Math.ceil(waitingTime / ((2*fadeTime)/3f))) {
+			String text = Messages.get(Mode.class, mode.name());
+			dots = (int)Math.ceil(waitingTime / ((2*fadeTime)/3f))%3;
+			switch (dots){
+				case 1: default:
+					message.text(text + ".");
+					break;
+				case 2:
+					message.text(text + "..");
+					break;
+				case 0:
+					message.text(text + "...");
+					break;
+			}
+		}
 
 		float p = timeLeft / fadeTime;
 

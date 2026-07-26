@@ -41,6 +41,7 @@ import com.qsr.customspd.scenes.GameScene;
 import com.qsr.customspd.scenes.PixelScene;
 import com.qsr.customspd.sprites.CharSprite;
 import com.qsr.customspd.windows.WndBag;
+import com.qsr.customspd.windows.WndInfoItem;
 import com.qsr.customspd.windows.WndUseItem;
 import com.watabou.gltextures.TextureCache;
 import com.watabou.input.GameAction;
@@ -557,6 +558,20 @@ public class InventoryPane extends Component {
 		}
 
 		@Override
+		protected boolean onLongClick() {
+			if (selector == null && item.defaultAction() != null) {
+				QuickSlotButton.set( item );
+				return true;
+			} else if (selector != null) {
+				GameScene.centerNextWndOnInvPane();
+				GameScene.show(new WndInfoItem(item));
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		@Override
 		protected void onRightClick() {
 			if (lastBag != item && !lastBag.contains(item) && !item.isEquipped(Dungeon.hero)){
 				updateInventory();
@@ -651,6 +666,7 @@ public class InventoryPane extends Component {
 		@Override
 		protected void onClick() {
 			super.onClick();
+			GameScene.cancel();
 			lastBag = bag;
 			refresh();
 		}
