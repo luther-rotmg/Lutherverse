@@ -169,7 +169,12 @@ public class Ratmogrify extends ArmorAbility {
 			CellEmitter.get(rat.pos).burst(Speck.factory(Speck.WOOL), 4);
 			Sample.INSTANCE.play(Assets.Sounds.PUFF);
 
-			Dungeon.level.occupyCell(rat);
+			//for rare cases where a buff was keeping a mob alive (e.g. gnoll brute rage)
+			if (!rat.isAlive()){
+				rat.die(this);
+			} else {
+				Dungeon.level.occupyCell(rat);
+			}
 		}
 
 		armor.charge -= chargeUse(hero);
@@ -283,8 +288,10 @@ public class Ratmogrify extends ArmorAbility {
 
 		@Override
 		public void rollToDropLoot() {
-			original.pos = pos;
-			original.rollToDropLoot();
+			if (original != null) {
+				original.pos = pos;
+				original.rollToDropLoot();
+			}
 		}
 
 		@Override

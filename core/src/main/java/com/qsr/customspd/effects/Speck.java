@@ -23,6 +23,7 @@ package com.qsr.customspd.effects;
 
 import com.qsr.customspd.assets.Asset;
 import com.qsr.customspd.assets.GeneralAsset;
+import com.qsr.customspd.scenes.PixelScene;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.particles.Emitter;
@@ -308,7 +309,7 @@ public class Speck extends Image {
 			
 		case BUBBLE:
 			speed.set( 0, -15 );
-			scale.set( Random.Float( 0.8f, 1 ) );
+			scale.set( PixelScene.align(Random.Float( 0.8f, 1 )) );
 			lifespan = Random.Float( 0.8f, 1.5f );
 			break;
 			

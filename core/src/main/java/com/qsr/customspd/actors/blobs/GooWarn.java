@@ -25,6 +25,7 @@ package com.qsr.customspd.actors.blobs;
 
 import com.qsr.customspd.Dungeon;
 import com.qsr.customspd.effects.BlobEmitter;
+import com.qsr.customspd.levels.Level;
 import com.qsr.customspd.messages.Messages;
 import com.qsr.customspd.sprites.GooSprite;
 
@@ -38,6 +39,20 @@ public class GooWarn extends Blob {
 	}
 
 	protected int pos;
+
+	@Override
+	public void seed(Level level, int cell, int amount ) {
+		if (cur == null) cur = new int[level.length()];
+		if (off == null) off = new int[cur.length];
+
+		int toAdd = amount - cur[cell];
+		if (toAdd > 0){
+			cur[cell] += toAdd;
+			volume += toAdd;
+		}
+
+		area.union(cell%level.width(), cell/level.width());
+	}
 
 	@Override
 	protected void evolve() {

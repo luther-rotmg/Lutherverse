@@ -147,8 +147,17 @@ public class Bones {
 			}
 
 		} else {
-			//heroes who are challenged or on a seeded run cannot find bones
-			if (level.equals(Dungeon.levelName) && Dungeon.challenges == 0 && Dungeon.customSeedText.isEmpty() && Dungeon.layout.getBones()) {
+			//heroes who are challenged or on a seeded run can still find bones, but they get gold
+			if (level.equals(Dungeon.levelName) && Dungeon.layout.getBones()) {
+
+				if (Dungeon.challenges != 0 || !Dungeon.customSeedText.isEmpty()){
+					item = new Gold(10);
+				}
+
+				if (item == null) {
+					item = new Gold(50);
+				}
+
 				Bundle emptyBones = new Bundle();
 				emptyBones.put(LEVEL, 0);
 				try {
