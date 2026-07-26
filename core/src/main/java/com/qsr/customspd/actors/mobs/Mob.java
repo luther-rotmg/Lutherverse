@@ -51,6 +51,7 @@ import com.qsr.customspd.actors.hero.HeroClass;
 import com.qsr.customspd.actors.hero.HeroSubClass;
 import com.qsr.customspd.actors.hero.Talent;
 import com.qsr.customspd.actors.hero.abilities.duelist.Feint;
+import com.qsr.customspd.actors.hero.abilities.rogue.ShadowClone;
 import com.qsr.customspd.actors.mobs.npcs.DirectableAlly;
 import com.qsr.customspd.effects.CellEmitter;
 import com.qsr.customspd.effects.Surprise;
@@ -282,7 +283,7 @@ public abstract class Mob extends Char {
 		}
 		
 		//if we are an alert enemy, auto-hunt a target that is affected by aggression, even another enemy
-		if (alignment == Alignment.ENEMY && state != PASSIVE && state != SLEEPING) {
+		if ((alignment == Alignment.ENEMY || buff(Amok.class) != null ) && state != PASSIVE && state != SLEEPING) {
 			if (enemy != null && enemy.buff(StoneOfAggression.Aggression.class) != null){
 				state = HUNTING;
 				return enemy;
@@ -306,6 +307,9 @@ public abstract class Mob extends Char {
 			newEnemy = true;
 		//We are charmed and current enemy is what charmed us
 		} else if (buff(Charm.class) != null && buff(Charm.class).object == enemy.id()) {
+			newEnemy = true;
+		//We are sleeping (rather than preferring existing target, we want to see if anything is closer
+		} else if (state == SLEEPING){
 			newEnemy = true;
 		}
 
@@ -438,10 +442,10 @@ public abstract class Mob extends Char {
 	@Override
 	public boolean remove( Buff buff ) {
 		if (super.remove( buff )) {
-			if ((buff instanceof Terror && buff(Dread.class) == null)
-					|| (buff instanceof Dread && buff(Terror.class) == null)) {
+			if (state == FLEEING && ((buff instanceof Terror && buff(Dread.class) == null)
+					|| (buff instanceof Dread && buff(Terror.class) == null))) {
 				if (enemySeen) {
-					sprite.showStatus(CharSprite.NEGATIVE, Messages.get(this, "rage"));
+					sprite.showStatus(CharSprite.WARNING, Messages.get(this, "rage"));
 					state = HUNTING;
 				} else {
 					state = WANDERING;
@@ -503,11 +507,13 @@ public abstract class Mob extends Char {
 		} else {
 
 			boolean newPath = false;
+			float longFactor = state == WANDERING ? 2f : 1.33f;
 			//scrap the current path if it's empty, no longer connects to the current location
-			//or if it's extremely inefficient and checking again may result in a much better path
+			//or if it's quite inefficient and checking again may result in a much better path
+			//mobs are much more tolerant of inefficient paths if wandering
 			if (path == null || path.isEmpty()
 					|| !Dungeon.level.adjacent(pos, path.getFirst())
-					|| path.size() > 2*Dungeon.level.distance(pos, target))
+					|| path.size() > longFactor*Dungeon.level.distance(pos, target))
 				newPath = true;
 			else if (path.getLast() != target) {
 				//if the new target is adjacent to the end of the path, adjust for that
@@ -1051,22 +1057,43 @@ public abstract class Mob extends Char {
 			for (Buff b : buffs()){
 				if (b.type == Buff.buffType.NEGATIVE){
 					awaken(enemyInFOV);
+					if (state == SLEEPING){
+						spend(TICK); //wait if we can't wake up for some reason
+					}
 					return true;
 				}
 			}
 
-			if (enemyInFOV) {
+			//can be awoken by the least stealthy hostile present, not necessarily just our target
+			if (enemyInFOV || (enemy != null && enemy.invisible > 0)) {
 
-				float enemyStealth = enemy.stealth();
+				float closestHostileDist = Float.POSITIVE_INFINITY;
 
-				if (enemy instanceof Hero && ((Hero) enemy).hasTalent(Talent.SILENT_STEPS)){
-					if (Dungeon.level.distance(pos, enemy.pos) >= 4 - ((Hero) enemy).pointsInTalent(Talent.SILENT_STEPS)) {
-						enemyStealth = Float.POSITIVE_INFINITY;
+				for (Char ch : Actor.chars()){
+					if (fieldOfView[ch.pos] && ch.invisible == 0 && ch.alignment != alignment && ch.alignment != Alignment.NEUTRAL){
+						float chDist = ch.stealth() + distance(ch);
+						//silent steps rogue talent, which also applies to rogue's shadow clone
+						if ((ch instanceof Hero || ch instanceof ShadowClone.ShadowAlly)
+								&& Dungeon.hero.hasTalent(Talent.SILENT_STEPS)){
+							if (distance(ch) >= 4 - Dungeon.hero.pointsInTalent(Talent.SILENT_STEPS)) {
+								chDist = Float.POSITIVE_INFINITY;
+							}
+						}
+						//flying characters are naturally stealthy
+						if (ch.flying && distance(ch) >= 2){
+							chDist = Float.POSITIVE_INFINITY;
+						}
+						if (chDist < closestHostileDist){
+							closestHostileDist = chDist;
+						}
 					}
 				}
 
-				if (Random.Float( distance( enemy ) + enemyStealth ) < 1) {
+				if (Random.Float( closestHostileDist ) < 1) {
 					awaken(enemyInFOV);
+					if (state == SLEEPING){
+						spend(TICK); //wait if we can't wake up for some reason
+					}
 					return true;
 				}
 
@@ -1306,7 +1333,7 @@ public abstract class Mob extends Char {
 			
 			ArrayList<Integer> candidatePositions = new ArrayList<>();
 			for (int i : PathFinder.NEIGHBOURS8) {
-				if (!Dungeon.level.solid[i+pos] && level.findMob(i+pos) == null){
+				if (!Dungeon.level.solid[i+pos] && !Dungeon.level.avoid[i+pos] && level.findMob(i+pos) == null){
 					candidatePositions.add(i+pos);
 				}
 			}
