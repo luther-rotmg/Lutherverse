@@ -83,7 +83,9 @@ import com.qsr.customspd.levels.traps.PitfallTrap;
 import com.qsr.customspd.levels.traps.Trap;
 import com.qsr.customspd.levels.traps.WornDartTrap;
 import com.qsr.customspd.mechanics.ShadowCaster;
+import com.qsr.customspd.utils.BArray;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.PathFinder;
 import com.watabou.utils.Point;
 import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
@@ -138,7 +140,7 @@ public abstract class RegularLevel extends Level {
 			do {
 				s = StandardRoom.createRoom();
 			} while (!s.setSizeCat( standards-i ));
-			i += s.sizeCat.roomValue-1;
+			i += s.sizeFactor()-1;
 			initRooms.add(s);
 		}
 		
@@ -237,7 +239,7 @@ public abstract class RegularLevel extends Level {
 		ArrayList<Room> stdRooms = new ArrayList<>();
 		for (Room room : rooms) {
 			if (room instanceof StandardRoom) {
-				for (int i = 0; i < ((StandardRoom) room).sizeCat.roomValue; i++) {
+				for (int i = 0; i < ((StandardRoom) room).mobSpawnWeight(); i++) {
 					stdRooms.add(room);
 				}
 			}
@@ -245,12 +247,16 @@ public abstract class RegularLevel extends Level {
 		Random.shuffle(stdRooms);
 		Iterator<Room> stdRoomIter = stdRooms.iterator();
 
+		//enemies cannot be within an 8-tile FOV of the entrance
+		// or a 6-tile open space distance from the entrance
 		boolean[] entranceFOV = new boolean[length()];
 		Point c = cellToPoint(entrance());
-		ShadowCaster.castShadow(c.x, c.y, width(), entranceFOV, losBlocking, 8);
+		ShadowCaster.castShadow(c.x, c.y, width(), entranceFOV, losBlocking, 6);
+		PathFinder.buildDistanceMap(entrance(), BArray.not(solid, null), 8);
 
+		Mob mob = null;
 		while (mobsToSpawn > 0) {
-			Mob mob = createMob();
+			if (mob == null) mob = createMob();
 			Room roomToSpawn;
 			
 			if (!stdRoomIter.hasNext()) {
@@ -263,7 +269,7 @@ public abstract class RegularLevel extends Level {
 				mob.pos = pointToCell(roomToSpawn.random());
 				tries--;
 			} while (tries >= 0 && (findMob(mob.pos) != null
-					|| entranceFOV[mob.pos] || (roomToSpawn.isEntrance() && distance(entrance(), mob.pos) <= 5)
+					|| entranceFOV[mob.pos] || PathFinder.distance[mob.pos] != Integer.MAX_VALUE
 					|| !passable[mob.pos]
 					|| solid[mob.pos]
 					|| !roomToSpawn.canPlaceCharacter(cellToPoint(mob.pos), this)
@@ -274,6 +280,7 @@ public abstract class RegularLevel extends Level {
 			if (tries >= 0) {
 				mobsToSpawn--;
 				mobs.add(mob);
+				mob = null;
 
 				//chance to add a second mob to this room, except on floor 1
 				if (Dungeon.depth > 1 && mobsToSpawn > 0 && Random.Int(4) == 0){
@@ -284,7 +291,7 @@ public abstract class RegularLevel extends Level {
 						mob.pos = pointToCell(roomToSpawn.random());
 						tries--;
 					} while (tries >= 0 && (findMob(mob.pos) != null
-							|| entranceFOV[mob.pos] || (roomToSpawn.isEntrance() && distance(entrance(), mob.pos) <= 5)
+							|| entranceFOV[mob.pos] || PathFinder.distance[mob.pos] != Integer.MAX_VALUE
 							|| !passable[mob.pos]
 							|| solid[mob.pos]
 							|| !roomToSpawn.canPlaceCharacter(cellToPoint(mob.pos), this)
@@ -295,36 +302,37 @@ public abstract class RegularLevel extends Level {
 					if (tries >= 0) {
 						mobsToSpawn--;
 						mobs.add(mob);
+						mob = null;
 					}
 				}
 			}
 		}
 
 		for (ExtraMobSpawn mobSpawn : Dungeon.layout.getDungeon().get(Dungeon.levelName).getExtraMobs()) {
-			Mob mob = (Mob) Reflection.newInstance(Reflection.forName("com.qsr.customspd.actors.mobs." + mobSpawn.getType()));
-			if (mobSpawn.getAlignment() != null) mob.alignment = Char.Alignment.valueOf(mobSpawn.getAlignment().toUpperCase(Locale.ENGLISH));
+			Mob m = (Mob) Reflection.newInstance(Reflection.forName("com.qsr.customspd.actors.mobs." + mobSpawn.getType()));
+			if (mobSpawn.getAlignment() != null) m.alignment = Char.Alignment.valueOf(mobSpawn.getAlignment().toUpperCase(Locale.ENGLISH));
 			if (mobSpawn.getHp() != null) {
-				mob.HP = mobSpawn.getHp();
+				m.HP = mobSpawn.getHp();
 			}
 			if (mobSpawn.getChampion() != null) {
-				Buff.affect(mob, Reflection.forName("com.qsr.customspd.actors.buffs.ChampionEnemy$" + mobSpawn.getChampion()));
+				Buff.affect(m, Reflection.forName("com.qsr.customspd.actors.buffs.ChampionEnemy$" + mobSpawn.getChampion()));
 			}
 			if (mobSpawn.getAiState() != null) {
 				switch (mobSpawn.getAiState().toUpperCase()) {
 					case "SLEEPING":
-						mob.state = mob.SLEEPING;
+						m.state = m.SLEEPING;
 						break;
 					case "HUNTING":
-						mob.state = mob.HUNTING;
+						m.state = m.HUNTING;
 						break;
 					case "WANDERING":
-						mob.state = mob.WANDERING;
+						m.state = m.WANDERING;
 						break;
 					case "FLEEING":
-						mob.state = mob.FLEEING;
+						m.state = m.FLEEING;
 						break;
 					case "PASSIVE":
-						mob.state = mob.PASSIVE;
+						m.state = m.PASSIVE;
 						break;
 				}
 			}
@@ -338,17 +346,17 @@ public abstract class RegularLevel extends Level {
 
 			int tries = 30;
 			do {
-				mob.pos = pointToCell(roomToSpawn.random());
+				m.pos = pointToCell(roomToSpawn.random());
 				tries--;
-			} while (tries >= 0 && (findMob(mob.pos) != null
-				|| !passable[mob.pos]
-				|| solid[mob.pos]
-				|| !roomToSpawn.canPlaceCharacter(cellToPoint(mob.pos), this)
-				|| mob.pos == exit()
-				|| (!openSpace[mob.pos] && mob.properties().contains(Char.Property.LARGE))));
+			} while (tries >= 0 && (findMob(m.pos) != null
+				|| !passable[m.pos]
+				|| solid[m.pos]
+				|| !roomToSpawn.canPlaceCharacter(cellToPoint(m.pos), this)
+				|| m.pos == exit()
+				|| (!openSpace[m.pos] && m.properties().contains(Char.Property.LARGE))));
 
 			if (tries >= 0) {
-				mobs.add(mob);
+				mobs.add(m);
 			}
 		}
 
