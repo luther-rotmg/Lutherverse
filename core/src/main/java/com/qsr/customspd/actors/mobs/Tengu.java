@@ -33,6 +33,7 @@ import com.qsr.customspd.actors.blobs.Electricity;
 import com.qsr.customspd.actors.blobs.Fire;
 import com.qsr.customspd.actors.buffs.Blindness;
 import com.qsr.customspd.actors.buffs.Buff;
+import com.qsr.customspd.actors.buffs.Burning;
 import com.qsr.customspd.actors.buffs.Doom;
 import com.qsr.customspd.actors.buffs.Dread;
 import com.qsr.customspd.actors.buffs.LockedFloor;
@@ -59,6 +60,7 @@ import com.qsr.customspd.levels.Level;
 import com.qsr.customspd.levels.PrisonBossLevel;
 import com.qsr.customspd.mechanics.Ballistica;
 import com.qsr.customspd.messages.Messages;
+import com.qsr.customspd.plants.Plant;
 import com.qsr.customspd.scenes.GameScene;
 import com.qsr.customspd.sprites.CharSprite;
 import com.qsr.customspd.sprites.MissileSprite;
@@ -149,7 +151,7 @@ public class Tengu extends Mob {
 		dmg = beforeHitHP - HP;
 
 		LockedFloor lock = Dungeon.hero.buff(LockedFloor.class);
-		if (lock != null) {
+		if (lock != null && !isImmune(src.getClass()) && !isInvulnerable(src.getClass())){
 			if (Dungeon.isChallenged(Challenges.STRONGER_BOSSES))   lock.addTime(2*dmg/3f);
 			else                                                    lock.addTime(dmg);
 		}
@@ -853,13 +855,26 @@ public class Tengu extends Mob {
 						}
 						
 					if (cur[cell] > 0 && off[cell] == 0){
-						
-						if (Actor.findChar( cell ) == Dungeon.hero){
+
+						//similar to fire.burn(), but Tengu is immune, and hero loses score
+						Char ch = Actor.findChar( cell );
+						if (ch != null && !ch.isImmune(Fire.class) && !(ch instanceof Tengu)) {
+							Buff.affect( ch, Burning.class ).reignite( ch );
+						}
+						if (ch == Dungeon.hero){
 							Statistics.qualifiedForBossChallengeBadge = false;
 							Statistics.bossScores[1] -= 100;
 						}
 
-						Fire.burn(cell);
+						Heap heap = Dungeon.level.heaps.get( cell );
+						if (heap != null) {
+							heap.burn();
+						}
+
+						Plant plant = Dungeon.level.plants.get( cell );
+						if (plant != null){
+							plant.wither();
+						}
 						
 						if (Dungeon.level.flamable[cell]){
 							Dungeon.level.destroy( cell );
