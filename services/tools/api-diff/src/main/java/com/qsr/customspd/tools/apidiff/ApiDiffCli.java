@@ -117,7 +117,18 @@ public final class ApiDiffCli {
      * "does not exist in".
      */
     private static boolean isPathNotFound(IOException e) {
-        return e.getMessage() != null && e.getMessage().contains("does not exist in");
+        String message = e.getMessage();
+        if (message == null) {
+            return false;
+        }
+        // git reports an absent path two different ways depending on whether the
+        // file is present in the working tree:
+        //   fatal: path 'X' does not exist in 'REF'
+        //   fatal: path 'X' exists on disk, but not in 'REF'
+        // The second form is what a file ADDED by the audited range produces, so
+        // missing it makes the tool crash on exactly the commits it exists to audit.
+        return message.contains("does not exist in")
+                || message.contains("exists on disk, but not in");
     }
 
     private static String describe(JavaSurface.Symbol symbol) {
@@ -148,8 +159,35 @@ public final class ApiDiffCli {
      * Lists every file path in the tree at {@code ref} via
      * {@code git ls-tree -r --name-only <ref>}.
      */
+    /**
+     * Resolves the repository root so git invocations are independent of the
+     * JVM's working directory. Returns {@code null} (meaning "inherit the
+     * current directory") if the root cannot be determined, which keeps the
+     * tool usable outside a git checkout rather than hard-failing.
+     */
+    private static java.io.File repoRoot() throws IOException {
+        ProcessBuilder builder = new ProcessBuilder("git", "rev-parse", "--show-toplevel");
+        builder.redirectErrorStream(true);
+        Process process = builder.start();
+        String out = readStream(process.getInputStream()).trim();
+        try {
+            if (process.waitFor() != 0 || out.isEmpty()) {
+                return null;
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("interrupted resolving repository root", e);
+        }
+        return new java.io.File(out);
+    }
+
     private static List<String> listTree(String ref) throws IOException {
         ProcessBuilder builder = new ProcessBuilder("git", "ls-tree", "-r", "--name-only", ref);
+        // git ls-tree scopes its output to the current directory prefix, so running
+        // from a subproject (as `gradle :services:tools:api-diff:run` does) would list
+        // only that subproject's files and silently scan zero of the paths the glob
+        // targets -- reporting PASS without auditing anything. Anchor to the repo root.
+        builder.directory(repoRoot());
         Process process = builder.start();
 
         StringBuilder stderrBuffer = new StringBuilder();
