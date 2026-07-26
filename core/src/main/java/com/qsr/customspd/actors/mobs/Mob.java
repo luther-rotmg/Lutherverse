@@ -53,7 +53,6 @@ import com.qsr.customspd.actors.hero.Talent;
 import com.qsr.customspd.actors.hero.abilities.duelist.Feint;
 import com.qsr.customspd.actors.mobs.npcs.DirectableAlly;
 import com.qsr.customspd.effects.CellEmitter;
-import com.qsr.customspd.effects.Speck;
 import com.qsr.customspd.effects.Surprise;
 import com.qsr.customspd.effects.Wound;
 import com.qsr.customspd.effects.particles.ShadowParticle;
@@ -356,9 +355,10 @@ public abstract class Mob extends Char {
 				for (Mob mob : Dungeon.level.mobs)
 					if (mob.alignment == Alignment.ENEMY && fieldOfView[mob.pos]
 							&& mob.invisible <= 0 && !mob.isInvulnerable(getClass()))
-						//intelligent allies do not target mobs which are passive, wandering, or asleep
-						if (!intelligentAlly ||
-								(mob.state != mob.SLEEPING && mob.state != mob.PASSIVE && mob.state != mob.WANDERING)) {
+						//do not target passive mobs
+						//intelligent allies also don't target mobs which are wandering or asleep
+						if (mob.state != mob.PASSIVE &&
+								(!intelligentAlly || (mob.state != mob.SLEEPING && mob.state != mob.WANDERING))) {
 							enemies.add(mob);
 						}
 				
@@ -710,8 +710,12 @@ public abstract class Mob extends Char {
 			}
 			if (restoration > 0) {
 				Buff.affect(Dungeon.hero, Hunger.class).affectHunger(restoration*Dungeon.hero.pointsInTalent(Talent.SOUL_EATER)/3f);
-				Dungeon.hero.HP = (int) Math.ceil(Math.min(Dungeon.hero.HT, Dungeon.hero.HP + (restoration * 0.4f)));
-				Dungeon.hero.sprite.emitter().burst(Speck.factory(Speck.HEALING), 1);
+
+				if (Dungeon.hero.HP < Dungeon.hero.HT) {
+					int heal = (int)Math.ceil(restoration * 0.4f);
+					Dungeon.hero.HP = Math.min(Dungeon.hero.HT, Dungeon.hero.HP + heal);
+					Dungeon.hero.sprite.showStatus(CharSprite.POSITIVE, Integer.toString(heal));
+				}
 			}
 		}
 
@@ -753,11 +757,13 @@ public abstract class Mob extends Char {
 	@Override
 	public void damage( int dmg, Object src ) {
 
-		if (state == SLEEPING) {
-			state = WANDERING;
-		}
-		if (state != HUNTING && !(src instanceof Corruption)) {
-			alerted = true;
+		if (!isInvulnerable(src.getClass())) {
+			if (state == SLEEPING) {
+				state = WANDERING;
+			}
+			if (state != HUNTING && !(src instanceof Corruption)) {
+				alerted = true;
+			}
 		}
 		
 		super.damage( dmg, src );
