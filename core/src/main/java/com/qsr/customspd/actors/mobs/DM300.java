@@ -46,6 +46,7 @@ import com.qsr.customspd.actors.buffs.Terror;
 import com.qsr.customspd.actors.buffs.Vertigo;
 import com.qsr.customspd.effects.CellEmitter;
 import com.qsr.customspd.effects.Speck;
+import com.qsr.customspd.effects.TargetedCell;
 import com.qsr.customspd.effects.particles.EarthParticle;
 import com.qsr.customspd.effects.particles.SparkParticle;
 import com.qsr.customspd.items.artifacts.DriedRose;
@@ -324,14 +325,14 @@ public class DM300 extends Mob {
 
 		if (travelling) Camera.main.shake( supercharged ? 3 : 1, 0.25f );
 
-		if (Dungeon.level.map[step] == Terrain.INACTIVE_TRAP && state == HUNTING) {
+		if (!flying && Dungeon.level.map[pos] == Terrain.INACTIVE_TRAP && state == HUNTING) {
 
 			//don't gain energy from cells that are energized
 			if (CavesBossLevel.PylonEnergy.volumeAt(pos, CavesBossLevel.PylonEnergy.class) > 0){
 				return;
 			}
 
-			if (Dungeon.level.heroFOV[step]) {
+			if (Dungeon.level.heroFOV[pos]) {
 				if (buff(Barrier.class) == null) {
 					GLog.w(Messages.get(this, "shield"));
 				}
@@ -456,7 +457,10 @@ public class DM300 extends Mob {
 				pos++;
 			}
 		}
-		Buff.append(this, FallingRockBuff.class, GameMath.gate(TICK, target.cooldown(), 3*TICK)).setRockPositions(rockCells);
+		for (int i : rockCells){
+			sprite.parent.add(new TargetedCell(i, 0xFF0000));
+		}
+		Buff.append(this, FallingRockBuff.class, GameMath.gate(TICK, (int)Math.ceil(target.cooldown()), 3*TICK)).setRockPositions(rockCells);
 
 	}
 
@@ -490,7 +494,7 @@ public class DM300 extends Mob {
 			threshold = HT / 3 * (2 - pylonsActivated);
 		}
 
-		if (HP < threshold){
+		if (HP <= threshold && HP > 0){
 			HP = threshold;
 			supercharge();
 		}
@@ -531,6 +535,9 @@ public class DM300 extends Mob {
 	public void loseSupercharge(){
 		supercharged = false;
 		((DM300Sprite)sprite).updateChargeState(false);
+
+		//adjust turns since last ability to prevent DM immediately using an ability when charge ends
+		turnsSinceLastAbility = Math.max(turnsSinceLastAbility, MIN_COOLDOWN-3);
 
 		if (pylonsActivated < totalPylonsToActivate()){
 			yell(Messages.get(this, "charge_lost"));

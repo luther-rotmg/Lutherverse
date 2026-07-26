@@ -106,7 +106,7 @@ public class Goo extends Mob {
 			sprite.idle();
 		}
 
-		if (Dungeon.level.water[pos] && HP < HT) {
+		if (!flying && Dungeon.level.water[pos] && HP < HT) {
 			HP += healInc;
 			Statistics.qualifiedForBossChallengeBadge = false;
 
@@ -210,7 +210,7 @@ public class Goo extends Mob {
 			if (Dungeon.isChallenged(Challenges.STRONGER_BOSSES)){
 				pumpedUp += 2;
 				//don't want to overly punish players with slow move or attack speed
-				spend(GameMath.gate(attackDelay(), Dungeon.hero.cooldown(), 3*attackDelay()));
+				spend(GameMath.gate(attackDelay(), (int)Math.ceil(enemy.cooldown()), 3*attackDelay()));
 			} else {
 				pumpedUp++;
 				spend( attackDelay() );

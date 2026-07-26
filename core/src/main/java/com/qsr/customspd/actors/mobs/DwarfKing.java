@@ -491,16 +491,23 @@ public class DwarfKing extends Mob {
 				phase = 2;
 				summonsMade = 0;
 				sprite.idle();
-				Buff.affect(this, DKBarrior.class).setShield(HT);
-				for (Summoning s : buffs(Summoning.class)) {
-					s.detach();
-				}
-				for (Mob m : Dungeon.level.mobs.toArray(new Mob[0])) {
+			Buff.affect(this, DKBarrior.class).setShield(HT);
+			for (Summoning s : buffs(Summoning.class)) {
+				s.detach();
+			}
+			for (Mob m : Dungeon.level.mobs.toArray(new Mob[0])) {
+				if (m.alignment == alignment) {
 					if (m instanceof Ghoul || m instanceof Monk || m instanceof Warlock || m instanceof Golem) {
 						m.die(null);
 					}
 				}
 			}
+			for (Buff b: buffs()){
+				if (b instanceof LifeLink){
+					b.detach();
+				}
+			}
+		}
 		} else if (phase == 2 && shielding() == 0) {
 			properties.remove(Property.IMMOVABLE);
 			phase = 3;

@@ -33,10 +33,10 @@ import com.qsr.customspd.actors.blobs.Electricity;
 import com.qsr.customspd.actors.blobs.Fire;
 import com.qsr.customspd.actors.buffs.Blindness;
 import com.qsr.customspd.actors.buffs.Buff;
-import com.qsr.customspd.actors.buffs.Burning;
 import com.qsr.customspd.actors.buffs.Doom;
 import com.qsr.customspd.actors.buffs.Dread;
 import com.qsr.customspd.actors.buffs.LockedFloor;
+import com.qsr.customspd.actors.buffs.Roots;
 import com.qsr.customspd.actors.buffs.Terror;
 import com.qsr.customspd.actors.hero.Hero;
 import com.qsr.customspd.actors.hero.HeroSubClass;
@@ -65,10 +65,10 @@ import com.qsr.customspd.sprites.MissileSprite;
 import com.qsr.customspd.sprites.TenguSprite;
 import com.qsr.customspd.tiles.DungeonTilemap;
 import com.qsr.customspd.ui.BossHealthBar;
-import com.qsr.customspd.utils.BArray;
 import com.qsr.customspd.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
+import com.qsr.customspd.utils.BArray;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
 import com.watabou.utils.GameMath;
@@ -89,8 +89,6 @@ public class Tengu extends Mob {
 		defenseSkill = 15;
 		
 		HUNTING = new Hunting();
-		
-		flying = true; //doesn't literally fly, but he is fleet-of-foot enough to avoid hazards
 		
 		properties.add(Property.BOSS);
 		
@@ -136,19 +134,23 @@ public class Tengu extends Mob {
 		PrisonBossLevel.State state = ((PrisonBossLevel)Dungeon.level).state();
 		
 		int hpBracket = HT / 8;
-		
+
+		int curbracket = HP / hpBracket;
+
 		int beforeHitHP = HP;
 		super.damage(dmg, src);
-		dmg = beforeHitHP - HP;
-		
-		//tengu cannot be hit through multiple brackets at a time
-		if ((beforeHitHP/hpBracket - HP/hpBracket) >= 2){
-			HP = hpBracket * ((beforeHitHP/hpBracket)-1) + 1;
+
+		//cannot be hit through multiple brackets at a time
+		if (HP <= (curbracket-1)*hpBracket){
+			HP = (curbracket-1)*hpBracket + 1;
 		}
-		
+
+		int newBracket =  HP / hpBracket;
+		dmg = beforeHitHP - HP;
+
 		LockedFloor lock = Dungeon.hero.buff(LockedFloor.class);
 		if (lock != null) {
-			if (Dungeon.isChallenged(Challenges.STRONGER_BOSSES))   lock.addTime(dmg/2f);
+			if (Dungeon.isChallenged(Challenges.STRONGER_BOSSES))   lock.addTime(2*dmg/3f);
 			else                                                    lock.addTime(dmg);
 		}
 		
@@ -179,7 +181,7 @@ public class Tengu extends Mob {
 			BossHealthBar.bleed(true);
 			
 		//if tengu has lost a certain amount of hp, jump
-		} else if (beforeHitHP / hpBracket != HP / hpBracket) {
+		} else if (newBracket != curbracket) {
 			//let full attack action complete first
 			Actor.add(new Actor() {
 
@@ -337,6 +339,7 @@ public class Tengu extends Mob {
 	}
 	
 	{
+		immunities.add( Roots.class );
 		immunities.add( Blindness.class );
 		immunities.add( Dread.class );
 		immunities.add( Terror.class );
@@ -550,10 +553,16 @@ public class Tengu extends Mob {
 		
 		int targetCell = -1;
 		
-		//Targets closest cell which is adjacent to target
+		//Targets closest cell which is adjacent to target and has no existing bombs
 		for (int i : PathFinder.NEIGHBOURS8){
 			int cell = target.pos + i;
-			if (!Dungeon.level.solid[cell] &&
+			boolean bombHere = false;
+			for (BombAbility b : thrower.buffs(BombAbility.class)){
+				if (b.bombPos == cell){
+					bombHere = true;
+				}
+			}
+			if (!bombHere && !Dungeon.level.solid[cell] &&
 					(targetCell == -1 || Dungeon.level.trueDistance(cell, thrower.pos) < Dungeon.level.trueDistance(targetCell, thrower.pos))){
 				targetCell = cell;
 			}
@@ -843,19 +852,17 @@ public class Tengu extends Mob {
 							volume += off[cell];
 						}
 						
-						if (cur[cell] > 0 && off[cell] == 0){
-							
-							Char ch = Actor.findChar( cell );
-							if (ch != null && !ch.isImmune(Fire.class) && !(ch instanceof Tengu)) {
-								Buff.affect( ch, Burning.class ).reignite( ch );
-							}
-							if (ch == Dungeon.hero){
-								Statistics.qualifiedForBossChallengeBadge = false;
-								Statistics.bossScores[1] -= 100;
-							}
-							
-							if (Dungeon.level.flamable[cell]){
-								Dungeon.level.destroy( cell );
+					if (cur[cell] > 0 && off[cell] == 0){
+						
+						if (Actor.findChar( cell ) == Dungeon.hero){
+							Statistics.qualifiedForBossChallengeBadge = false;
+							Statistics.bossScores[1] -= 100;
+						}
+
+						Fire.burn(cell);
+						
+						if (Dungeon.level.flamable[cell]){
+							Dungeon.level.destroy( cell );
 								
 								observe = true;
 								GameScene.updateMap( cell );

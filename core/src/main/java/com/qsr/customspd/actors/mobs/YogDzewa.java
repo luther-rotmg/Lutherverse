@@ -291,8 +291,8 @@ public class YogDzewa extends Mob {
 					}
 				}
 
-				//don't want to overly punish players with slow move or attack speed
-				spend(GameMath.gate(TICK, Dungeon.hero.cooldown(), 3*TICK));
+			//don't want to overly punish players with slow move or attack speed
+			spend(GameMath.gate(TICK, (int)Math.ceil(Dungeon.hero.cooldown()), 3*TICK));
 				Dungeon.hero.interrupt();
 
 				abilityCooldown += Random.NormalFloat(MIN_ABILITY_CD, MAX_ABILITY_CD);
@@ -458,12 +458,11 @@ public class YogDzewa extends Mob {
 	}
 
 	public void updateVisibility( Level level ){
+		int viewDistance = 4;
 		if (phase > 1 && isAlive()){
-			level.viewDistance = 4 - (phase-1);
-		} else {
-			level.viewDistance = 4;
+			viewDistance = 4 - (phase-1);
 		}
-		level.viewDistance = Math.max(1, level.viewDistance);
+		level.viewDistance = (int)GameMath.gate(1, viewDistance, level.viewDistance);
 		if (Dungeon.hero != null) {
 			if (Dungeon.hero.buff(Light.class) == null) {
 				Dungeon.hero.viewDistance = level.viewDistance;
