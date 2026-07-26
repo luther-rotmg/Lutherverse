@@ -139,6 +139,41 @@ Phase 3 has landed Tasks 11–16 (Actor, Char, Hero, Dungeon, Level and generato
 
 ---
 
+## Slice 1 re-estimation from measured velocity (2026-07-26)
+
+**Measured, not guessed.** 34 worker beads completed this session at ~10 commits
+each, roughly 8–10 minutes per bead serialized through one dispatcher. Four needed
+a fallback-model retry (~15 min wasted each) before the sizing was corrected.
+
+**Bead sizing rule, corrected by evidence.** The rubric in CLAUDE.md sizes by net
+LOC. That under-predicts this workload: timeouts track **commit count and file
+spread**, not lines. A 434-line / 23-commit bead timed out; a 509-line / 11-commit
+bead spread across many enemy files timed out; 10–12 commits over a narrow file set
+passes first try. Heterogeneous buckets need ~4 commits. Use commit count as the
+primary sizing input for integration sweeps.
+
+**Slice 1 remaining.** Tasks 11–16 are done and 11 of Tasks 17–20's 34 batches
+landed, leaving 22 batches (~230 commits) blocked only on OpenRouter credits — about
+4 hours of pipeline time. Beyond that sit the buckets the manifest still lists as
+`slice1`: `cold-code` 3041 (mostly genuinely cold Watabou zones, but this is the
+bucket the 730-row audit came out of and it has never been fully reviewed),
+`frontier-mixed` 81, `assets-localization` 50, `build-review` 40, `platform-review`
+27, plus the residual hotspot rows. Sixteen dependency-deferred epics from Tasks
+11–14 also remain, most of which are frontier supersession calls rather than worker
+work.
+
+**Implication for Slices 2–7.** Slice 1's original estimate assumed a reviewed
+manifest. It was not reviewed: 730 rows carried unreviewed `provisional:` reasons,
+and 60 quest-content commits had to be reclassified out of Slice 1 across four tasks
+after the machine triage missed them. Any estimate for Slices 2–7 that draws scope
+from the same manifest inherits that error. **Re-estimate after a real hunk-level
+review of the remaining buckets, not before** — a number produced now would repeat
+the mistake Slice 1 just demonstrated. What can be said with confidence is the
+throughput figure above: ~10 commits per bead, ~8–10 minutes per bead, one
+dispatcher at a time.
+
+---
+
 ## Awaiting LO input
 
 - **⛔ BLOCKING — OpenRouter credits exhausted.** The bead pipeline stopped mid-run on

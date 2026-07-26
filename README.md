@@ -87,7 +87,7 @@ Every substantive commit updates this section. It's the accurate current state, 
 | Sub | Name | Status | Notes |
 |---|---|---|---|
 | A | Fork infrastructure | ✅ done | This repo. Attribution, docs, branch rename `margarita` to `main`. |
-| B | Upstream sync (CPD to SPD v3.3.8) | 🟡 Slice 1 active | Slice 0 foundation shipped; engine/tuning catchup is being classified and integrated. |
+| B | Upstream sync (CPD to SPD v3.3.8) | 🟡 Slice 1 active | Slice 0 foundation shipped. Engine and tuning catchup is landing: actor, character, hero, dungeon, level generation and enemy behaviour are integrated, with item, UI and buff work in progress. |
 | C | Broad modding-platform API | ⏳ next | Java-hook API on top of CPD's JSON-manifest framework: cutscenes, dialogue, dual-wield, story flags, biome swapping, NPC insertion. |
 | D | God Mode addon | ⏳ | Top-tier starter gear. Flagged as "cheat" in coop lobby. |
 | E | Hard Mode addon | ⏳ | Balance tuning. Coop-fair. |
@@ -110,7 +110,7 @@ Every substantive commit updates this section. It's the accurate current state, 
 
 ## Alpha testers and watchers
 
-There's nothing new to play yet. The fork is at its base commit and Sub-B is next. If the roadmap sounds like something you want to see happen, starring the repo bookmarks it for later, and switching Watch to Custom then Releases will ping you when the first alpha ships.
+There's nothing new to play yet. Sub-B, the upstream sync, is underway: the engine and tuning catchup toward Shattered Pixel Dungeon v2.5 is landing on `main` now, but it isn't a playable release and no alpha has shipped. If the roadmap sounds like something you want to see happen, starring the repo bookmarks it for later, and switching Watch to Custom then Releases will ping you when the first alpha ships.
 
 Issues are welcome. Bugs, feature ideas, cameo suggestions, all fine. Pull requests aren't being accepted right now because the modding API isn't stable and every hook is likely to change. That loosens up when Sub-C ships.
 
