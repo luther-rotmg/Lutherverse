@@ -137,7 +137,7 @@ public class WndWandmaker extends Window {
 				@Override
 				protected void onClick() {
 					if (Dungeon.hero.belongings.contains(questItem)) {
-						GameScene.show(new RewardWindow(item));
+						GameScene.show(new RewardWindow(item()));
 					} else {
 						hide();
 					}

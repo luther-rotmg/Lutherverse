@@ -567,10 +567,13 @@ public class GameScene extends PixelScene {
 				flashForDocument(Document.ADVENTURERS_GUIDE, Document.GUIDE_INTRO);
 			} else {
 				if (ControllerHandler.isControllerConnected()) {
+					GameLog.wipe();
 					GLog.p(Messages.get(GameScene.class, "tutorial_move_controller"));
 				} else if (SPDSettings.interfaceSize() == 0) {
+					GameLog.wipe();
 					GLog.p(Messages.get(GameScene.class, "tutorial_move_mobile"));
 				} else {
+					GameLog.wipe();
 					GLog.p(Messages.get(GameScene.class, "tutorial_move_desktop"));
 				}
 			}
@@ -668,7 +671,10 @@ public class GameScene extends PixelScene {
 	//this caps the speed of resting for higher refresh rate displays
 	private float notifyDelay = 1/60f;
 
-	public static boolean updateItemDisplays = false;
+ 	public static boolean updateItemDisplays = false;
+
+	public static boolean tagDisappeared = false;
+	public static boolean updateTags = false;
 	
 	@Override
 	public synchronized void update() {
@@ -720,7 +726,15 @@ public class GameScene extends PixelScene {
 			log.newLine();
 		}
 
-		if (tagAttack != attack.active ||
+		if (updateTags){
+			tagAttack = attack.active;
+			tagLoot = loot.visible;
+			tagAction = action.visible;
+			tagResume = resume.visible;
+
+			layoutTags();
+
+		} else if (tagAttack != attack.active ||
 				tagLoot != loot.visible ||
 				tagAction != action.visible ||
 				tagResume != resume.visible) {
@@ -743,6 +757,7 @@ public class GameScene extends PixelScene {
 			}
 
 			if (tagAppearing) layoutTags();
+			else                tagDisappeared = true;
 		}
 
 		cellSelector.enable(Dungeon.hero.ready);
@@ -770,6 +785,8 @@ public class GameScene extends PixelScene {
 	private boolean tagResume    = false;
 
 	public static void layoutTags() {
+
+		updateTags = false;
 
 		if (scene == null) return;
 
@@ -1404,6 +1421,10 @@ public class GameScene extends PixelScene {
 			
 		} else {
 			
+			if (tagDisappeared) {
+				tagDisappeared = false;
+				updateTags = true;
+			}
 			return cancelCellSelector();
 			
 		}

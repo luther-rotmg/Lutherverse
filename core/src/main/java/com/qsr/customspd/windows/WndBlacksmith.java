@@ -116,7 +116,7 @@ public class WndBlacksmith extends Window {
 
 		@Override
 		public boolean itemSelectable(Item item) {
-			return item.isUpgradable();
+			return item.isIdentified() && !item.cursed && item.isUpgradable();
 		}
 
 		@Override

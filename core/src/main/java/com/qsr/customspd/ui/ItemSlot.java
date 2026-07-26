@@ -211,6 +211,10 @@ public class ItemSlot extends Button {
 		}
 	}
 
+	public Item item() {
+		return item;
+	}
+
 	public void updateText(){
 
 		if (itemIcon != null){
