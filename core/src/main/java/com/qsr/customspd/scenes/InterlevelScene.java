@@ -227,12 +227,12 @@ public class InterlevelScene extends PixelScene {
 		bg.autoAdjust = true;
 		add(bg);
 
-		Image im = new Image(TextureCache.createGradient(0xAA000000, 0xBB000000, 0xCC000000, 0xDD000000, 0xFF000000)){
+		Image im = new Image(TextureCache.createGradient(0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xFF000000)){
 			@Override
 			public void update() {
 				super.update();
-				if (phase == Phase.FADE_IN)         aa = Math.max( 0, (timeLeft - (fadeTime - 0.333f)));
-				else if (phase == Phase.FADE_OUT)   aa = Math.max( 0, (0.333f - timeLeft));
+				if (phase == Phase.FADE_IN)         aa = Math.max( 0, 2*(timeLeft - (fadeTime - 0.333f)));
+				else if (phase == Phase.FADE_OUT)   aa = Math.max( 0, 2*(0.333f - timeLeft));
 				else                                aa = 0;
 			}
 		};
@@ -321,9 +321,11 @@ public class InterlevelScene extends PixelScene {
 
 					}
 
-					if (phase == Phase.STATIC && error == null) {
-						phase = Phase.FADE_OUT;
-						timeLeft = fadeTime;
+					synchronized (thread) {
+						if (phase == Phase.STATIC && error == null) {
+							phase = Phase.FADE_OUT;
+							timeLeft = fadeTime;
+						}
 					}
 
 					if (Dungeon.level != null && Dungeon.layout.getDungeon().get(Dungeon.levelName).getLocked()) {
@@ -366,11 +368,13 @@ public class InterlevelScene extends PixelScene {
 			case FADE_IN:
 				message.alpha( 1 - p );
 				if ((timeLeft -= Game.elapsed) <= 0) {
-					if (!thread.isAlive() && error == null) {
-						phase = Phase.FADE_OUT;
-						timeLeft = fadeTime;
-					} else {
-						phase = Phase.STATIC;
+					synchronized (thread) {
+						if (!thread.isAlive() && error == null) {
+							phase = Phase.FADE_OUT;
+							timeLeft = fadeTime;
+						} else {
+							phase = Phase.STATIC;
+						}
 					}
 				}
 				break;
@@ -393,7 +397,7 @@ public class InterlevelScene extends PixelScene {
 					else if (error.getMessage() != null &&
 						error.getMessage().equals("old save")) errorMsg = Messages.get(this, "io_error");
 
-					else throw new RuntimeException("fatal error occured while moving between floors. " +
+					else throw new RuntimeException("fatal error occurred while moving between floors. " +
 							"Seed:" + Dungeon.seed + " depth:" + Dungeon.depth, error);
 
 					add( new WndError( errorMsg ) {
@@ -411,11 +415,14 @@ public class InterlevelScene extends PixelScene {
 						s += "\n";
 						s += t.toString();
 					}
-					ShatteredPixelDungeon.reportException(
-						new RuntimeException("waited more than 10 seconds on levelgen. " +
-							"Seed:" + Dungeon.seed + " depth:" + Dungeon.depth + " trace:" +
-							s)
-					);
+					//we care about reporting game logic exceptions, not slow IO
+					if (!s.contains("FileUtils.bundleToFile")){
+						ShatteredPixelDungeon.reportException(
+							new RuntimeException("waited more than 10 seconds on levelgen. " +
+								"Seed:" + Dungeon.seed + " depth:" + Dungeon.depth + " trace:" +
+								s)
+						);
+					}
 				}
 				break;
 		}
