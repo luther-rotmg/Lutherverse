@@ -36,8 +36,6 @@ import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
-import java.util.ArrayList;
-
 public class CorpseDust extends Item {
 	
 	{
@@ -47,11 +45,6 @@ public class CorpseDust extends Item {
 		cursedKnown = true;
 		
 		unique = true;
-	}
-
-	@Override
-	public ArrayList<String> actions(Hero hero) {
-		return new ArrayList<>(); //yup, no dropping this one
 	}
 
 	@Override
@@ -122,6 +115,9 @@ public class CorpseDust extends Item {
 					Wraith.spawnAt(pos, false);
 					Sample.INSTANCE.play(Assets.Sounds.CURSED);
 				}
+			} else {
+				//prevents excessive spawn power buildup
+				spawnPower = Math.min(spawnPower, 2*wraiths);
 			}
 
 			spend(TICK);

@@ -106,6 +106,21 @@ public class BrokenSeal extends Item {
 		return level() == 0;
 	}
 
+	@Override
+	public String name() {
+		return glyph != null ? glyph.name( super.name() ) : super.name();
+	}
+
+	@Override
+	public String info() {
+		String info = super.info();
+		if (glyph != null){
+			info += "\n\n" + Messages.get(this, "inscribed", glyph.name());
+			info += " " + glyph.desc();
+		}
+		return info;
+	}
+
 	protected static WndBag.ItemSelector armorSelector = new WndBag.ItemSelector() {
 
 		@Override
