@@ -13,7 +13,7 @@
 
 **Sub-B (Upstream sync to SPD v3.3.8)** Slice 0 is shipped; Slice 1 is in execution, Phase 3. Full design spec at [docs/superpowers/specs/2026-07-22-cpdu-sub-b-upstream-sync-design.md](docs/superpowers/specs/2026-07-22-cpdu-sub-b-upstream-sync-design.md). Slice 1 implementation plan at [docs/superpowers/plans/2026-07-23-cpdu-sub-b-slice-1-catchup.md](docs/superpowers/plans/2026-07-23-cpdu-sub-b-slice-1-catchup.md). Eight architectural decisions remain locked: Cleric first-class + Vault first-class + full marketplace green-gate + DSL freeze + save bridge + iOS deferred + SPD tilemap edits win + 14 slices with sub-splits.
 
-Phase 3 has landed Tasks 11–15 (Actor, Char, Hero, Dungeon, Level and generator), including the full entrance/exit room cluster. Tasks 16–20 (mobs, items, buffs, scenes, remaining batches) are next. Sixteen dependency-deferred clusters from Tasks 11–14 remain open as epics, tracked in beads.
+Phase 3 has landed Tasks 11–16 (Actor, Char, Hero, Dungeon, Level and generator, and mob/combat-engine tuning), including the full entrance/exit room cluster. Tasks 17–20 are partially landed — 11 of 34 batches integrated before the pipeline stopped on exhausted OpenRouter credits (see below). Sixteen dependency-deferred clusters from Tasks 11–14 remain open as epics, tracked in beads.
 
 > **⚠ Slice 1 is materially larger than this plan states.** A 2026-07-25 audit found 730 in-range commits sitting in the manifest's `cold-code` batch with unreviewed `provisional:` reasons from Task 6. Machine triage classified **541 of them as unintegrated Slice 1 candidates** — roughly nine times the size of Task 15's own 63-commit scope. They are area-bucketed (`triaged-item` 181, `triaged-mob` 123, `triaged-ui` 83, `triaged-level` 64, `triaged-misc` 55, `triaged-buff` 35) so Tasks 16–20 can consume them, but **that triage is not the reviewed manifest the plan's acceptance block requires.** "Slice 1 candidate" means the symbols resolve against CPDU, not that the hunks apply; the conditional-music cluster is the counterexample where every class existed and the change was still architecturally superseded. Expect the 541 to shrink under hunk review, and expect Tasks 16–20 to re-estimate upward regardless.
 
@@ -24,7 +24,7 @@ Phase 3 has landed Tasks 11–15 (Actor, Char, Hero, Dungeon, Level and generato
 | Sub | Name | Status | Blockers / Notes |
 |---|---|---|---|
 | A | Fork infrastructure | ✅ shipped | Seven commits on origin, both builds verified, final review clean after one fix commit. |
-| B | Upstream sync (CPD → SPD v3.3.8) | 🟡 Slice 1 Phase 3 | Tasks 11–15 done. 541 unintegrated Slice 1 commits found hiding in `cold-code`; Slice 1 needs re-estimation before Task 16. |
+| B | Upstream sync (CPD → SPD v3.3.8) | 🔴 Slice 1 Phase 3, **blocked** | Tasks 11–16 done; 17–20 partial. **Pipeline halted: OpenRouter credits exhausted.** 23 beads parked `worker-failed`, specs believed sound. |
 | C | Broad modding-platform API | ⚪ not started | Blocked on Sub-B ship |
 | D | God Mode addon | ⚪ | Blocked on Sub-C |
 | E | Hard Mode addon | ⚪ | Blocked on Sub-C |
@@ -50,6 +50,12 @@ Phase 3 has landed Tasks 11–15 (Actor, Char, Hero, Dungeon, Level and generato
 - **Task 15 closed out** — mob spawn and room sizing (`268b804ac` `sizeFactor`/`mobSpawnWeight`/`connectionWeight` migration, `cb18c1eee`, `d45cc9cae`), plus housekeeping resolved inline: SPD copyright extended to 2024 on the 30 `levels/` files that actually received v2.4/v2.5 content, the `BArray` move recorded as superseded (CPDU keeps it at `utils/BArray.java`), and upstream's codebase-wide import reorder skipped as churn.
 - **`5576a7777` split out** (`cpdu-m7a`) — the cached-rations redesign needs a new `SupplyRation` class, so its `RegularLevel` hunk cannot stand alone. Routed to Task 17. Flagged there: `ItemSpriteSheet` is a positional index table, the same hazard class as `StandardRoom.chances[]`, where a bad reindex yields wrong icons at runtime with a clean compile and no tests.
 - Pipeline: 15 beads dispatched, 15 succeeded on attempt 1, no failures, timeouts, or re-dispatches. Two further items were resolved inline as below the bead value line.
+- **Task 16 (mob and combat-engine tuning) complete** — 101 Slice 1 commits across 8 beads: 47 files, 699 insertions, concentrated in `actors/mobs`. Batch-reviewed with a Slice 2 leakage scan (zero hits) and a forced full recompile.
+- **Task 16 boundary correction** — 22 of the 123 `triaged-mob` commits were new blacksmith/crystal/gnoll quest content ("re-enabled crystal quest", "crystal and gnoll quests now have 50/50 spawn") and were reclassified to Slice 2 before dispatch. Four more were caught the same way in Tasks 19–20. Concrete proof that the machine triage is a first pass, not the reviewed manifest: its marker scan reads added lines only, so commits referencing quest *state* without naming a marker class slip through.
+- **Bead sizing rubric is wrong for this workload.** Four Task 16 beads timed out on the primary model and recovered on the fallback. Timeouts track **commit count and file spread, not LOC** — one bead was only 434 lines but 23 commits; another died at 11 commits spread across many enemy files. The CLAUDE.md rubric is LOC-only. Working limit found: **≤12 commits with a narrow file set**; heterogeneous buckets need ~4.
+- **Tasks 17–20 dispatched as 34 right-sized beads; 11 landed before the pipeline halted.** 50 files, 512 insertions across `windows/`, `items/`, `actors/`, `ui/`, `scenes/`. Leakage scan clean, compile and tests green.
+- **⛔ Pipeline halted on exhausted OpenRouter credits.** 23 beads failed with `AI_APICallError: Insufficient credits`, not on their specs. Parked `worker-failed` and annotated; see Awaiting LO input.
+- Session totals: 34 beads succeeded, 23 blocked on credits, 1 genuinely oversized bead split after two `ra=0` hard-timeouts.
 
 **2026-07-23 (Sub-B Slice 1 planning):**
 - Reconciled the approved design against Git history and found the exact upstream range: 1,209 commits from SPD v2.1.0 to v2.5.4.
@@ -90,6 +96,16 @@ Phase 3 has landed Tasks 11–15 (Actor, Char, Hero, Dungeon, Level and generato
 ---
 
 ## Awaiting LO input
+
+- **⛔ BLOCKING — OpenRouter credits exhausted.** The bead pipeline stopped mid-run on
+  `AI_APICallError: Insufficient credits`. 23 beads across Tasks 17–20 failed for this
+  reason alone; their specs were never actually attempted against a working provider and
+  should NOT be re-specced. After topping up at <https://openrouter.ai/settings/credits>,
+  re-arm them all with:
+  ```
+  for b in $(bd list --label worker-failed --json | jq -r '.[].id'); do bd update $b --remove-label worker-failed; done
+  ```
+  then run the dispatcher normally. Nothing else is needed — the work resumes where it left off.
 
 - **Slice 1 scope decision.** The 541 triaged commits mean Slice 1 is roughly an order of magnitude larger than planned. Options: review and integrate them inside Slice 1, split them into a Slice 1b, or push the non-engine areas to a later slice. Task 25's re-estimation should not be the first time this is confronted.
 - **Conditional music as pack config** (`cpdu-15l`). Should amulet-obtained / quest-active track selection become a pack-config surface rather than hardcoded level code? Landing upstream's form would hardcode what CPDU deliberately made configurable, and would not apply to configured dungeons at all. Touches the frozen DSL.
