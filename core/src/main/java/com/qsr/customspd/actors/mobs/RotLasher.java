@@ -29,6 +29,7 @@ import com.qsr.customspd.actors.buffs.Burning;
 import com.qsr.customspd.actors.buffs.Cripple;
 import com.qsr.customspd.items.Generator;
 import com.qsr.customspd.sprites.RotLasherSprite;
+import com.qsr.customspd.sprites.CharSprite;
 import com.watabou.utils.Random;
 
 public class RotLasher extends Mob {
@@ -52,7 +53,9 @@ public class RotLasher extends Mob {
 
 	@Override
 	protected boolean act() {
-		if (enemy == null || !Dungeon.level.adjacent(pos, enemy.pos)) {
+		if (HP < HT && (enemy == null || !Dungeon.level.adjacent(pos, enemy.pos))) {
+			int healAmount = Math.min(3, HT - HP);
+			sprite.showStatus(CharSprite.POSITIVE, String.valueOf(healAmount));
 			HP = Math.min(HT, HP + 3);
 		}
 		return super.act();

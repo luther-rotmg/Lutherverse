@@ -29,6 +29,7 @@ import com.qsr.customspd.actors.buffs.Buff;
 import com.qsr.customspd.actors.hero.abilities.duelist.Challenge;
 import com.qsr.customspd.effects.Pushing;
 import com.qsr.customspd.items.Gold;
+import com.qsr.customspd.items.artifacts.MasterThievesArmband;
 import com.qsr.customspd.levels.features.Chasm;
 import com.qsr.customspd.scenes.GameScene;
 import com.qsr.customspd.sprites.GhoulSprite;
@@ -182,7 +183,8 @@ public class Ghoul extends Mob {
 			if (buff instanceof SacrificialFire.Marked){
 				//don't remove and postpone so marked stays on
 				Buff.prolong(this, SacrificialFire.Marked.class, timesDowned*5);
-			} else if (buff.revivePersists) {
+			} else if (buff.revivePersists
+					|| buff instanceof MasterThievesArmband.StolenTracker) {
 				//don't remove
 			} else {
 				buff.detach();

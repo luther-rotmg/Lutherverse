@@ -30,7 +30,6 @@ import com.qsr.customspd.modding.SpriteSizeConfig;
 import com.qsr.customspd.utils.Holiday;
 import com.watabou.noosa.TextureFilm;
 
-import java.util.Calendar;
 import java.util.List;
 
 import kotlin.Pair;
@@ -46,11 +45,6 @@ public class RatKingSprite extends MobSprite {
 	}
 
 	public void resetAnims(){
-
-		final Calendar calendar = Calendar.getInstance();
-		//once a year the rat king feels a bit festive!
-		festive = (calendar.get(Calendar.MONTH) == Calendar.DECEMBER
-				&& calendar.get(Calendar.WEEK_OF_MONTH) > 2);
 
 		int c;
 		switch (Holiday.getCurrentHoliday()){

@@ -38,6 +38,7 @@ import com.qsr.customspd.assets.Asset;
 import com.qsr.customspd.effects.CellEmitter;
 import com.qsr.customspd.effects.Speck;
 import com.qsr.customspd.items.armor.ClassArmor;
+import com.qsr.customspd.items.artifacts.MasterThievesArmband;
 import com.qsr.customspd.items.scrolls.ScrollOfTeleportation;
 import com.qsr.customspd.messages.Messages;
 import com.qsr.customspd.scenes.GameScene;
@@ -146,12 +147,20 @@ public class Ratmogrify extends ArmorAbility {
 			}
 		}
 
+		MasterThievesArmband.StolenTracker stealTracker = ch.buff(MasterThievesArmband.StolenTracker.class);
+		if (stealTracker != null){
+			ch.remove(stealTracker);
+		}
+
 		Actor.remove( ch );
 		ch.sprite.killAndErase();
 		Dungeon.level.mobs.remove(ch);
 
 		for (Buff b : persistentBuffs){
 			ch.add(b);
+		}
+		if (stealTracker != null) {
+			ch.add(stealTracker);
 		}
 
 			GameScene.add(rat);

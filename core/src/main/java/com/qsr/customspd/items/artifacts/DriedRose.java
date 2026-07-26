@@ -521,15 +521,16 @@ public class DriedRose extends Artifact {
 
 	public static class GhostHero extends DirectableAlly {
 
-		{
-			spriteClass = GhostSprite.class;
+	{
+		spriteClass = GhostSprite.class;
 
-			flying = true;
-			
-			state = HUNTING;
-			
-			properties.add(Property.UNDEAD);
-		}
+		flying = true;
+		
+		state = HUNTING;
+		
+		properties.add(Property.UNDEAD);
+		properties.add(Property.INORGANIC);
+	}
 		
 		private DriedRose rose = null;
 		

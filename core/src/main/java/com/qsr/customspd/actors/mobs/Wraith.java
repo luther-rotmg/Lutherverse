@@ -33,6 +33,8 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
 
+import java.util.ArrayList;
+
 public class Wraith extends Mob {
 
 	private static final float SPAWN_DELAY	= 2f;
@@ -50,6 +52,7 @@ public class Wraith extends Mob {
 		flying = true;
 
 		properties.add(Property.UNDEAD);
+		properties.add(Property.INORGANIC);
 	}
 	
 	private static final String LEVEL = "level";
@@ -96,12 +99,35 @@ public class Wraith extends Mob {
 	
 	public static void spawnAround( int pos, boolean allowExotic ) {
 		for (int n : PathFinder.NEIGHBOURS4) {
-			spawnAt( pos + n, allowExotic );
+			spawnAt( pos + n, allowExotic, false );
 		}
 	}
 	
 	public static Wraith spawnAt( int pos, boolean allowExotic ) {
-		if ((!Dungeon.level.solid[pos] || Dungeon.level.passable[pos]) && Actor.findChar( pos ) == null) {
+		return spawnAt( pos, allowExotic, true );
+	}
+
+	private static Wraith spawnAt( int pos, boolean allowExotic, boolean allowAdjacent ) {
+
+		//if the position itself is blocked, try to place in an adjacent cell if allowed
+		if (Dungeon.level.solid[pos] || Actor.findChar( pos ) != null){
+			ArrayList<Integer> candidates = new ArrayList<>();
+
+			for (int i : PathFinder.NEIGHBOURS8){
+				if (!Dungeon.level.solid[pos+i] && Actor.findChar( pos+i ) == null){
+					candidates.add(pos+i);
+				}
+			}
+
+			if (allowAdjacent && !candidates.isEmpty()){
+				pos = Random.element(candidates);
+			} else {
+				pos = -1;
+			}
+
+		}
+
+		if (pos != -1 && ((!Dungeon.level.solid[pos] || Dungeon.level.passable[pos]) && Actor.findChar( pos ) == null)) {
 
 			Wraith w;
 			if (allowExotic && Random.Int(100) == 0){
