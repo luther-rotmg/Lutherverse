@@ -24,6 +24,8 @@ package com.qsr.customspd.items;
 import com.qsr.customspd.Assets;
 import com.qsr.customspd.Badges;
 import com.qsr.customspd.actors.Actor;
+import com.qsr.customspd.actors.buffs.Buff;
+import com.qsr.customspd.actors.buffs.Preparation;
 import com.qsr.customspd.actors.hero.Hero;
 import com.qsr.customspd.actors.hero.HeroSubClass;
 import com.qsr.customspd.actors.hero.Talent;
@@ -97,6 +99,10 @@ public class TengusMask extends Item {
 		
 		curUser.subClass = way;
 		Talent.initSubclassTalents(curUser);
+
+		if (way == HeroSubClass.ASSASSIN && curUser.invisible > 0){
+			Buff.affect(curUser, Preparation.class);
+		}
 		
 		curUser.sprite.operate( curUser.pos );
 		Sample.INSTANCE.play( Assets.Sounds.MASTERY );
