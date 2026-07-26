@@ -31,6 +31,7 @@ import com.qsr.customspd.actors.buffs.FlavourBuff;
 import com.qsr.customspd.actors.buffs.Haste;
 import com.qsr.customspd.actors.buffs.Invisibility;
 import com.qsr.customspd.actors.buffs.Vulnerable;
+import com.qsr.customspd.actors.buffs.Weakness;
 import com.qsr.customspd.actors.hero.Hero;
 import com.qsr.customspd.actors.hero.Talent;
 import com.qsr.customspd.actors.hero.abilities.ArmorAbility;
@@ -191,6 +192,7 @@ public class Feint extends ArmorAbility {
 				}
 				if (Dungeon.hero.hasTalent(Talent.EXPOSE_WEAKNESS)) {
 					Buff.prolong(enemy, Vulnerable.class, 2f * Dungeon.hero.pointsInTalent(Talent.EXPOSE_WEAKNESS));
+					Buff.prolong(enemy, Weakness.class, 2f * Dungeon.hero.pointsInTalent(Talent.EXPOSE_WEAKNESS));
 				}
 				if (Dungeon.hero.hasTalent(Talent.COUNTER_ABILITY)) {
 					Buff.prolong(Dungeon.hero, Talent.CounterAbilityTacker.class, 3f);

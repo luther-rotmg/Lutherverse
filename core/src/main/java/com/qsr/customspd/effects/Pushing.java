@@ -24,6 +24,7 @@ package com.qsr.customspd.effects;
 import com.qsr.customspd.Dungeon;
 import com.qsr.customspd.actors.Actor;
 import com.qsr.customspd.actors.Char;
+import com.qsr.customspd.scenes.GameScene;
 import com.qsr.customspd.sprites.CharSprite;
 import com.watabou.noosa.Camera;
 import com.watabou.noosa.Game;
@@ -124,7 +125,8 @@ public class Pushing extends Actor {
 				killAndErase();
 				Actor.remove(Pushing.this);
 				if (callback != null) callback.call();
-				
+				GameScene.sortMobSprites();
+
 				next();
 			}
 		}
