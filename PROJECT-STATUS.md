@@ -24,7 +24,7 @@ Phase 3 has landed Tasks 11–16 (Actor, Char, Hero, Dungeon, Level and generato
 | Sub | Name | Status | Blockers / Notes |
 |---|---|---|---|
 | A | Fork infrastructure | ✅ shipped | Seven commits on origin, both builds verified, final review clean after one fix commit. |
-| B | Upstream sync (CPD → SPD v3.3.8) | 🔴 Slice 1 Phase 3, **blocked** | Tasks 11–16 done; 17–20 partial. **Pipeline halted: OpenRouter credits exhausted.** 23 beads parked `worker-failed`, specs believed sound. |
+| B | Upstream sync (CPD → SPD v3.3.8) | 🔴 Slice 1, **blocked** | Tasks 11–16 done; 17–20 partial; Phase 4 gates run (21–23 pass, 24 blocked on emulator). **Pipeline halted: OpenRouter credits exhausted.** 23 beads parked `worker-failed`, specs believed sound. |
 | C | Broad modding-platform API | ⚪ not started | Blocked on Sub-B ship |
 | D | God Mode addon | ⚪ | Blocked on Sub-C |
 | E | Hard Mode addon | ⚪ | Blocked on Sub-C |
@@ -92,6 +92,50 @@ Phase 3 has landed Tasks 11–16 (Actor, Char, Hero, Dungeon, Level and generato
 - Sub-A build-baseline hotfix (gdx-controllers pin + multidex + useAndroidX + desktop:dist→release doc rename): `fa5a31750`
 - README humanization pass (stripped AI-writing tells): `3eff58a15`
 - Final whole-branch review fix commit (Dark Souls Mode leak, PROJECT-STATUS staleness, RoboVM copyright, SVG SPDX header, iOS README framing, notices-scope wording, Sub-B research imported into repo): this commit
+
+---
+
+## Slice 1 Phase 4 gate results (2026-07-26)
+
+| Gate | Command | Result |
+|---|---|---|
+| Core compile | `gradlew core:compileJava --rerun-tasks` | **PASS** (forced, 4 tasks executed) |
+| SPD-classes tests | `gradlew SPD-classes:test --rerun-tasks` | **PASS** |
+| api-diff tests | `gradlew :services:tools:api-diff:test --rerun-tasks` | **PASS** |
+| pack-smoke tests | `gradlew :services:tools:pack-smoke:test --rerun-tasks` | **PASS** |
+| namespace-transform tests | `gradlew :services:tools:namespace-transform:test --rerun-tasks` | **PASS** |
+| Desktop build | `gradlew desktop:release` | **PASS** — `desktop-2.1.0-1.0.jar`, 54 MB |
+| Android build | `gradlew android:assembleDebug` | **PASS** — `android-debug.apk`, 32 MB |
+| API compatibility | `api-diff --base 7d9c139c8 --head HEAD` | **PASS after review** — 1021 files, 21 removed / 160 added / 13 changed, all accounted for |
+| Marketplace pack smoke | `PackSmokeCli --marketplace ./marketplace` | **PASS** — 29/29 GREEN, matches Slice 0 baseline |
+| Android runtime smoke | `smoke-boot.ps1 -TimeoutSeconds 300` | **BLOCKED** — emulator never reaches `sys.boot_completed`; fails before `adb install`, so the APK is never exercised |
+| Manual runtime checks | title screen, seeded Warrior run, save/reload | **NOT DONE** — requires a human at the machine |
+| Serialized-state roundtrip | — | **NOT DONE** — see below |
+
+### Known tool limitations found while running these gates
+
+- **`core:test` is `NO-SOURCE`.** The core module has no tests at all, so for
+  core-only changes *compilation is the only mechanical gate*. Every acceptance
+  bullet in this plan that cites `core:test` is vacuous.
+- **The api-diff tool was inert until fixed.** It ran `git ls-tree` with no
+  working directory, inheriting Gradle's subproject CWD, so it scanned 0 files
+  and printed PASS. Fixing that exposed a second bug: `isPathNotFound` matched
+  only git's `does not exist in` message and not `exists on disk, but not in`,
+  which is what a newly ADDED file produces — so it crashed on the first added
+  file. Both fixed in `4b9c83f6b`. Its first real run caught a genuine
+  regression (`CorpseDust.actions()`, fixed in `874e49851`).
+- **The bead validate gate never ran before 2026-07-25.** The dispatcher parses
+  `validate:` from `acceptance_criteria`/`notes`, never `description`, requires
+  it to start its own line, and requires a bare allowlisted first token.
+  `.\gradlew.bat` failed on both counts, so every bead through Task 14 closed on
+  frontier diff review alone.
+- **Android smoke is a PID-alive check only**, and cannot run in this
+  environment at all. It never verified gameplay even when it did run.
+- **No save-roundtrip harness exists.** Slice 1 touched serialized state
+  (`Bundle.addAlias` registrations for the moved `EntranceRoom`/`ExitRoom`, and
+  terrain ID reuse where `CUSTOM_DECO` takes the old `SIGN` id 23). The plan says
+  to add real fixture/roundtrip work rather than mark this N/A. It is **NOT
+  done** and remains an open gate.
 
 ---
 

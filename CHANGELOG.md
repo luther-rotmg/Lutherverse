@@ -12,6 +12,43 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 
 Work-in-progress on `main` since the fork base (`cpd-sync-base-2025-08-15`, CPD commit `c97fb83`).
 
+### Sub-B Slice 1: Phase 3 execution and Phase 4 gates
+
+**Integrated (Tasks 11–16 complete, 17–20 partial).** Actor, Char, Hero, Dungeon,
+Level and generator, and mob/combat-engine tuning are done. The entrance/exit room
+cluster landed in full: the `EntranceRoom`/`ExitRoom` package move with
+`Bundle.addAlias` save compatibility, six new region standard rooms, twenty
+entrance/exit variants, the `canMerge(Level, Room, Point, int)` signature migration
+across fourteen definitions, and seven refinement commits. Terrain gained
+`CUSTOM_DECO` (reusing the old `SIGN` id 23, so saves stay compatible),
+`CUSTOM_DECO_EMPTY` and `ENTRANCE_SP`, with the tiles layer updated to match.
+Eleven of Tasks 17–20's thirty-four batches also landed before the pipeline halted.
+
+**Fixed — CorpseDust could be dropped.** The `actions(Hero)` override that makes the
+quest item undroppable was removed during Slice 1 integration while an unrelated
+spawn-power change was applied. Without it the player can drop a unique quest item
+and potentially soft-lock the Wandmaker quest. Caught by the Task 22 API audit.
+
+**Fixed — the API-diff auditor never audited anything.** It ran `git ls-tree` with no
+working directory, so under Gradle it scanned the subproject rather than the repo and
+reported PASS having examined zero files. Fixing that exposed a second defect: its
+path-not-found matcher knew only one of git's two "absent path" messages, so it
+crashed on the first file added by the range under audit. Both fixed; the auditor now
+scans 1021 files and produces real results.
+
+**Classification manifest corrections.** 730 in-range commits were sitting in the
+`cold-code` batch with unreviewed `provisional:` reasons from Task 6; machine triage
+resolved them to 541 unintegrated Slice 1 candidates, 56 Slice 2, 83 genuinely cold
+and 50 needing a human call. A further 60 quest-content commits were reclassified out
+of Slice 1 across Tasks 15, 16, 19 and 20 — the triage's marker scan reads added lines
+only, so commits referencing quest state without naming a marker class slipped through.
+
+**Known-incomplete gates.** `core:test` is `NO-SOURCE`, so compilation is the only
+mechanical gate for core-only changes. The Android runtime smoke cannot run here —
+the emulator never reaches `sys.boot_completed`, failing before the APK is installed.
+No save-roundtrip harness exists, and Slice 1 did touch serialized state. See
+PROJECT-STATUS for the full gate table.
+
 ### Sub-B Slice 1: planning and reconciliation
 
 - Added the just-in-time Slice 1 implementation plan. It pins the exact SPD v2.1.0→v2.5.4 range (1,209 commits), makes the overlapping Slice 1 engine/tuning versus Slice 2 feature boundary an explicit hunk-level classification manifest, and prohibits a direct tag merge or wholesale cherry-pick.
