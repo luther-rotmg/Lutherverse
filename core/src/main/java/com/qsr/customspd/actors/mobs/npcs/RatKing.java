@@ -30,6 +30,7 @@ import com.qsr.customspd.items.KingsCrown;
 import com.qsr.customspd.messages.Messages;
 import com.qsr.customspd.scenes.GameScene;
 import com.qsr.customspd.sprites.RatKingSprite;
+import com.qsr.customspd.utils.Holiday;
 import com.qsr.customspd.windows.WndInfoArmorAbility;
 import com.qsr.customspd.windows.WndOptions;
 import com.watabou.noosa.Game;
@@ -153,8 +154,14 @@ public class RatKing extends NPC {
 	
 	@Override
 	public String description() {
-		return ((RatKingSprite)sprite).festive ?
-				Messages.get(this, "desc_festive")
-				: super.description();
+		if (Dungeon.hero.armorAbility instanceof Ratmogrify){
+			return Messages.get(this, "desc_crown");
+		} else if (Holiday.getCurrentHoliday() == Holiday.APRIL_FOOLS){
+			return Messages.get(this, "desc_birthday");
+		} else if (Holiday.getCurrentHoliday() == Holiday.WINTER_HOLIDAYS){
+			return Messages.get(this, "desc_winter");
+		} else {
+			return super.description();
+		}
 	}
 }

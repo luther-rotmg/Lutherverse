@@ -26,10 +26,9 @@ import com.qsr.customspd.Dungeon;
 import com.qsr.customspd.actors.Actor;
 import com.qsr.customspd.actors.Char;
 import com.qsr.customspd.actors.buffs.Adrenaline;
-import com.qsr.customspd.actors.buffs.AllyBuff;
 import com.qsr.customspd.actors.buffs.AscensionChallenge;
+import com.qsr.customspd.actors.buffs.AllyBuff;
 import com.qsr.customspd.actors.buffs.Buff;
-import com.qsr.customspd.actors.buffs.ChampionEnemy;
 import com.qsr.customspd.actors.buffs.Invisibility;
 import com.qsr.customspd.actors.hero.Hero;
 import com.qsr.customspd.actors.hero.Talent;
@@ -135,25 +134,25 @@ public class Ratmogrify extends ArmorAbility {
 			GLog.w(Messages.get(this, "too_strong"));
 			return;
 		} else {
-			TransmogRat rat = new TransmogRat();
-			rat.setup((Mob)ch);
-			rat.pos = ch.pos;
+		TransmogRat rat = new TransmogRat();
+		rat.setup((Mob)ch);
+		rat.pos = ch.pos;
 
-			//preserve champion enemy buffs
-			HashSet<ChampionEnemy> champBuffs = ch.buffs(ChampionEnemy.class);
-			for (ChampionEnemy champ : champBuffs){
-				if (ch.remove(champ)) {
-					ch.sprite.clearAura();
-				}
+		//preserve some buffs
+		HashSet<Buff> persistentBuffs = new HashSet<>();
+		for (Buff b : ch.buffs()){
+			if (b.revivePersists){
+				persistentBuffs.add(b);
 			}
+		}
 
-			Actor.remove( ch );
-			ch.sprite.killAndErase();
-			Dungeon.level.mobs.remove(ch);
+		Actor.remove( ch );
+		ch.sprite.killAndErase();
+		Dungeon.level.mobs.remove(ch);
 
-			for (ChampionEnemy champ : champBuffs){
-				ch.add(champ);
-			}
+		for (Buff b : persistentBuffs){
+			ch.add(b);
+		}
 
 			GameScene.add(rat);
 

@@ -25,6 +25,7 @@ import com.qsr.customspd.Badges;
 import com.qsr.customspd.Dungeon;
 import com.qsr.customspd.SPDSettings;
 import com.qsr.customspd.actors.hero.abilities.ArmorAbility;
+import com.qsr.customspd.actors.hero.abilities.Ratmogrify;
 import com.qsr.customspd.actors.hero.abilities.duelist.Challenge;
 import com.qsr.customspd.actors.hero.abilities.duelist.ElementalStrike;
 import com.qsr.customspd.actors.hero.abilities.duelist.Feint;
@@ -37,7 +38,6 @@ import com.qsr.customspd.actors.hero.abilities.mage.WildMagic;
 import com.qsr.customspd.actors.hero.abilities.rogue.DeathMark;
 import com.qsr.customspd.actors.hero.abilities.rogue.ShadowClone;
 import com.qsr.customspd.actors.hero.abilities.rogue.SmokeBomb;
-import com.qsr.customspd.actors.hero.abilities.warrior.Endure;
 import com.qsr.customspd.actors.hero.abilities.warrior.HeroicLeap;
 import com.qsr.customspd.actors.hero.abilities.warrior.Shockwave;
 import com.qsr.customspd.assets.Asset;
@@ -259,7 +259,7 @@ public enum HeroClass {
 	public ArmorAbility[] armorAbilities(){
 		switch (this) {
 			case WARRIOR: default:
-				return new ArmorAbility[]{new HeroicLeap(), new Shockwave(), new Endure()};
+				return new ArmorAbility[]{new HeroicLeap(), new Shockwave(), new Ratmogrify()};
 			case MAGE:
 				return new ArmorAbility[]{new ElementalBlast(), new WildMagic(), new WarpBeacon()};
 			case ROGUE:

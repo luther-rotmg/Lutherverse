@@ -27,6 +27,7 @@ import com.qsr.customspd.actors.hero.abilities.Ratmogrify;
 import com.qsr.customspd.assets.Asset;
 import com.qsr.customspd.assets.GeneralAsset;
 import com.qsr.customspd.modding.SpriteSizeConfig;
+import com.qsr.customspd.utils.Holiday;
 import com.watabou.noosa.TextureFilm;
 
 import java.util.Calendar;
@@ -51,10 +52,21 @@ public class RatKingSprite extends MobSprite {
 		festive = (calendar.get(Calendar.MONTH) == Calendar.DECEMBER
 				&& calendar.get(Calendar.WEEK_OF_MONTH) > 2);
 
-		int c = festive ? 8 : 0;
+		int c;
+		switch (Holiday.getCurrentHoliday()){
+			default:
+				c = 0;
+				break;
+			case APRIL_FOOLS:
+				c = 8;
+				break;
+			case WINTER_HOLIDAYS:
+				c = 16;
+				break;
+		}
 
 		if (Dungeon.hero != null && Dungeon.hero.armorAbility instanceof Ratmogrify){
-			c += 16;
+			c = 24;
 			if (parent != null) aura(0xFFFF00);
 		}
 

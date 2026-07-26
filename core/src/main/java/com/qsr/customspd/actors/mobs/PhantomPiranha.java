@@ -24,6 +24,7 @@ package com.qsr.customspd.actors.mobs;
 import com.qsr.customspd.Dungeon;
 import com.qsr.customspd.actors.Actor;
 import com.qsr.customspd.actors.Char;
+import com.qsr.customspd.actors.buffs.Corruption;
 import com.qsr.customspd.items.food.PhantomMeat;
 import com.qsr.customspd.items.scrolls.ScrollOfTeleportation;
 import com.qsr.customspd.items.wands.Wand;
@@ -53,10 +54,10 @@ public class PhantomPiranha extends Piranha {
 		if (dmgSource == null || !Dungeon.level.adjacent(pos, dmgSource.pos)){
 			dmg = Math.round(dmg/2f); //halve damage taken if we are going to teleport
 		}
-		super.damage(dmg, src);
+	super.damage(dmg, src);
 
-		if (isAlive()) {
-			if (dmgSource != null) {
+	if (isAlive() && !(src instanceof Corruption)) {
+		if (dmgSource != null) {
 				if (!Dungeon.level.adjacent(pos, dmgSource.pos)) {
 					ArrayList<Integer> candidates = new ArrayList<>();
 					for (int i : PathFinder.NEIGHBOURS8) {
@@ -84,10 +85,12 @@ public class PhantomPiranha extends Piranha {
 
 	@Override
 	public void dieOnLand() {
-		teleportAway();
+		if (!teleportAway()){
+			super.dieOnLand();
+		}
 	}
 
-	private void teleportAway(){
+	private boolean teleportAway(){
 
 		ArrayList<Integer> inFOVCandidates = new ArrayList<>();
 		ArrayList<Integer> outFOVCandidates = new ArrayList<>();
@@ -104,9 +107,13 @@ public class PhantomPiranha extends Piranha {
 		if (!outFOVCandidates.isEmpty()){
 			if (Dungeon.level.heroFOV[pos]) GLog.i(Messages.get(this, "teleport_away"));
 			ScrollOfTeleportation.appear(this, Random.element(outFOVCandidates));
+			return true;
 		} else if (!inFOVCandidates.isEmpty()){
 			ScrollOfTeleportation.appear(this, Random.element(inFOVCandidates));
+			return true;
 		}
+
+		return false;
 
 	}
 }

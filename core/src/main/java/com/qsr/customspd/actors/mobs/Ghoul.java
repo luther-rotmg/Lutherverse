@@ -25,9 +25,7 @@ import com.qsr.customspd.Dungeon;
 import com.qsr.customspd.actors.Actor;
 import com.qsr.customspd.actors.Char;
 import com.qsr.customspd.actors.blobs.SacrificialFire;
-import com.qsr.customspd.actors.buffs.AllyBuff;
 import com.qsr.customspd.actors.buffs.Buff;
-import com.qsr.customspd.actors.buffs.ChampionEnemy;
 import com.qsr.customspd.actors.hero.abilities.duelist.Challenge;
 import com.qsr.customspd.effects.Pushing;
 import com.qsr.customspd.items.Gold;
@@ -132,13 +130,16 @@ public class Ghoul extends Mob {
 				
 				if (sprite.visible) {
 					Actor.addDelayed( new Pushing( child, pos, child.pos ), -1 );
-				}
-
-				for (Buff b : buffs(ChampionEnemy.class)){
-					Buff.affect( child, b.getClass());
-				}
-
 			}
+
+			//champion buff, mainly
+			for (Buff b : buffs()){
+				if (b.revivePersists) {
+					Buff.affect(child, b.getClass());
+				}
+			}
+
+		}
 			
 		}
 		return super.act();
@@ -177,18 +178,16 @@ public class Ghoul extends Mob {
 	@Override
 	protected synchronized void onRemove() {
 		if (beingLifeLinked) {
-			for (Buff buff : buffs()) {
-				if (buff instanceof SacrificialFire.Marked){
-					//don't remove and postpone so marked stays on
-					Buff.prolong(this, SacrificialFire.Marked.class, timesDowned*5);
-				} else if (buff instanceof AllyBuff
-						|| buff instanceof ChampionEnemy
-						|| buff instanceof DwarfKing.KingDamager) {
-					//don't remove
-				} else {
-					buff.detach();
-				}
+		for (Buff buff : buffs()) {
+			if (buff instanceof SacrificialFire.Marked){
+				//don't remove and postpone so marked stays on
+				Buff.prolong(this, SacrificialFire.Marked.class, timesDowned*5);
+			} else if (buff.revivePersists) {
+				//don't remove
+			} else {
+				buff.detach();
 			}
+		}
 		} else {
 			super.onRemove();
 		}

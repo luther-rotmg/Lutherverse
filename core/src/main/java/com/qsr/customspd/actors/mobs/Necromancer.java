@@ -26,19 +26,19 @@ import com.qsr.customspd.Dungeon;
 import com.qsr.customspd.actors.Actor;
 import com.qsr.customspd.actors.Char;
 import com.qsr.customspd.actors.buffs.Adrenaline;
-import com.qsr.customspd.actors.buffs.AllyBuff;
 import com.qsr.customspd.actors.buffs.Buff;
-import com.qsr.customspd.actors.buffs.ChampionEnemy;
 import com.qsr.customspd.effects.Beam;
 import com.qsr.customspd.effects.Pushing;
 import com.qsr.customspd.effects.Speck;
 import com.qsr.customspd.items.Item;
 import com.qsr.customspd.items.potions.PotionOfHealing;
 import com.qsr.customspd.items.scrolls.ScrollOfTeleportation;
+import com.qsr.customspd.messages.Messages;
 import com.qsr.customspd.scenes.GameScene;
 import com.qsr.customspd.sprites.NecromancerSprite;
 import com.qsr.customspd.sprites.SkeletonSprite;
 import com.qsr.customspd.utils.BArray;
+import com.qsr.customspd.utils.GLog;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
@@ -75,12 +75,22 @@ public class Necromancer extends Mob {
 		if (summoning && state != HUNTING){
 			summoning = false;
 			if (sprite instanceof NecromancerSprite) ((NecromancerSprite) sprite).cancelSummoning();
-		}
-		return super.act();
 	}
-	
-	@Override
-	public int drRoll() {
+	return super.act();
+}
+
+@Override
+public void aggro(Char ch) {
+	super.aggro(ch);
+	if (mySkeleton != null && mySkeleton.isAlive()
+			&& Dungeon.level.mobs.contains(mySkeleton)
+			&& mySkeleton.alignment == alignment){
+		mySkeleton.aggro(ch);
+	}
+}
+
+@Override
+public int drRoll() {
 		return super.drRoll() + Random.NormalIntRange(0, 5);
 	}
 	
@@ -212,10 +222,11 @@ public class Necromancer extends Mob {
 				Char blocker = Actor.findChar(summoningPos);
 				if (blocker.alignment != alignment){
 					blocker.damage( Random.NormalIntRange(2, 10), this );
-					if (blocker == Dungeon.hero && !blocker.isAlive()){
-						Badges.validateDeathFromEnemyMagic();
-						Dungeon.fail(this);
-					}
+				if (blocker == Dungeon.hero && !blocker.isAlive()){
+					Badges.validateDeathFromEnemyMagic();
+					Dungeon.fail(this);
+					GLog.n( Messages.capitalize(Messages.get(Char.class, "kill", name())) );
+				}
 				}
 
 				spend(TICK);
@@ -228,16 +239,15 @@ public class Necromancer extends Mob {
 		mySkeleton = new NecroSkeleton();
 		mySkeleton.pos = summoningPos;
 		GameScene.add( mySkeleton );
-		Dungeon.level.occupyCell( mySkeleton );
-		((NecromancerSprite)sprite).finishSummoning();
+	Dungeon.level.occupyCell( mySkeleton );
+	((NecromancerSprite)sprite).finishSummoning();
 
-		for (Buff b : buffs(AllyBuff.class)){
+	for (Buff b : buffs()){
+		if (b.revivePersists) {
 			Buff.affect(mySkeleton, b.getClass());
 		}
-		for (Buff b : buffs(ChampionEnemy.class)){
-			Buff.affect( mySkeleton, b.getClass());
-		}
 	}
+}
 	
 	private class Hunting extends Mob.Hunting{
 		

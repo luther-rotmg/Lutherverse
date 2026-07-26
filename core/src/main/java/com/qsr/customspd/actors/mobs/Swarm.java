@@ -24,11 +24,9 @@ package com.qsr.customspd.actors.mobs;
 import com.qsr.customspd.Dungeon;
 import com.qsr.customspd.actors.Actor;
 import com.qsr.customspd.actors.Char;
-import com.qsr.customspd.actors.buffs.AllyBuff;
 import com.qsr.customspd.actors.buffs.AscensionChallenge;
 import com.qsr.customspd.actors.buffs.Buff;
 import com.qsr.customspd.actors.buffs.Burning;
-import com.qsr.customspd.actors.buffs.ChampionEnemy;
 import com.qsr.customspd.actors.buffs.Poison;
 import com.qsr.customspd.effects.Pushing;
 import com.qsr.customspd.items.Item;
@@ -128,16 +126,15 @@ public class Swarm extends Mob {
 		if (buff( Burning.class ) != null) {
 			Buff.affect( clone, Burning.class ).reignite( clone );
 		}
-		if (buff( Poison.class ) != null) {
-			Buff.affect( clone, Poison.class ).set(2);
+	if (buff( Poison.class ) != null) {
+		Buff.affect( clone, Poison.class ).set(2);
+	}
+	for (Buff b : buffs()){
+		if (b.revivePersists) {
+			Buff.affect(clone, b.getClass());
 		}
-		for (Buff b : buffs(AllyBuff.class)){
-			Buff.affect( clone, b.getClass());
-		}
-		for (Buff b : buffs(ChampionEnemy.class)){
-			Buff.affect( clone, b.getClass());
-		}
-		return clone;
+	}
+	return clone;
 	}
 
 	@Override

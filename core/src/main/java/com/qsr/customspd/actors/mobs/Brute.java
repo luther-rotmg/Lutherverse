@@ -148,13 +148,9 @@ public class Brute extends Mob {
 			return BuffIndicator.FURY;
 		}
 		
-		@Override
-		public String desc () {
-			return Messages.get(this, "desc", shielding());
-		}
-
-		{
-			immunities.add(Terror.class);
-		}
+	@Override
+	public String desc () {
+		return Messages.get(this, "desc", shielding());
+	}
 	}
 }
