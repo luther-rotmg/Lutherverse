@@ -275,20 +275,59 @@ than marking the conditional gate N/A.
 
 ## Mandatory acceptance block
 
-- [ ] Namespace transformer roundtrips both directions and refuses collisions.
-- [ ] Classification manifest accounts for all 1,209 upstream commits.
-- [ ] Slice 2/later feature hunks are absent from Slice 1.
-- [ ] `Actor.java`, `Char.java`, and `Hero.java` were separate reviewed units.
-- [ ] Android and desktop builds exit 0.
-- [ ] Focused tool and bridge tests exit 0.
-- [ ] Android smoke evidence is recorded without overstating PID coverage.
-- [ ] Pack smoke reports no regression from the 29-pack Slice 0 baseline.
-- [ ] API diff reports no undocumented removals/signature changes.
-- [ ] Serialized-state roundtrip is either proven or explicitly N/A with reviewed
-      evidence that no serialized state changed.
-- [ ] No DSL surface additions, iOS work, or original Lutherverse content.
-- [ ] No unrelated edits and no worker commits/pushes.
-- [ ] CHANGELOG, PROJECT-STATUS, and README accurately report current state.
-- [ ] Remaining slices are re-estimated from Slice 1 empirical velocity.
+Status as of 2026-07-26. Slice 1 is **not closed** — Tasks 17–20 are partially
+complete and the pipeline is halted on exhausted OpenRouter credits. These marks
+record what is currently evidenced, not a closure claim.
+
+- [x] Namespace transformer roundtrips both directions and refuses collisions.
+      `:services:tools:namespace-transform:test` passes on a forced rerun.
+- [x] Classification manifest accounts for all 1,209 upstream commits.
+      Verified: 1,209 unique SHAs in the manifest, 1,209 commits in
+      `v2.1.0..v2.5.4`. **Caveat:** accounting for a commit is not the same as
+      reviewing it. 730 rows carried unreviewed `provisional:` reasons until the
+      2026-07-25 triage, and 60 quest-content commits had to be reclassified out
+      of Slice 1 across Tasks 15, 16, 19 and 20.
+- [x] Slice 2/later feature hunks are absent from Slice 1.
+      Leakage scans over the Task 15, 16 and 17–20 diffs find zero added-line
+      references to `MiningLevel`, `GnollSapper`, `GnollGeomancer`,
+      `CrystalSpire`, `CrystalGuardian`, `CrystalWisp`, `DarkGold`, `Pickaxe`,
+      `SupplyRation`, `WndBlacksmithOld` or `Blacksmith.Quest.Type`.
+- [x] `Actor.java`, `Char.java`, and `Hero.java` were separate reviewed units.
+      Separate beads across Tasks 11–13, each frontier-reviewed.
+- [x] Android and desktop builds exit 0. APK 32 MB, JAR 54 MB.
+- [x] Focused tool and bridge tests exit 0. SPD-classes, api-diff, pack-smoke and
+      namespace-transform all pass on forced reruns.
+- [x] Android smoke evidence is recorded without overstating PID coverage.
+      Recorded as **BLOCKED**: the emulator never reaches `sys.boot_completed`
+      here, failing before `adb install`, so the APK is never exercised. The
+      check was only ever a PID-alive gate even when it did run.
+- [x] Pack smoke reports no regression from the 29-pack Slice 0 baseline.
+      29/29 GREEN. The 30th `marketplace/` entry is `Summary/`, a metadata and
+      screenshot directory with no `mod_info.json`, correctly not a pack.
+- [x] API diff reports no undocumented removals/signature changes.
+      1,021 files scanned: 21 removed, 160 added, 13 signature-changed, every one
+      accounted for (11 the entrance/exit package move, 6 the upstream Noisemaker
+      refactor, 2 relocations, 2 removed upstream too; 12 changes the `canMerge`
+      migration, 1 `ShadowCaster.castShadow`). **This gate only became real
+      today** — the tool previously scanned 0 files and printed PASS. Its first
+      working run caught the `CorpseDust.actions()` regression.
+- [ ] **FAILED — Serialized-state roundtrip is neither proven nor legitimately
+      N/A.** Slice 1 *did* change serialized state: `Bundle.addAlias`
+      registrations for the moved `EntranceRoom`/`ExitRoom`, and terrain id reuse
+      where `CUSTOM_DECO` takes the old `SIGN` id 23. No save-roundtrip harness
+      exists. The plan explicitly forbids marking this N/A without real fixture
+      work, so it stands as a failed gate and blocks Slice 1 closure.
+- [x] No DSL surface additions, iOS work, or original Lutherverse content.
+      `core/.../modding/` untouched; no `ios/` paths; no original content.
+- [x] No unrelated edits and no worker commits/pushes.
+      Every commit authored `LO`; nothing pushed — `origin/main` is unchanged.
+- [x] CHANGELOG, PROJECT-STATUS, and README accurately report current state,
+      including the blocked gates and the credit halt.
+- [~] Remaining slices are re-estimated from Slice 1 empirical velocity.
+      Throughput is measured and recorded (~10 commits per bead, ~8–10 min per
+      bead, plus a corrected sizing rule based on commit count rather than LOC).
+      Numeric estimates for Slices 2–7 are **deliberately withheld**: they would
+      draw scope from the manifest that just proved unreliable, so a number now
+      would repeat Slice 1's estimation error rather than correct it.
 
 Missing evidence is a failed gate.
