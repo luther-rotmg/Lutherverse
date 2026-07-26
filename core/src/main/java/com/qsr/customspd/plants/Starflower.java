@@ -21,6 +21,7 @@
 
 package com.qsr.customspd.plants;
 
+import com.qsr.customspd.Dungeon;
 import com.qsr.customspd.actors.Char;
 import com.qsr.customspd.actors.buffs.Bless;
 import com.qsr.customspd.actors.buffs.Buff;
@@ -44,7 +45,9 @@ public class Starflower extends Plant {
 
 		if (ch != null) {
 			Buff.prolong(ch, Bless.class, Bless.DURATION);
-			new Flare( 6, 32 ).color(0xFFFF00, true).show( ch.sprite, 2f );
+			if (Dungeon.level.heroFOV[ch.pos]){
+				new Flare(6, 32).color(0xFFFF00, true).show(ch.sprite, 2f);
+			}
 			if (ch instanceof Hero && ((Hero) ch).subClass == HeroSubClass.WARDEN){
 				Buff.prolong(ch, Recharging.class, Recharging.DURATION);
 				SpellSprite.show( ch, GeneralAsset.CHARGE );
