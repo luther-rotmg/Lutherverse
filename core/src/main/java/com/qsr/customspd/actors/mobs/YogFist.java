@@ -179,6 +179,16 @@ public abstract class YogFist extends Mob {
 		return super.drRoll() + Random.NormalIntRange(0, 15);
 	}
 
+	@Override
+	public void die(Object cause) {
+		super.die(cause);
+		for ( Char c : Actor.chars() ){
+			if (c instanceof YogDzewa){
+				((YogDzewa) c).processFistDeath();
+			}
+		}
+	}
+
 	{
 		immunities.add( Sleep.class );
 	}

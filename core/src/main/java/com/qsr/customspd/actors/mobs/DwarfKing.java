@@ -60,6 +60,7 @@ import com.qsr.customspd.sprites.CharSprite;
 import com.qsr.customspd.sprites.KingSprite;
 import com.qsr.customspd.ui.BossHealthBar;
 import com.qsr.customspd.ui.BuffIndicator;
+import com.qsr.customspd.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
 import com.watabou.utils.Bundle;
@@ -684,6 +685,7 @@ public class DwarfKing extends Mob {
 					}
 					if (!ch.isAlive() && ch == Dungeon.hero) {
 						Dungeon.fail(DwarfKing.class);
+						GLog.n( Messages.capitalize(Messages.get(Char.class, "kill", Messages.get(DwarfKing.class, "name"))));
 					}
 				}
 

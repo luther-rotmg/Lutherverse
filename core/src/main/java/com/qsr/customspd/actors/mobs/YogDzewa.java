@@ -190,13 +190,6 @@ public class YogDzewa extends Mob {
 			}
 		}
 
-		if (phase == 4 && findFist() == null){
-			yell(Messages.get(this, "hope"));
-			summonCooldown = -15; //summon a burst of minions!
-			phase = 5;
-			BossHealthBar.bleed(true);
-		}
-
 		if (phase == 0){
 			spend(TICK);
 			return true;
@@ -364,6 +357,17 @@ public class YogDzewa extends Mob {
 		return true;
 	}
 
+	public void processFistDeath(){
+		//normally Yog has no logic when a fist dies specifically
+		//but the very last fist to die does trigger the final phase
+		if (phase == 4 && findFist() == null){
+			yell(Messages.get(this, "hope"));
+			summonCooldown = -15; //summon a burst of minions!
+			phase = 5;
+			BossHealthBar.bleed(true);
+		}
+	}
+
 	@Override
 	public boolean isAlive() {
 		return super.isAlive() || phase != 5;
@@ -462,7 +466,10 @@ public class YogDzewa extends Mob {
 		if (phase > 1 && isAlive()){
 			viewDistance = 4 - (phase-1);
 		}
-		level.viewDistance = (int)GameMath.gate(1, viewDistance, level.viewDistance);
+		if (Dungeon.isChallenged(Challenges.DARKNESS)) {
+			viewDistance = Math.min(viewDistance, 2);
+		}
+		level.viewDistance = viewDistance;
 		if (Dungeon.hero != null) {
 			if (Dungeon.hero.buff(Light.class) == null) {
 				Dungeon.hero.viewDistance = level.viewDistance;
@@ -492,7 +499,7 @@ public class YogDzewa extends Mob {
 	@Override
 	public void aggro(Char ch) {
 		for (Mob mob : (Iterable<Mob>)Dungeon.level.mobs.clone()) {
-			if (Dungeon.level.distance(pos, mob.pos) <= 4 &&
+			if (mob != ch && Dungeon.level.distance(pos, mob.pos) <= 4 &&
 					(mob instanceof Larva || mob instanceof YogRipper || mob instanceof YogEye || mob instanceof YogScorpio)) {
 				mob.aggro(ch);
 			}

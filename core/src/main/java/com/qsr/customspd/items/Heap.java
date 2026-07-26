@@ -23,6 +23,7 @@ package com.qsr.customspd.items;
 
 import com.qsr.customspd.Assets;
 import com.qsr.customspd.Dungeon;
+import com.qsr.customspd.actors.Char;
 import com.qsr.customspd.actors.hero.Hero;
 import com.qsr.customspd.actors.mobs.Wraith;
 import com.qsr.customspd.actors.mobs.npcs.Shopkeeper;
@@ -47,6 +48,7 @@ import com.qsr.customspd.items.weapon.missiles.darts.TippedDart;
 import com.qsr.customspd.journal.Document;
 import com.qsr.customspd.messages.Messages;
 import com.qsr.customspd.sprites.ItemSprite;
+import com.qsr.customspd.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
@@ -95,6 +97,10 @@ public class Heap implements Bundlable {
 			if (Wraith.spawnAt( pos, true ) == null) {
 				hero.sprite.emitter().burst( ShadowParticle.CURSE, 6 );
 				hero.damage( hero.HP / 2, this );
+				if (!hero.isAlive()){
+					Dungeon.fail(Wraith.class);
+					GLog.n( Messages.capitalize(Messages.get(Char.class, "kill", Messages.get(Wraith.class, "name"))));
+				}
 			}
 			Sample.INSTANCE.play( Assets.Sounds.CURSED );
 		}
