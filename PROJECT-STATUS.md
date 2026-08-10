@@ -112,6 +112,43 @@ Phase 3 has landed Tasks 11–16 (Actor, Char, Hero, Dungeon, Level and generato
 | Manual runtime checks | title screen, seeded Warrior run, save/reload | **NOT DONE** — requires a human at the machine |
 | Serialized-state roundtrip | — | **NOT DONE** — see below |
 
+## ⛔ P0 found 2026-08-10 — seeded runs are not actually seeded
+
+`cpdu-yaa`. `Dungeon.init()` computes `posLevels`, `souLevels`, `asLevels` and all four
+quest-NPC floors with an RNG that is neither the game's nor seeded. **Two stacked defects:**
+
+1. `modding/randomGenUtils.kt` has no imports. `.shuffled()` is Kotlin stdlib, backed by an
+   unseeded `java.util.Random`; `.random()` is `kotlin.random.Random.Default`. Neither is
+   `com.watabou.utils.Random`.
+2. Even with the right RNG it would still fail: those calls sit at roughly `Dungeon.java`
+   lines 218–228, `seed` is not assigned until ~232, and `Random.pushGenerator(seed+1)` is
+   at ~245. **The distributions are computed before the seed exists.**
+
+Same seed, two runs → different guaranteed scroll/potion floors and different quest-NPC
+floors. This defeats labeled seed sharing, **daily runs (already shipped)**, deterministic
+lockstep coop, and any replay verifier.
+
+Fix needs both halves, and should land *with* the seeded-determinism harness rather than
+before it — sequence after the `:core` headless bootstrap spike. There is no correct current
+behavior to preserve, since it is already nondeterministic.
+
+## Group B started, Group D landed (2026-08-10)
+
+- **`:core` has a test source set and tests for the first time.** `core:test` was `NO-SOURCE`
+  and reported green forever across 1019 Java + 49 Kotlin files. Seven tests now cover
+  `RandomGenUtils.halveQuantities`, chosen because they touch no libGDX statics and so did
+  not have to wait on the headless bootstrap spike.
+- **CI exists** (`.github/workflows/ci.yml`); the repo previously had none. Every step
+  asserts it analysed something: it probes that `options.release = 8` is genuinely applied,
+  requires each test suite to report a non-zero count, requires deletion-audit to scan >0
+  files, runs manifest-audit in canary mode, requires pack smoke to report 29/29, and
+  size-checks the jar and APK. `desktop-smoke` and the Android emulator are excluded with
+  written reasons. **Not yet executed — needs a push.**
+- **Forbidden Runes (`cpdu-0a7`) landed.** `Challenges.NO_SCROLLS` was defined but never
+  consulted anywhere. Implemented inside CPDU's layout-driven model by halving each
+  region's `ItemDistribution.quantity`, so custom layouts and the save round-trip are
+  unaffected.
+
 ## Toolbelt Group C partially landed (2026-08-10)
 
 Attacks the ~541-commit upstream backlog, the largest recurring cost in the project.
