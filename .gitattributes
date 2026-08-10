@@ -1,0 +1,48 @@
+# Line-ending and diff policy.
+#
+# Why this file exists: the repo had none, while core.autocrlf was true. That made line
+# endings a property of each developer's machine rather than of the repo, which (a) makes
+# merges and cherry-picks noisier than they need to be -- material when ~541 upstream commits
+# are still to be ported -- and (b) would diverge between a Windows dev box and a Linux CI
+# runner. Verified before adding this: no binary asset was ever mis-stored as text.
+
+# Normalize every text file to LF in the index AND in the working tree, so behaviour is
+# identical on Windows, Linux CI, and macOS regardless of anyone's core.autocrlf setting.
+* text=auto eol=lf
+
+# Scripts whose interpreter cares about line endings.
+*.bat        text eol=crlf
+*.cmd        text eol=crlf
+*.sh         text eol=lf
+gradlew      text eol=lf
+
+# Binary assets: never normalize, never diff as text.
+# (3498 .png / 66 .mp3 / 31 .ogg / 10 .jpg / 3 .ttf at time of writing.)
+*.png        binary
+*.jpg        binary
+*.jpeg       binary
+*.gif        binary
+*.ogg        binary
+*.mp3        binary
+*.wav        binary
+*.ttf        binary
+*.otf        binary
+*.jar        binary
+*.apk        binary
+*.aab        binary
+*.keystore   binary
+*.jks        binary
+*.dat        binary
+*.zip        binary
+*.so         binary
+
+# Better diff hunk headers: git shows the enclosing class/function on each hunk.
+*.java       diff=java
+*.kt         diff=java
+*.kts        diff=java
+*.html       diff=html
+*.md         diff=markdown
+
+# Save fixtures are binary by intent -- a textual diff of one is meaningless and a
+# normalized one is a corrupted test fixture.
+SPD-classes/src/test/resources/save-fixtures/** binary
