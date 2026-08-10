@@ -112,6 +112,40 @@ Phase 3 has landed Tasks 11–16 (Actor, Char, Hero, Dungeon, Level and generato
 | Manual runtime checks | title screen, seeded Warrior run, save/reload | **NOT DONE** — requires a human at the machine |
 | Serialized-state roundtrip | — | **NOT DONE** — see below |
 
+## Toolbelt Group C partially landed (2026-08-10)
+
+Attacks the ~541-commit upstream backlog, the largest recurring cost in the project.
+
+- **`git rerere` enabled** (`rerere.enabled` + `rerere.autoupdate`). It was off, so the same
+  namespace-rename conflicts were being re-resolved by hand on every batch.
+- **`services/tools/manifest-audit`** — the Slice 1 manifests define the whole slice's scope
+  and every downstream estimate, are hand-maintained, and already lied once. Seven checks,
+  canary-verified. Current state: **PASS** — 1209 inventory rows, 6083 classification rows,
+  31 provisional (down from 761 pre-triage), 0 coverage gaps, 0 orphans, closed vocabulary.
+
+  **Correction to the record:** an earlier reading of this session claimed the manifests were
+  untracked and that the 730 provisional rows were never triaged. Both were wrong. The
+  canonical manifests are git-tracked at `docs/superpowers/research/`, and the triage did
+  happen — 730 → 31. The confusion came from `.beads/`, which holds **14 untracked working
+  copies** with authoritative-sounding names (`final.sol3`, `final.validation2`) that are
+  *pre-triage* snapshots showing 761 provisional rows, and whose five `final` files split into
+  **two mutually contradictory versions**. `manifest-audit` check M7 now reports them so the
+  next reader is not misled the same way.
+
+- **Two determinism defects fixed.** `Random.chances(HashMap)` selects via
+  `keySet().toArray()`, and `Class` does not override `hashCode()`, so a `HashMap` keyed by
+  `Class` iterates in identity-hash order that varies between JVM runs.
+  `WandOfCorruption`'s debuff maps and `AlchemicalCatalyst.potionChances` were both affected:
+  the same seed produced a different debuff or a different brewed potion on different runs.
+  That breaks labeled seed sharing, deterministic lockstep coop, and any replay verifier —
+  three things on the roadmap. Fixed with `LinkedHashMap`, matching what
+  `Generator.categoryProbs` already did correctly. There was no prior deterministic behavior
+  to preserve. `float[]` call sites and keyed-lookup maps were checked and are unaffected.
+
+**Still open in Group C:** `port-verify` (bead filed — the design insight is that
+`services/tools/namespace-transform` is the missing link for comparing an upstream diff
+against its CPDU port), plus Mergiraf and difftastic, which need LO to install the binaries.
+
 ## Toolbelt Group A landed (2026-08-10)
 
 Research: [2026-08-10-toolbelt-research.md](docs/superpowers/specs/2026-08-10-toolbelt-research.md).
