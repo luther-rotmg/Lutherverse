@@ -23,7 +23,21 @@ lint {
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 sourceCompatibility = targetCompatibility = appJavaCompatibility
 
+//:core had no test source set at all, so core:test was NO-SOURCE and reported green forever
+//while 1019 Java + 49 Kotlin files went untested -- compilation was effectively the only gate.
+//
+//Tests here must NOT touch libGDX statics: Gdx.app/files/graphics are never initialised in a
+//plain JVM test, and Gdx.gl is never available at all. Anything needing them requires the
+//gdx-backend-headless bootstrap, which is a separate timeboxed spike. Pure logic, data
+//classes and pure functions are fair game today.
+test {
+    useJUnitPlatform()
+}
+
 dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
     api project(':SPD-classes')
     implementation project(':services')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"

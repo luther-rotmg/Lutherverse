@@ -4,8 +4,8 @@ name: CI
 #
 # That is not defensive style, it is this repo's history: api-diff scanned zero files and
 # printed PASS for weeks; a bead validate: gate never fired for ~14 tasks; the Android
-# emulator smoke has never once executed the APK; :core:test is NO-SOURCE and reports green
-# forever; and Android Lint analysed 9 of 1077 files while looking clean. A gate that cannot
+# emulator smoke has never once executed the APK; :core:test was NO-SOURCE and reported green
+# forever until 2026-08-10; and Android Lint analysed 9 of 1077 files while looking clean. A gate that cannot
 # be observed failing is not a gate.
 
 on:
@@ -60,14 +60,14 @@ jobs:
             || { echo "::error::options.release is NOT applied to :core - the Java 8 API gate is inert"; exit 1; }
 
       - name: Tests
-        run: ./gradlew SPD-classes:test :services:tools:api-diff:test :services:tools:pack-smoke:test :services:tools:namespace-transform:test :services:tools:deletion-audit:test --rerun-tasks
+        run: ./gradlew core:test SPD-classes:test :services:tools:api-diff:test :services:tools:pack-smoke:test :services:tools:namespace-transform:test :services:tools:deletion-audit:test --rerun-tasks
 
       - name: Assert the test suites are not empty
         # A suite that runs zero tests passes. SPD-classes and the tools modules must each
         # report a non-zero test count or the "tests passed" claim is worthless.
         run: |
           fail=0
-          for m in SPD-classes services/tools/api-diff services/tools/pack-smoke \
+          for m in core SPD-classes services/tools/api-diff services/tools/pack-smoke \
                    services/tools/namespace-transform services/tools/deletion-audit; do
             dir="$m/build/test-results/test"
             if [ ! -d "$dir" ]; then echo "::error::no test results for $m"; fail=1; continue; fi
@@ -79,16 +79,12 @@ jobs:
           done
           exit $fail
 
-      - name: Report the :core test gap
-        # :core has 1019 Java files and no test source set, so core:test is NO-SOURCE and
-        # would report green forever. Surfaced deliberately rather than silently skipped.
-        # Flip this to a hard failure the moment the test source set lands.
+      - name: Guard against :core losing its test source set again
+        # core:test was NO-SOURCE until 2026-08-10 and reported green forever across 1019
+        # Java files. If the source set is ever removed, the assertion above would pass
+        # vacuously on a missing directory, so check the directory itself.
         run: |
-          if [ -d core/src/test ]; then
-            echo "::notice::core now has a test source set - make this step assert tests > 0"
-          else
-            echo "::warning::core has NO test source set; core:test is NO-SOURCE and gates nothing"
-          fi
+          [ -d core/src/test ] \n            || { echo "::error::core/src/test is gone - core:test is NO-SOURCE and gates nothing"; exit 1; }
 
       - name: Lint
         run: ./gradlew :core:lint :android:lint
