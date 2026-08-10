@@ -1,6 +1,8 @@
 package com.qsr.customspd.tools.deletionaudit;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,10 +39,36 @@ public final class DeletionAuditCli {
             return;
         }
 
+        Path allowlistPath = resolveAgainstRepoRoot(parsed.allowlist);
+        if (allowlistPath != null && !Files.exists(allowlistPath)) {
+            // Failing loudly here is deliberate. Silently loading an empty allowlist
+            // is how api-diff printed PASS while auditing nothing: a path problem
+            // that looks like a clean result.
+            System.err.println("Allowlist not found: " + allowlistPath);
+            System.exit(2);
+            return;
+        }
+
         Result result = run(parsed.base, parsed.head, parsed.filesGlob, parsed.minShrink,
-                Allowlist.load(parsed.allowlist));
+                Allowlist.load(allowlistPath));
         print(parsed, result);
         System.exit(result.hasFindings() ? 1 : 0);
+    }
+
+    /**
+     * Resolves a relative allowlist path against the repository root.
+     *
+     * <p>{@code gradle run} sets the JVM's working directory to the subproject, so
+     * a repo-root-relative path passed on the command line would not exist and the
+     * allowlist would load empty — silently reporting every reviewed removal again.
+     * This is the same defect class that made api-diff scan zero files.
+     */
+    private static Path resolveAgainstRepoRoot(Path path) throws IOException {
+        if (path == null || path.isAbsolute()) {
+            return path;
+        }
+        File root = GitCommands.repoRoot();
+        return root == null ? path : root.toPath().resolve(path);
     }
 
     /** Runs the audit without printing or exiting. Exposed for testability. */

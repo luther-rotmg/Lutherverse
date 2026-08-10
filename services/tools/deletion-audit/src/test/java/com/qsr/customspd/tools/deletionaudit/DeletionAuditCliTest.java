@@ -3,6 +3,8 @@ package com.qsr.customspd.tools.deletionaudit;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -27,6 +29,21 @@ class DeletionAuditCliTest {
                 "HEAD", "HEAD", "SPD-classes/src/main/java/**/*.java", 3, Allowlist.load(null));
 
         assertTrue(result.filesScanned() > 0, "SPD-classes sources must match the glob");
+    }
+
+    @Test
+    void theCheckedInAllowlistLoadsWhenResolvedFromTheRepoRoot() throws IOException {
+        // Regression: `gradle run` sets the CWD to the subproject, so the
+        // repo-root-relative allowlist path did not exist and loaded empty --
+        // silently re-reporting every reviewed removal. Same defect class as
+        // api-diff scanning zero files.
+        Path fromRoot = GitCommands.repoRoot().toPath()
+                .resolve("services/tools/deletion-audit/reviewed-removals.txt");
+
+        assertTrue(Files.exists(fromRoot), "the checked-in allowlist must resolve from the repo root");
+        assertTrue(Allowlist.load(fromRoot).permits("Room#canMerge(Level, Point, int)"),
+                "a known reviewed key must be permitted; if this fails the allowlist "
+                        + "silently loaded empty");
     }
 
     @Test

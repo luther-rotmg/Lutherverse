@@ -1,0 +1,69 @@
+# Reviewed removals for the Slice 1 integration range (7d9c139c8..HEAD).
+#
+# One TypeName#signature key per line. The comment above each block records why
+# the removal is legitimate and when it was reviewed. Anything NOT in this file
+# is still an open review item -- do not add an entry without verifying it.
+#
+# Reviewed 2026-08-10 during T1 gate repair (docs/superpowers/plans/2026-08-10-t1-gate-repair.md).
+
+
+# --- canMerge signature migration (12 entries) ---
+# The 3-arg canMerge(Level, Point, int) was replaced by the 4-arg
+# canMerge(Level, Room, Point, int) across 14 definitions. Recorded in
+# PROJECT-STATUS under the entrance/exit room cluster. The tool sees the old
+# arity vanish; the replacement is present at HEAD under the new signature.
+Room#canMerge(Level, Point, int)
+BridgeRoom#canMerge(Level, Point, int)
+RingBridgeRoom#canMerge(Level, Point, int)
+WalkwayRoom#canMerge(Level, Point, int)
+GooBossRoom#canMerge(Level, Point, int)
+BurnedRoom#canMerge(Level, Point, int)
+CavesFissureRoom#canMerge(Level, Point, int)
+HallwayRoom#canMerge(Level, Point, int)
+MinefieldRoom#canMerge(Level, Point, int)
+RuinsRoom#canMerge(Level, Point, int)
+SewerPipeRoom#canMerge(Level, Point, int)
+StandardRoom#canMerge(Level, Point, int)
+
+
+# --- EntranceRoom / ExitRoom package move (11 entries) ---
+# These classes moved from levels/rooms/standard/ to levels/rooms/standard/entrance/
+# and .../exit/, with Bundle.addAlias registered for save compat. Verified at HEAD:
+# both classes exist at the new paths alongside their 20 region variants.
+#
+# TOOL LIMITATION, not a code defect: deletion-audit compares per-path and has no
+# rename detection, so a moved file reports every one of its callables as DELETED.
+# Follow-up bead filed to add rename following.
+EntranceRoom#minWidth()
+EntranceRoom#minHeight()
+EntranceRoom#canMerge(Level, Point, int)
+EntranceRoom#canPlaceTrap(Point)
+EntranceRoom#paint(Level)
+EntranceRoom#connect(Room)
+ExitRoom#minWidth()
+ExitRoom#minHeight()
+ExitRoom#paint(Level)
+ExitRoom#canPlaceCharacter(Point, Level)
+ExitRoom#connect(Room)
+
+
+# --- ShadowCaster signature change (2 entries) ---
+# Both methods gained a leading width parameter:
+#   castShadow(int x, int y, int w, boolean[] fov, boolean[] blocking, int distance)
+# Verified present at HEAD (ShadowCaster.java:48 and :78). This is a signature
+# change, which is api-diff's job to report, not a deletion.
+ShadowCaster#castShadow(int, int, boolean[], boolean[], int)
+ShadowCaster#scanOctant(int, boolean[], boolean[], int, int, int, double, double, int, int, boolean)
+
+
+# --- Room sizing migration (1 entry) ---
+# Part of the documented sizeFactor / mobSpawnWeight / connectionWeight migration
+# (268b804ac), recorded in PROJECT-STATUS under Task 15 closeout.
+StandardRoom.SizeCategory#connectionWeight()
+
+
+# --- Extract-method refactor (1 entry) ---
+# Wraith#spawnAt(int, boolean) shrank 24 -> 2 statements because its body moved to
+# a new private spawnAt(int, boolean, boolean) overload; the 2-arg form delegates.
+# Verified at Wraith.java:106-110. Behavior preserved.
+Wraith#spawnAt(int, boolean)
