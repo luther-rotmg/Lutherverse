@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 7.4.2" type="baseline" client="gradle" dependencies="false" name="AGP (7.4.2)" variant="all" version="7.4.2">
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toUpperCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="    switch (mobSpawn.getAiState().toUpperCase()) {"
+        errorLine2="                                  ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/levels/CustomLevel.java"
+            line="302"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="   bundle.put(cat.name().toLowerCase() + CATEGORY_PROBS,   cat.probs);"
+        errorLine2="                         ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/items/Generator.java"
+            line="751"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="    bundle.put(cat.name().toLowerCase() + CATEGORY_SEED, cat.seed);"
+        errorLine2="                          ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/items/Generator.java"
+            line="753"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="    bundle.put(cat.name().toLowerCase() + CATEGORY_DROPPED, cat.dropped);"
+        errorLine2="                          ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/items/Generator.java"
+            line="754"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="   if (bundle.contains(cat.name().toLowerCase() + CATEGORY_PROBS)){"
+        errorLine2="                                  ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/items/Generator.java"
+            line="772"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="    float[] probs = bundle.getFloatArray(cat.name().toLowerCase() + CATEGORY_PROBS);"
+        errorLine2="                                                    ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/items/Generator.java"
+            line="773"
+            column="53"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="    if (bundle.contains(cat.name().toLowerCase() + CATEGORY_SEED)){"
+        errorLine2="                                   ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/items/Generator.java"
+            line="777"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="     cat.seed = bundle.getLong(cat.name().toLowerCase() + CATEGORY_SEED);"
+        errorLine2="                                          ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/items/Generator.java"
+            line="778"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="     cat.dropped = bundle.getInt(cat.name().toLowerCase() + CATEGORY_DROPPED);"
+        errorLine2="                                            ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/items/Generator.java"
+            line="779"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="    + &quot;-&quot; + String.format(&quot;%02d&quot;, cal.get(Calendar.MONTH)+1)"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/services/news/News.java"
+            line="128"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="    + &quot;-&quot; + String.format(&quot;%02d&quot;, cal.get(Calendar.DAY_OF_MONTH));"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/services/news/News.java"
+            line="129"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toUpperCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="    switch (mobSpawn.getAiState().toUpperCase()) {"
+        errorLine2="                                  ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/levels/RegularLevel.java"
+            line="321"
+            column="35"/>
+    </issue>
+
+</issues>

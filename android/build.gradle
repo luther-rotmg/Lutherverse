@@ -8,6 +8,26 @@ android {
 
     sourceSets.main.assets.srcDirs = [new File(project(':core').projectDir, "/src/main/assets")]
 
+    lint {
+        //Without this, lint analyses ONLY this module's handful of sources and reports a
+        //near-clean result while never looking at :core's 1019 Java + 49 Kotlin files --
+        //a gate that passes because it checked almost nothing.
+        //
+        //NewApi is the reason this matters most: compileSdk is 33 and minSdk is 19, so every
+        //API call above 19 is a potential crash on an old device and nothing else guards it.
+        //options.release = 8 covers the Java sources but has no Kotlin equivalent, so lint is
+        //the only thing watching the .kt files.
+        //This is also the ONLY configuration that runs NewApi against :core's Kotlin sources
+        //with a real minSdk context. options.release = 8 guards the Java sources and has no
+        //Kotlin equivalent, so without this the 49 .kt files have no API-level guard at all.
+        checkDependencies = true
+
+        //Separate baseline from :core's, because this run covers a different issue set
+        //(the Android-context checks) over the same sources.
+        baseline = file('lint-baseline.xml')
+        abortOnError = true
+    }
+
     defaultConfig {
         manifestPlaceholders = [appName:appName]
         applicationId appPackageName

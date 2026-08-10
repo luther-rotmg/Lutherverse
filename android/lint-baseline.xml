@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 7.4.2" type="baseline" client="gradle" dependencies="true" name="AGP (7.4.2)" variant="all" version="7.4.2">
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toUpperCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="    switch (mobSpawn.getAiState().toUpperCase()) {"
+        errorLine2="                                  ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/levels/CustomLevel.java"
+            line="302"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="   bundle.put(cat.name().toLowerCase() + CATEGORY_PROBS,   cat.probs);"
+        errorLine2="                         ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/items/Generator.java"
+            line="751"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="    bundle.put(cat.name().toLowerCase() + CATEGORY_SEED, cat.seed);"
+        errorLine2="                          ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/items/Generator.java"
+            line="753"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="    bundle.put(cat.name().toLowerCase() + CATEGORY_DROPPED, cat.dropped);"
+        errorLine2="                          ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/items/Generator.java"
+            line="754"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="   if (bundle.contains(cat.name().toLowerCase() + CATEGORY_PROBS)){"
+        errorLine2="                                  ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/items/Generator.java"
+            line="772"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="    float[] probs = bundle.getFloatArray(cat.name().toLowerCase() + CATEGORY_PROBS);"
+        errorLine2="                                                    ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/items/Generator.java"
+            line="773"
+            column="53"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="    if (bundle.contains(cat.name().toLowerCase() + CATEGORY_SEED)){"
+        errorLine2="                                   ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/items/Generator.java"
+            line="777"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="     cat.seed = bundle.getLong(cat.name().toLowerCase() + CATEGORY_SEED);"
+        errorLine2="                                          ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/items/Generator.java"
+            line="778"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="     cat.dropped = bundle.getInt(cat.name().toLowerCase() + CATEGORY_DROPPED);"
+        errorLine2="                                            ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/items/Generator.java"
+            line="779"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="    + &quot;-&quot; + String.format(&quot;%02d&quot;, cal.get(Calendar.MONTH)+1)"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/services/news/News.java"
+            line="128"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="    + &quot;-&quot; + String.format(&quot;%02d&quot;, cal.get(Calendar.DAY_OF_MONTH));"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/services/news/News.java"
+            line="129"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toUpperCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="    switch (mobSpawn.getAiState().toUpperCase()) {"
+        errorLine2="                                  ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/levels/RegularLevel.java"
+            line="321"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        message="Attribute `targetSandboxVersion` is only used in API level 26 and higher (current min is 19)"
+        errorLine1=" android:targetSandboxVersion=&quot;2&quot;"
+        errorLine2=" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="5"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        message="Attribute `resizeableActivity` is only used in API level 24 and higher (current min is 19)"
+        errorLine1="  android:resizeableActivity=&quot;true&quot;"
+        errorLine2="  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="30"
+            column="3"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        message="Attribute `fullBackupOnly` is only used in API level 21 and higher (current min is 19)"
+        errorLine1="  android:fullBackupOnly=&quot;true&quot;"
+        errorLine2="  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="32"
+            column="3"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; SDK_INT is always >= 14"
+        errorLine1=" @TargetApi(14)"
+        errorLine2=" ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/android/AndroidBackupHandler.java"
+            line="46"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; SDK_INT is never &lt; 19"
+        errorLine1="  if (Build.VERSION.SDK_INT &lt;= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {"
+        errorLine2="      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/android/AndroidLauncher.java"
+            line="127"
+            column="7"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; SDK_INT is always >= 19"
+        errorLine1="    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/qsr/customspd/android/AndroidPlatformSupport.java"
+            line="136"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@drawable/error_background` with a theme that also paints a background (inferred theme is `@android:style/Theme.Black.NoTitleBar`)"
+        errorLine1="            android:background=&quot;@drawable/error_background&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/crash_view.xml"
+            line="5"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.mipmap.ic_launcher_round` appears to be unused"
+        errorLine1="&lt;adaptive-icon xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;>"
+        errorLine2="^">
+        <location
+            file="src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml"
+            line="2"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="MonochromeLauncherIcon"
+        message="The application adaptive icon is missing a monochrome tag"
+        errorLine1="&lt;adaptive-icon xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;>"
+        errorLine2="^">
+        <location
+            file="src/debug/res/mipmap-anydpi-v26/ic_launcher.xml"
+            line="2"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="MonochromeLauncherIcon"
+        message="The application adaptive icon is missing a monochrome tag"
+        errorLine1="&lt;adaptive-icon xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;>"
+        errorLine2="^">
+        <location
+            file="src/main/res/mipmap-anydpi-v26/ic_launcher.xml"
+            line="2"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="IconLocation"
+        message="Found bitmap drawable `res/drawable/error_background_image.png` in densityless folder">
+        <location
+            file="src/main/res/drawable/error_background_image.png"/>
+    </issue>
+
+</issues>

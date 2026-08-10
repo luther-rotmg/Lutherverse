@@ -1,6 +1,24 @@
 apply plugin: 'java-library'
 apply plugin: 'kotlin'
 apply plugin: 'kotlinx-serialization'
+//Standalone Android Lint, shipped inside AGP. Needed because :core is a plain java-library,
+//so :android's lint checkDependencies does NOT descend into it -- verified: with
+//checkDependencies=true, lint analysed 9 android files and zero of core's 1068.
+//This is also the only static analysis that reads the 49 Kotlin files, since options.release
+//has no Kotlin equivalent.
+apply plugin: 'com.android.lint'
+
+lint {
+    //Ratchet, not a cliff: the 12 inherited DefaultLocale findings are parked in the baseline
+    //so NEW violations fail the build while the existing backlog is worked down separately.
+    //
+    //A baseline is itself a gate that can lie -- it hides everything recorded in it. Review it
+    //on a schedule and shrink it; do not let it grow. Deleting the file and re-running
+    //regenerates it, which silently forgives regressions, so treat it as a tracked artifact.
+    baseline = file('lint-baseline.xml')
+    abortOnError = true
+    warningsAsErrors = true
+}
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 sourceCompatibility = targetCompatibility = appJavaCompatibility
