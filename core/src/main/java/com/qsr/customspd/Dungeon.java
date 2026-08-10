@@ -211,18 +211,20 @@ public class Dungeon {
 
 		visited = new String[]{};
 
+		initialVersion = version = Game.versionCode;
+		challenges = SPDSettings.challenges();
+		mobsToChampion = -1;
+
 		posLevels = RandomGenUtils.calculateLevels(layout.getPosDistribution());
-		souLevels = RandomGenUtils.calculateLevels(layout.getSouDistribution());
+		//Forbidden Runes challenge: half of the dungeon's upgrade scrolls are removed (v2.2 levelgen-safe behavior)
+		souLevels = RandomGenUtils.calculateLevels(isChallenged(Challenges.NO_SCROLLS) ?
+				RandomGenUtils.halveQuantities(layout.getSouDistribution()) : layout.getSouDistribution());
 		asLevels = RandomGenUtils.calculateLevels(layout.getAsDistribution());
 
 		ghostLevel = RandomGenUtils.calculateQuestLevel(layout.getGhostSpawnLevels());
 		wandmakerLevel = RandomGenUtils.calculateQuestLevel(layout.getWandmakerSpawnLevels());
 		blacksmithLevel = RandomGenUtils.calculateQuestLevel(layout.getBlacksmithSpawnLevels());
 		impLevel = RandomGenUtils.calculateQuestLevel(layout.getImpSpawnLevels());
-
-		initialVersion = version = Game.versionCode;
-		challenges = SPDSettings.challenges();
-		mobsToChampion = -1;
 
 		if (daily) {
 			//Ensures that daily seeds are not in the range of user-enterable seeds
