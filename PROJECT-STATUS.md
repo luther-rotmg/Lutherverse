@@ -112,6 +112,36 @@ Phase 3 has landed Tasks 11–16 (Actor, Char, Hero, Dungeon, Level and generato
 | Manual runtime checks | title screen, seeded Warrior run, save/reload | **NOT DONE** — requires a human at the machine |
 | Serialized-state roundtrip | — | **NOT DONE** — see below |
 
+## Toolbelt Group A landed (2026-08-10)
+
+Research: [2026-08-10-toolbelt-research.md](docs/superpowers/specs/2026-08-10-toolbelt-research.md).
+
+- **`options.release = 8`** on every module whose `sourceCompatibility` is 1.8. `-source/-target`
+  restrict the *language* level only; javac 17 was resolving Java 17 APIs into Java 8 bytecode.
+  It immediately caught `BundleBridge`'s `java.util.List.of` (Android API 34) on a minSdk 19 app
+  with no core library desugaring — latent, but armed for the Slice 3a save path. Fixed.
+  `services/tools/*` correctly keep Java 17; `:android` is excluded because `--release` conflicts
+  with AGP's `android.jar` bootclasspath.
+  *The check must run in `afterEvaluate`* — a bare `configureEach` reads `sourceCompatibility`
+  before the subproject sets it and silently applies the flag to nothing. Verified by probing
+  `options.release` rather than trusting a green build.
+- **`.gitattributes`** added; the repo had none while `core.autocrlf=true`. Line endings were a
+  property of each machine rather than the repo, which inflates conflicts on the ~541 commits
+  still to port and would diverge on a Linux CI runner. A `--renormalize` dry run touched zero
+  files and zero binaries, so this locks in correct behavior rather than rewriting anything.
+- **Android Lint** wired as a ratcheted gate. It ships in AGP 7.4.2 and had never been run. Its
+  default scope is misleading: `:android:lint` analysed 9 files and *zero* of core's 1068.
+  `checkDependencies` alone does not fix that because `:core` is a plain `java-library`; applying
+  AGP's standalone `com.android.lint` plugin to `:core` is what makes `checkDependencies` descend.
+  That combination is the **only** configuration that runs NewApi against core's 49 Kotlin files
+  with a real minSdk context, since `options.release` has no Kotlin equivalent.
+  Found 12 `DefaultLocale` violations (8 in `Generator.java`) — implicit-locale case conversion on
+  a game shipping 202 localization bundles. Parked in baselines; bead filed.
+  **Ratchet verified by negative control:** an injected violation fails the build.
+
+Both baselines are gates that can lie by construction — they hide whatever is recorded in them.
+Review and shrink them on a schedule; do not let them grow.
+
 ## T1 gate repair (2026-08-10) — the three open gates are now closed
 
 Plan: [2026-08-10-t1-gate-repair.md](docs/superpowers/plans/2026-08-10-t1-gate-repair.md).
