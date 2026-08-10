@@ -34,6 +34,7 @@ import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class AlchemicalCatalyst extends Potion {
 	
@@ -42,7 +43,10 @@ public class AlchemicalCatalyst extends Potion {
 		
 	}
 	
-	private static HashMap<Class<? extends Potion>, Float> potionChances = new HashMap<>();
+	//LinkedHashMap, not HashMap: fed to Random.chances(), which selects via keySet().toArray().
+	//Class does not override hashCode(), so plain-HashMap order varies between JVM runs and the
+	//same seed would brew a different potion on different runs.
+	private static HashMap<Class<? extends Potion>, Float> potionChances = new LinkedHashMap<>();
 	static{
 		potionChances.put(PotionOfHealing.class,        3f);
 		potionChances.put(PotionOfMindVision.class,     2f);

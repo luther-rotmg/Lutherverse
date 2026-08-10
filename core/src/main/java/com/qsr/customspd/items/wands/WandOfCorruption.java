@@ -75,6 +75,7 @@ import com.watabou.utils.Callback;
 import com.watabou.utils.Random;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class WandOfCorruption extends Wand {
 
@@ -87,7 +88,11 @@ public class WandOfCorruption extends Wand {
 	// for the purposes of reducing resistance, but does not actually apply them itself
 	
 	private static final float MINOR_DEBUFF_WEAKEN = 1/4f;
-	private static final HashMap<Class<? extends Buff>, Float> MINOR_DEBUFFS = new HashMap<>();
+	//LinkedHashMap, not HashMap: this map is fed to Random.chances(), which selects via
+	//keySet().toArray(). Class does not override hashCode(), so a plain HashMap iterates in
+	//identity-hash order and varies between JVM runs -- the same seed would pick a different
+	//debuff on different runs, breaking seed sharing, lockstep coop and replay verification.
+	private static final HashMap<Class<? extends Buff>, Float> MINOR_DEBUFFS = new LinkedHashMap<>();
 	static{
 		MINOR_DEBUFFS.put(Weakness.class,       2f);
 		MINOR_DEBUFFS.put(Vulnerable.class,     2f);
@@ -106,7 +111,8 @@ public class WandOfCorruption extends Wand {
 	}
 	
 	private static final float MAJOR_DEBUFF_WEAKEN = 1/2f;
-	private static final HashMap<Class<? extends Buff>, Float> MAJOR_DEBUFFS = new HashMap<>();
+	//LinkedHashMap for the same determinism reason as MINOR_DEBUFFS above.
+	private static final HashMap<Class<? extends Buff>, Float> MAJOR_DEBUFFS = new LinkedHashMap<>();
 	static{
 		MAJOR_DEBUFFS.put(Amok.class,           3f);
 		MAJOR_DEBUFFS.put(Slow.class,           2f);
@@ -195,7 +201,8 @@ public class WandOfCorruption extends Wand {
 	private void debuffEnemy( Mob enemy, HashMap<Class<? extends Buff>, Float> category ){
 		
 		//do not consider buffs which are already assigned, or that the enemy is immune to.
-		HashMap<Class<? extends Buff>, Float> debuffs = new HashMap<>(category);
+		//the working copy must preserve the source map's order, or the determinism above is lost here
+		HashMap<Class<? extends Buff>, Float> debuffs = new LinkedHashMap<>(category);
 		for (Buff existing : enemy.buffs()){
 			if (debuffs.containsKey(existing.getClass())) {
 				debuffs.put(existing.getClass(), 0f);
