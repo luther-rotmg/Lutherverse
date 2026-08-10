@@ -272,15 +272,15 @@ No commit in the code lane merges without all of:
 
 | Gate | Command |
 |---|---|
-| Silent-deletion audit *(new)* | `deletion-audit --base 7d9c139c8 --head HEAD` |
-| Save roundtrip *(new)* | `gradlew SPD-classes:test` |
+| Silent-deletion audit *(new)* | `gradlew :services:tools:deletion-audit:run --args="--base 7d9c139c8 --head HEAD --min-shrink 3 --allowlist services/tools/deletion-audit/reviewed-removals.txt"` |
+| Bundle alias resolution *(new)* | `gradlew SPD-classes:test` — mechanism only; core registrations tracked separately |
 | Core compile | `gradlew core:compileJava --rerun-tasks` |
 | Tool tests | `gradlew :services:tools:{api-diff,pack-smoke,namespace-transform,deletion-audit}:test` |
 | Desktop build | `gradlew desktop:release` |
 | Android build | `gradlew android:assembleDebug` |
 | API compatibility | `api-diff --base 7d9c139c8 --head HEAD`, reviewed |
 | Marketplace pack smoke | `PackSmokeCli --marketplace ./marketplace`, 29/29 GREEN |
-| Desktop boot smoke *(new)* | reaches title screen, exits clean |
+| Desktop boot smoke *(new)* | `pwsh services/tools/desktop-smoke/desktop-smoke.ps1` |
 
 Diff review at commit time follows the C-1 through C-9 checklist in
 `~/.claude/pipeline/rules.md`. Every `-` line in every touched file is read and matched

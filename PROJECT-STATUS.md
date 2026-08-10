@@ -112,6 +112,48 @@ Phase 3 has landed Tasks 11–16 (Actor, Char, Hero, Dungeon, Level and generato
 | Manual runtime checks | title screen, seeded Warrior run, save/reload | **NOT DONE** — requires a human at the machine |
 | Serialized-state roundtrip | — | **NOT DONE** — see below |
 
+## T1 gate repair (2026-08-10) — the three open gates are now closed
+
+Plan: [2026-08-10-t1-gate-repair.md](docs/superpowers/plans/2026-08-10-t1-gate-repair.md).
+Design: [2026-08-10-lutherverse-push-design.md](docs/superpowers/specs/2026-08-10-lutherverse-push-design.md).
+
+**`services/tools/deletion-audit` now exists** and audits what api-diff structurally
+cannot: private members, and statements removed from inside a body whose signature
+never changed. First real run over `7d9c139c8..HEAD`, 1,021 files: **35 deleted, 8
+shrunk**. Triage classified 27 as legitimate and allowlisted them with reasons in
+`services/tools/deletion-audit/reviewed-removals.txt`; **16 remain open**, tracked in
+beads. Two matter:
+
+- **`Noisemaker.Trigger`** — the entire `Bundlable` inner class was removed along with
+  `setTrigger`/`glowing`. If no save migration accompanied it, old saves carrying a
+  Noisemaker Trigger fail to restore.
+- **`DM201#act()`** — vent logic moved into a `Hunting` state class (upstream's
+  refactor), but the old `canVent(enemy.pos)` and non-adjacency guards did not move
+  with it. `DM201.canVent` is now overridden and never called. api-diff cannot see
+  this, because `canVent` itself still exists.
+
+**Known false-positive class:** deletion-audit has no rename detection, so a moved file
+reports every callable as deleted. The `EntranceRoom`/`ExitRoom` package move produced
+11 such entries. Bead filed to add `git diff -M` rename following.
+
+**`Bundle.addAlias` resolution is now pinned by a test** (`BundleAliasRoundtripTest`)
+and **it works**, with a negative control proving an unregistered vanished class does
+not resolve by some other path. This retroactively validates the save-compat approach
+Slice 1's package moves relied on. It covers the *mechanism* only — `core` depends on
+`SPD-classes` and never the reverse, so no test there can reach the actual
+registrations or the `CUSTOM_DECO`-takes-`SIGN`-id-23 terrain reuse. Bead filed for a
+static checker.
+
+**`services/tools/desktop-smoke` replaces the Android emulator smoke** and passes: the
+real jar boots and renders 120 frames. This is the first automated proof in this
+project's history that the game actually starts. **Android runtime smoke is hereby
+downgraded to a documented manual pre-release check** and must not be cited as an
+automated gate. desktop-smoke requires a display and cannot run headless.
+
+`core:test` is still `NO-SOURCE` and remains vacuous; bead filed to add a test source
+set. Until then, compilation plus deletion-audit are the mechanical gates for
+core-only changes.
+
 ### Known tool limitations found while running these gates
 
 - **`core:test` is `NO-SOURCE`.** The core module has no tests at all, so for

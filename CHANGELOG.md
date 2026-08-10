@@ -12,6 +12,34 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 
 Work-in-progress on `main` since the fork base (`cpd-sync-base-2025-08-15`, CPD commit `c97fb83`).
 
+### Added — T1 gate repair (2026-08-10)
+
+- `services/tools/deletion-audit` — audits removals api-diff structurally cannot see:
+  private members, and statements removed from inside a body whose signature never
+  changed. Ships a reviewed-removal allowlist so legitimate integration removals stop
+  re-reporting. First run over the Slice 1 range found 35 deletions and 8 body shrinks
+  across 1,021 files; 27 triaged as legitimate, 16 left as tracked review items.
+- `services/tools/desktop-smoke` — boot smoke that actually executes the game and
+  confirms a rendered frame, replacing the Android emulator smoke that never once
+  reached `adb install`. First green run: 120 frames.
+- `BundleAliasRoundtripTest` — pins the `Bundle.addAlias` resolution that Slice 1's
+  `EntranceRoom`/`ExitRoom` package moves depend on. It works; a negative control
+  proves an unregistered vanished class does not resolve by another path.
+
+### Fixed — T1 gate repair (2026-08-10)
+
+- deletion-audit resolved its allowlist against the process working directory, which
+  `gradle run` sets to the subproject. The path did not exist, the allowlist loaded
+  empty, and all 43 findings re-reported as unreviewed. Relative paths now resolve
+  against the repository root, and a specified-but-missing allowlist exits 2 rather
+  than silently permitting nothing — the same defect class that made api-diff scan
+  zero files and print PASS.
+
+### Changed — T1 gate repair (2026-08-10)
+
+- Android runtime smoke is downgraded from an automated gate to a documented manual
+  pre-release check. It has never executed the APK in this environment.
+
 ### Sub-B Slice 1: Phase 3 execution and Phase 4 gates
 
 **Integrated (Tasks 11–16 complete, 17–20 partial).** Actor, Char, Hero, Dungeon,
