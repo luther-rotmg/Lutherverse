@@ -37,6 +37,36 @@ allprojects {
 
 }
 
+// Constrain the Java 8 modules to the Java 8 *API*, not just the Java 8 language level.
+//
+// sourceCompatibility/targetCompatibility emit -source 8 -target 8, which restrict syntax
+// only. With no bootclasspath, javac 17 still resolves java.base@17 symbols and stamps them
+// into Java 8 bytecode -- so a Java 9+ API call compiles clean and then NoSuchMethodError at
+// runtime. That is not hypothetical here: BundleBridge used java.util.List.of (Android API 34)
+// on a minSdk 19 app with no core library desugaring configured.
+//
+// options.release swaps in the JDK's ct.sym Java 8 API signature data and makes those
+// references a compile error instead.
+//
+// Applied only where sourceCompatibility is actually 1.8, so services/tools/* (which have no
+// explicit level and use records, switch expressions and text blocks on the Gradle JVM) are
+// untouched. Excluded on :android, where --release conflicts with AGP's android.jar
+// bootclasspath -- Android Lint's NewApi is the correct guard there, and it also covers Kotlin,
+// which has no --release equivalent.
+// NB: this must run in afterEvaluate. Reading sourceCompatibility inside a bare
+// configureEach resolves it before the subproject's own build.gradle has set it, so the
+// comparison sees the Gradle JVM default (17), silently skips every module, and leaves you
+// with a green build and no gate at all.
+subprojects {
+    afterEvaluate { proj ->
+        if (proj.name == 'android' || !proj.plugins.hasPlugin('java')) return
+        if (proj.java.sourceCompatibility != JavaVersion.VERSION_1_8) return
+        proj.tasks.withType(JavaCompile).configureEach {
+            options.release = 8
+        }
+    }
+}
+
 // Force the api-diff subproject to configure itself (applying the 'java'
 // plugin and populating sourceSets) before the root project finishes
 // evaluating, since the apiDiff task below reads its runtime classpath.

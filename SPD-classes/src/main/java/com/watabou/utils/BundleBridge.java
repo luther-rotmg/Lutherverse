@@ -24,6 +24,8 @@ import com.watabou.utils.bridge.PreV232Translator;
 import com.watabou.utils.bridge.PreV242Translator;
 import com.watabou.utils.bridge.PreV254Translator;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -40,11 +42,15 @@ import java.util.List;
  */
 public final class BundleBridge {
 
-	private static final List<BundleTranslator> CHAIN = List.of(
+	//NB: java.util.List.of is Android API 34+. This app is minSdk 19 with no core library
+	//desugaring configured, so List.of here would NoSuchMethodError on every device below
+	//Android 14 the moment this class is loaded -- in the save-compat path, no less.
+	//Kept Java 8 API only; enforced build-wide by options.release = 8 in the root build.gradle.
+	private static final List<BundleTranslator> CHAIN = Collections.unmodifiableList(Arrays.asList(
 		new PreV232Translator(),
 		new PreV242Translator(),
 		new PreV254Translator()
-	);
+	));
 
 	private BundleBridge() {}
 
