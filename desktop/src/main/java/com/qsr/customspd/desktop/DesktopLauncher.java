@@ -22,6 +22,7 @@
 package com.qsr.customspd.desktop;
 
 import com.badlogic.gdx.Files;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3FileHandle;
@@ -186,6 +187,52 @@ public class DesktopLauncher {
 		config.setWindowIcon("icons/icon_16.png", "icons/icon_32.png", "icons/icon_48.png",
 				"icons/icon_64.png", "icons/icon_128.png", "icons/icon_256.png");
 
+		//must be started before the Lwjgl3Application constructor, which blocks
+		//for the lifetime of the application and never returns
+		installSmokeWatchdog();
+
 		new Lwjgl3Application(new ShatteredPixelDungeon(new DesktopPlatformSupport(), new DesktopTileMapCompiler()), config);
+	}
+
+	//Boot-smoke hook. When -Dsmoke.frames=N is set, the launcher exits with
+	//status 0 once the game has rendered N frames, and status 1 if it never
+	//gets there. Reaching a frame proves assets loaded, the GL context came up,
+	//and the initial scene constructed.
+	//
+	//This exists because the Android emulator smoke has never once executed the
+	//APK -- it dies before adb install -- so the desktop path is the only
+	//automated proof that core actually boots.
+	//
+	//With smoke.frames unset this returns immediately and starts no thread, so
+	//a normal launch is completely unaffected.
+	private static void installSmokeWatchdog() {
+		String frames = System.getProperty("smoke.frames");
+		if (frames == null) {
+			return;
+		}
+		int targetFrames = Integer.parseInt(frames);
+		Thread watchdog = new Thread(() -> {
+			//60fps nominal, with a 4x grace factor for slow first-frame asset loads
+			long budgetMillis = Math.max(5_000L, (targetFrames * 1000L / 60L) * 4L);
+			long deadline = System.currentTimeMillis() + budgetMillis;
+			while (System.currentTimeMillis() < deadline) {
+				if (Gdx.graphics != null && Gdx.graphics.getFrameId() >= targetFrames) {
+					System.out.println("SMOKE: reached frame " + Gdx.graphics.getFrameId()
+							+ ", exiting clean");
+					//halt rather than exit: shutdown hooks can block on the GL thread
+					Runtime.getRuntime().halt(0);
+				}
+				try {
+					Thread.sleep(100L);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					return;
+				}
+			}
+			System.err.println("SMOKE: never reached frame " + targetFrames);
+			Runtime.getRuntime().halt(1);
+		}, "smoke-watchdog");
+		watchdog.setDaemon(true);
+		watchdog.start();
 	}
 }
