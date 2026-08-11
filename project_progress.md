@@ -1,0 +1,93 @@
+# Project Progress
+
+Running log of what has been done, what is in flight, and what is next. Updated in the same
+commit as any substantive work.
+
+For the deeper "why" behind current state, see [PROJECT-STATUS.md](PROJECT-STATUS.md).
+For the release-facing change list, see [CHANGELOG.md](CHANGELOG.md).
+
+**Last updated:** 2026-08-10
+
+---
+
+## Now
+
+| Item | Status | Notes |
+|---|---|---|
+| **P0 — seeded runs are not seeded** (`cpdu-yaa`) | 🔴 open | Guaranteed-item and quest-NPC floors are computed before the seed exists, with an unseeded Kotlin RNG. Blocks seed sharing, daily runs, coop. Should land *with* a determinism test. |
+| Sub-B Slice 1 remainder | 🟡 paused | 22 batches (~230 commits) parked; 27 ready beads |
+| CI first green | 🟡 in flight | Workflow pushed; iterating on Windows→Linux issues |
+
+## Next
+
+1. Seeded-determinism harness for `:core` — needs the `gdx-backend-headless` bootstrap spike (do this by hand, 1–3 days, not a bead).
+2. Fix `cpdu-yaa` on top of that harness.
+3. `port-verify` (`cpdu-6lz`) — the design insight is that `services/tools/namespace-transform` is the missing link for comparing an upstream diff against its CPDU port.
+4. Resume the Slice 1 batch burndown with Mergiraf in place.
+5. Sub-C modding API design — gated on a vision-decomposition pass that has not happened yet.
+
+## Open defects
+
+| ID | Pri | Summary |
+|---|---|---|
+| `cpdu-yaa` | P0 | Guaranteed-item and quest-NPC floors are seed-independent |
+| `cpdu-5p6` | P1 | `DM201.canVent` guard dropped in the Hunting refactor; the override is now dead code |
+| `cpdu-jm4` | P1 | `Noisemaker.Trigger` (a `Bundlable`) removed — check for a save migration |
+| `cpdu-c4w` | P1 | Sweep remaining unordered collections in RNG paths |
+| `cpdu-6lz` | P1 | Build `port-verify` |
+| `cpdu-bnp` | P2 | Triage 8 remaining deletion-audit body-shrink findings |
+| — | P2 | 12 `DefaultLocale` violations parked in the lint baselines |
+
+---
+
+## Log
+
+### 2026-08-10 — gate repair, toolbelt research, CI
+
+Full detail in [PROJECT-STATUS.md](PROJECT-STATUS.md). Summary:
+
+**Verification infrastructure.** Three gates that had never worked were replaced or repaired,
+and every new gate ships with a negative control proving it can fail.
+
+- `services/tools/deletion-audit` — finds removals api-diff structurally cannot see (private
+  members, statements dropped from a body whose signature never changed). First run over the
+  Slice 1 range: 1,021 files, 35 deletions + 8 shrinks, 27 triaged as legitimate, 16 tracked.
+- `services/tools/desktop-smoke` — boots the real jar to 120 rendered frames. The first
+  automated proof in this project's history that the game starts. Replaces the Android
+  emulator smoke, which had never executed the APK.
+- `services/tools/manifest-audit` — seven checks over the manifests that define Slice 1's
+  entire scope.
+- `BundleAliasRoundtripTest` — pins the `Bundle.addAlias` resolution Slice 1's package moves
+  depend on. It works.
+
+**Static analysis, from zero.**
+
+- `options.release = 8` on the Java 8 modules. Caught `BundleBridge`'s `java.util.List.of`
+  (Android API 34) on a minSdk 19 app with no desugaring.
+- Android Lint wired as a ratcheted gate over `core` and `android`. Found 12 `DefaultLocale`
+  violations, 8 in `Generator.java`.
+
+**First tests in `:core`.** `core:test` was `NO-SOURCE` across 1019 Java + 49 Kotlin files.
+
+**CI, from nothing.** Every step asserts it analysed something.
+
+**Upstream-sync tooling.** `git rerere` enabled, Mergiraf + difftastic installed and validated.
+
+**Defects fixed.** `List.of` on Android; same-seed nondeterminism in `WandOfCorruption` and
+`AlchemicalCatalyst`; Forbidden Runes (`Challenges.NO_SCROLLS` was defined but never consulted).
+
+**Research.** A 12-agent sweep across 10 tooling domains produced 94 candidates, triaged into
+four adoption groups — see
+[docs/superpowers/specs/2026-08-10-toolbelt-research.md](docs/superpowers/specs/2026-08-10-toolbelt-research.md).
+Its most useful finding was a gap: ten domain researchers proposed *zero* tooling for the
+541-commit upstream backlog, the project's largest recurring cost.
+
+### 2026-07-21 → 2026-07-26 — Sub-A and Sub-B Slice 1
+
+Sub-A (fork infrastructure) shipped: 7 commits, attribution, both build paths verified after a
+four-layer build-baseline hotfix. Sub-B Slice 0 shipped the tooling foundation. Slice 1 landed
+Tasks 11–16 and part of 17–20 before the OpenRouter pipeline halted on exhausted credits.
+
+A 2026-07-25 audit found 730 commits carrying unreviewed `provisional:` reasons, revealing
+Slice 1 to be roughly nine times its planned size. That triage has since been completed —
+31 provisional rows remain.

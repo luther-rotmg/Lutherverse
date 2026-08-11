@@ -78,6 +78,66 @@ Two coop modes for two kinds of session:
 
 ---
 
+## Currently working on
+
+Short bulletin. Full detail in [project_progress.md](project_progress.md).
+
+- 🔴 **P0 — seeded runs aren't actually seeded.** Guaranteed item and quest-NPC floors are computed before the dungeon seed exists, using an unseeded RNG. Same seed, two runs, different dungeon composition. Blocks seed sharing, daily runs and coop.
+- 🟡 **Seeded-determinism test harness** for `core`, which the P0 fix should land on top of rather than before.
+- 🟡 **Sub-B Slice 1 remainder** — 22 batches (~230 commits) and 27 ready beads, now with syntax-aware merge tooling in place.
+- 🟡 **CI to first green** — the workflow exists and runs; shaking out Windows→Linux differences.
+- ⏳ **`port-verify`** — prove a ported upstream commit kept every hunk, which nothing currently checks.
+
+---
+
+## Completed milestones
+
+<details>
+  <summary><strong>Verification infrastructure — 2026-08-10</strong></summary>
+
+The project's gates were passing without checking anything. All of these now ship with a
+negative control proving they can fail.
+
+- **`deletion-audit`** — catches removals the API-surface diff structurally cannot see: private members, and statements dropped from a method whose signature never changed. First run: 1,021 files, 43 findings, 27 triaged as legitimate.
+- **`desktop-smoke`** — boots the real jar to 120 rendered frames. The first automated proof that the game starts. Replaces an Android emulator smoke that had never once executed the APK.
+- **`manifest-audit`** — seven checks over the manifests defining Slice 1's entire scope.
+- **Android Lint** wired as a ratcheted gate over `core` and `android`. It ships inside AGP and had never been run.
+- **`options.release = 8`** — constrains the Java 8 modules to the Java 8 *API*, not just the language level.
+- **First tests in `core`** — `core:test` was `NO-SOURCE` across 1019 Java and 49 Kotlin files.
+- **CI**, where the repo previously had none. Every step asserts it analysed something.
+
+</details>
+
+<details>
+  <summary><strong>Sub-B Slice 1 — engine and tuning catchup (partial)</strong></summary>
+
+- Tasks 11–16 complete: Actor, Char, Hero, Dungeon, Level and generator, and mob/combat-engine tuning.
+- The entrance/exit room cluster in full: package move with save-compat aliases, 6 new region standard rooms, 20 entrance/exit variants, and the `canMerge` signature migration across 14 definitions.
+- Tasks 17–20 partially landed (11 of 34 batches).
+- Manifest triage: 730 unreviewed rows resolved down to 31.
+
+</details>
+
+<details>
+  <summary><strong>Sub-B Slice 0 — sync foundation, 2026-07-22</strong></summary>
+
+`api-diff`, `pack-smoke` and `smoke-boot` tooling, the `BundleBridge` save-compat scaffolding,
+and the slice template that later slices are cut from.
+
+</details>
+
+<details>
+  <summary><strong>Sub-A — fork infrastructure, 2026-07-21</strong></summary>
+
+Fork established with three upstream remotes, attribution and licensing docs, `margarita` → `main`
+rename, and both build paths verified green. Required a four-layer build-baseline hotfix — an
+expired snapshot dependency, a wrong documented Gradle task, the DEX 64k method limit, and AndroidX
+enablement — each layer unblocking the next.
+
+</details>
+
+---
+
 ## Roadmap
 
 Every substantive commit updates this section. It's the accurate current state, not a snapshot from a while ago.
@@ -87,7 +147,7 @@ Every substantive commit updates this section. It's the accurate current state, 
 | Sub | Name | Status | Notes |
 |---|---|---|---|
 | A | Fork infrastructure | ✅ done | This repo. Attribution, docs, branch rename `margarita` to `main`. |
-| B | Upstream sync (CPD to SPD v3.3.8) | 🟡 Slice 1 active | Slice 0 foundation shipped. Engine and tuning catchup is landing: actor, character, hero, dungeon, level generation and enemy behaviour are integrated, with item, UI and buff work in progress. |
+| B | Upstream sync (CPD to SPD v3.3.8) | 🟡 Slice 1 of 7 | Slice 0 shipped. Tasks 11–16 done, 17–20 partial. Engine, hero, dungeon, level generation and enemy behaviour integrated. Slice 1 turned out ~9x its original estimate. |
 | C | Broad modding-platform API | ⏳ next | Java-hook API on top of CPD's JSON-manifest framework: cutscenes, dialogue, dual-wield, story flags, biome swapping, NPC insertion. |
 | D | God Mode addon | ⏳ | Top-tier starter gear. Flagged as "cheat" in coop lobby. |
 | E | Hard Mode addon | ⏳ | Balance tuning. Coop-fair. |
@@ -181,8 +241,10 @@ The modding framework is whatever Custom Pixel Dungeon ships right now: JSON man
 
 ## Development docs
 
+- [project_progress.md](project_progress.md): running log of done / in flight / next, plus the open defect list.
 - [CHANGELOG.md](CHANGELOG.md): every substantive commit.
-- [PROJECT-STATUS.md](PROJECT-STATUS.md): what I'm working on right now, what's blocking me, what's coming next.
+- [PROJECT-STATUS.md](PROJECT-STATUS.md): deeper detail on current state, blockers, and the reasoning behind them.
+- [Merge and diff tooling](services/tools/README-merge.md): Mergiraf and difftastic setup for upstream porting.
 - [Design specs](docs/superpowers/specs/): sub-project design docs.
 - [Implementation plans](docs/superpowers/plans/): task-by-task plans for each sub-project.
 - [Assets](docs/assets/): images and design assets.
