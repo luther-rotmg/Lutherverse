@@ -5,8 +5,11 @@
 and dated design docs, plans and CHANGELOG entries deliberately keep the original name as a
 historical record. Updated in the same commit as any substantive work — treat as ground truth for near-term state.*
 
-**Last update:** 2026-07-25
-**Current tip:** `main` at the tip of this commit (run `git log -1 main` for the exact SHA; this file is updated in every substantive commit).
+**Last update:** 2026-08-11
+**Current tip:** working branch `afk/2026-08-09`, pushed to origin, CI green (run `git log -1` for the exact SHA).
+
+> The dated sections further down are a **historical log** and are deliberately not rewritten.
+> Where an older entry contradicts this header, the header wins.
 
 ---
 
@@ -14,11 +17,46 @@ historical record. Updated in the same commit as any substantive work — treat 
 
 **Sub-A (Fork infrastructure)** is shipped. Seven commits landed on `main` and pushed to origin. Both build paths verified green (Android APK 22.8 MB, Desktop JAR 45.9 MB). Final whole-branch review completed with one blocker (a "Dark Souls Mode" leak in the public roadmap table) plus four documentation mediums plus a small tail of nits; all fixed in the same commit that added this line.
 
-**Sub-B (Upstream sync to SPD v3.3.8)** Slice 0 is shipped; Slice 1 is in execution, Phase 3. Full design spec at [docs/superpowers/specs/2026-07-22-cpdu-sub-b-upstream-sync-design.md](docs/superpowers/specs/2026-07-22-cpdu-sub-b-upstream-sync-design.md). Slice 1 implementation plan at [docs/superpowers/plans/2026-07-23-cpdu-sub-b-slice-1-catchup.md](docs/superpowers/plans/2026-07-23-cpdu-sub-b-slice-1-catchup.md). Eight architectural decisions remain locked: Cleric first-class + Vault first-class + full marketplace green-gate + DSL freeze + save bridge + iOS deferred + SPD tilemap edits win + 14 slices with sub-splits.
+**Sub-B (Upstream sync to SPD v3.3.8)** Slice 0 shipped; Slice 1 is in execution and **no longer
+blocked**. Design spec: [2026-07-22-cpdu-sub-b-upstream-sync-design.md](docs/superpowers/specs/2026-07-22-cpdu-sub-b-upstream-sync-design.md).
+Slice 1 plan: [2026-07-23-cpdu-sub-b-slice-1-catchup.md](docs/superpowers/plans/2026-07-23-cpdu-sub-b-slice-1-catchup.md).
+Eight architectural decisions remain locked.
 
-Phase 3 has landed Tasks 11–16 (Actor, Char, Hero, Dungeon, Level and generator, and mob/combat-engine tuning), including the full entrance/exit room cluster. Tasks 17–20 are partially landed — 11 of 34 batches integrated before the pipeline stopped on exhausted OpenRouter credits (see below). Sixteen dependency-deferred clusters from Tasks 11–14 remain open as epics, tracked in beads.
+Tasks 11–16 are done and 17–20 are partial. The OpenRouter credit halt that stopped the worker
+pipeline no longer binds — the deferred dependency clusters are being worked directly instead.
+**106 beads closed, 15 ready.**
 
-> **⚠ Slice 1 is materially larger than this plan states.** A 2026-07-25 audit found 730 in-range commits sitting in the manifest's `cold-code` batch with unreviewed `provisional:` reasons from Task 6. Machine triage classified **541 of them as unintegrated Slice 1 candidates** — roughly nine times the size of Task 15's own 63-commit scope. They are area-bucketed (`triaged-item` 181, `triaged-mob` 123, `triaged-ui` 83, `triaged-level` 64, `triaged-misc` 55, `triaged-buff` 35) so Tasks 16–20 can consume them, but **that triage is not the reviewed manifest the plan's acceptance block requires.** "Slice 1 candidate" means the symbols resolve against CPDU, not that the hunks apply; the conditional-music cluster is the counterexample where every class existed and the change was still architecturally superseded. Expect the 541 to shrink under hunk review, and expect Tasks 16–20 to re-estimate upward regardless.
+**What changed on 2026-08-10/11.** The verification story was rebuilt, because the gates were
+passing without checking anything:
+
+- `deletion-audit`, `desktop-smoke`, `manifest-audit` and `port-verify` now exist, each with a
+  negative control proving it can fail.
+- `options.release = 8` constrains the Java 8 modules to the Java 8 *API*; Android Lint runs over
+  `core` and `android` with **no baseline on `core`**.
+- `:core` has a test source set for the first time.
+- CI exists and is green, asserting non-vacuity at every step.
+
+Real defects found and fixed in that pass: `List.of` on a minSdk 19 app with no desugaring;
+region-tinted grass and ember tiles silently not rendering; and **seeded runs that were not
+actually seeded** — guaranteed-item and quest-NPC floors were drawn before the seed existed, and
+actor scheduling order varied per run, so turn resolution itself was nondeterministic. Same seed
+now reproduces the same run.
+
+**The queue's real blocker is no longer capacity — it is two decisions.**
+
+1. **Asset strategy.** The remaining ready clusters (Cached Rations, FloatingText damage icons)
+   port upstream commits that ship binary sprite sheets. CPDU drives sprites from pack config, so
+   each needs a call on whether to take upstream's sheet, extend pack config, or defer. The parked
+   conditional-music cluster (`cpdu-15l`) is the same question about audio.
+2. **Vision decomposition.** Nothing in the queue advances the 200-floor vision, because it has
+   never been decomposed into beads. That, not integration throughput, is what blocks vision work
+   from starting.
+
+**Spec quality warning.** Of six deferred-cluster specs worked on 2026-08-10/11, **three were
+wrong** — a missing localization key, a helper specified on the wrong class with the wrong
+signature, and a prohibition that read as forbidding upstream's own fix. All three would have
+compiled and passed every gate. Verify each remaining spec against upstream before implementing it;
+the gates catch regressions, not a faithfully implemented wrong spec.
 
 ---
 
@@ -27,12 +65,12 @@ Phase 3 has landed Tasks 11–16 (Actor, Char, Hero, Dungeon, Level and generato
 | Sub | Name | Status | Blockers / Notes |
 |---|---|---|---|
 | A | Fork infrastructure | ✅ shipped | Seven commits on origin, both builds verified, final review clean after one fix commit. |
-| B | Upstream sync (CPD → SPD v3.3.8) | 🔴 Slice 1, **blocked** | Tasks 11–16 done; 17–20 partial; Phase 4 gates run (21–23 pass, 24 blocked on emulator). **Pipeline halted: OpenRouter credits exhausted.** 23 beads parked `worker-failed`, specs believed sound. |
+| B | Upstream sync (CPD → SPD v3.3.8) | 🟡 Slice 1 of 7, unblocked | Tasks 11–16 done, 17–20 partial. The OpenRouter halt no longer binds: deferred clusters are being worked on frontier instead. 106 beads closed, 15 ready. Remaining ready work needs an asset-strategy decision (below). |
 | C | Broad modding-platform API | ⚪ not started | Blocked on Sub-B ship |
 | D | God Mode addon | ⚪ | Blocked on Sub-C |
 | E | Hard Mode addon | ⚪ | Blocked on Sub-C |
 | F | Bonfire Mode addon | ⚪ | Blocked on Sub-C |
-| G | CI / GitHub Actions | ⚪ | Deferred |
+| G | CI / GitHub Actions | ✅ shipped | `.github/workflows/ci.yml`, green. Every step asserts it analysed something. |
 | J | iOS reactivation | ⚪ | On paper only; deferred indefinitely |
 | K | Real-time coop | ⚪ | Post-v0.1 |
 
@@ -49,7 +87,7 @@ Phase 3 has landed Tasks 11–16 (Actor, Char, Hero, Dungeon, Level and generato
 - **Group 15A resolved as superseded** — CPDU has no `Dungeon.branch`; its `levelName` layout graph generalizes upstream's depth+branch model. `de6878cef` was already integrated and its manifest row was stale.
 - **Conditional-music cluster deferred** (`cpdu-15l`) — on a design question only. CPDU drives music from pack config via `CustomLevel.playLevelMusic`, so upstream's hardcoded conditional track selection may belong in pack config rather than level code. That touches the frozen DSL and needs LO's call. *(An earlier version of this entry claimed the TENSE/FINALE `.ogg` assets were missing. They are not — all nine landed 2026-07-23 with the Task 9 music batches. Only the `Assets.Music` constants are absent, which is a handful of strings. A pipeline seam: the assets bead landed the files, the code bead referencing them was deferred. Worth auditing the other Task 9 asset batches for the same seam.)*
 - **Bead validate gate was never running.** The dispatcher parses `validate:` from `acceptance_criteria`/`notes` (never `description`), requires it to start its own line, and requires a bare allowlisted first token — so `.\gradlew.bat` was rejected on both counts. Every bead through Task 14 closed on frontier diff review alone with the compile gate silently skipped. Fixed with `.beads/validate-core.ps1`; all Task 15E beads gated green.
-- Note `core:test` is `NO-SOURCE` — core has no tests, so **compilation is the only mechanical gate** for core-only changes. `SPD-classes:test` is where tests actually live.
+- Note `core:test` was `NO-SOURCE` — core had no tests, so compilation was the only mechanical gate for core-only changes. **Superseded 2026-08-10:** `:core` now has a test source set and its lint gate runs with no baseline.
 - **Task 15 closed out** — mob spawn and room sizing (`268b804ac` `sizeFactor`/`mobSpawnWeight`/`connectionWeight` migration, `cb18c1eee`, `d45cc9cae`), plus housekeeping resolved inline: SPD copyright extended to 2024 on the 30 `levels/` files that actually received v2.4/v2.5 content, the `BArray` move recorded as superseded (CPDU keeps it at `utils/BArray.java`), and upstream's codebase-wide import reorder skipped as churn.
 - **`5576a7777` split out** (`cpdu-m7a`) — the cached-rations redesign needs a new `SupplyRation` class, so its `RegularLevel` hunk cannot stand alone. Routed to Task 17. Flagged there: `ItemSpriteSheet` is a positional index table, the same hazard class as `StandardRoom.chances[]`, where a bad reindex yields wrong icons at runtime with a clean compile and no tests.
 - Pipeline: 15 beads dispatched, 15 succeeded on attempt 1, no failures, timeouts, or re-dispatches. Two further items were resolved inline as below the bead value line.
@@ -282,6 +320,47 @@ core-only changes.
   terrain ID reuse where `CUSTOM_DECO` takes the old `SIGN` id 23). The plan says
   to add real fixture/roundtrip work rather than mark this N/A. It is **NOT
   done** and remains an open gate.
+
+### Task 9 asset-batch audit (2026-08-11) — the follow-up filed at T1 Task 9 Step 1
+
+Checked all nine Task 9 asset-import specs (`.beads/task9-music-assets-01..08-spec.md`,
+`.beads/task9-sprite-assets-spec.md`) against `Assets.java` and the sprite-loading code,
+following up on the TENSE/FINALE `assets-landed/code-deferred` finding in
+[2026-08-10-lutherverse-push-design.md](docs/superpowers/specs/2026-08-10-lutherverse-push-design.md#L195-L199).
+
+- **Batches 1-4 (16 files: theme/sewers/prison/caves/city depth-1/2/boss tracks) are
+  fully wired.** `Assets.Music` (`Assets.java:57-80`) declares all of them, and
+  `CavesLevel`/`CityLevel`/`PrisonLevel`/`HallsLevel`/`SewerLevel`'s `playLevelMusic()`
+  consume them correctly.
+- **Batches 5-8 (halls_boss, the five depth-3 tracks, and the nine tense/finale
+  tracks) are not a separate forgotten code bead — they're the already-tracked
+  `cpdu-15l` decision.** `Assets.Music` has no depth-3 or tense/finale constants, and
+  none of the five built-in region level classes have any code path that would
+  consume them: each hardcodes only a 1/2/2-weighted rotation of its two base tracks,
+  the same simplified system CPDU forked with. Wiring these up requires building
+  upstream's conditional/depth-3 music selection first — exactly the "should this be
+  pack-config or level code" question already recorded under "Awaiting LO input"
+  above. The design doc's framing ("the code bead referencing them was deferred") is
+  slightly imprecise for this part: there's no missing constant-adding bead to file:
+  it's blocked on the `cpdu-15l` product decision, which already exists. **The 16 base
+  files were correctly split into their own batches (1-4) and got their code path
+  as a matter of course, so no new bead is needed here.**
+- **Sprite batch is a different failure mode, not this seam.**
+  `core/src/main/assets/sprites/items.png` and `core/src/main/assets/interfaces/talent_icons.png`
+  both landed on disk, but no code path loads either single-atlas file — CPDU renders
+  items and talent icons from one PNG per item/talent instead (`ItemSprite.java`,
+  `GeneralAsset.kt`, under `sprites/items/*.png` and `interfaces/talent_icons/*.png`).
+  These two atlas files are unreferenced dead weight for this fork's per-file sprite
+  convention, not code waiting to be written. Filed as a follow-up: confirm with LO
+  whether they're wanted for a future atlas-based rendering path, else delete them.
+
+Net result: the pipeline-seam pattern does **not** recur elsewhere in Task 9 — the one
+real gap (sprite atlas files) is architectural leftover, not a dropped code bead, and
+everything else either already works or is already tracked under `cpdu-15l`. No new
+`worker` bead filed for the music side. (Note: this session's Bash access was denied,
+so the `bd create`/`bd close` calls this finding would normally use could not be run —
+if a bead titled "Audit Task 9 asset batches for the assets-landed/code-deferred
+pipeline seam" exists and is open, close it with a note pointing here.)
 
 ---
 
