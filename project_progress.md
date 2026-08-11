@@ -15,13 +15,13 @@ For the release-facing change list, see [CHANGELOG.md](CHANGELOG.md).
 | Item | Status | Notes |
 |---|---|---|
 | **P0 — seeded runs** (`cpdu-yaa`) | 🟢 **fixed**, scope open | Both halves landed (right RNG + inside the pushed generator), with 8 tests and a negative control. *Same seed now reproduces the same dungeon layout.* Still open: `Level.mobs` is a `HashSet`, byte-identical to upstream, so *same seed reproduces the same run* does not yet hold — closing that means diverging from upstream and touching serialised state. |
-| Sub-B Slice 1 | 🟢 **resumed** | Deferred Hero clusters being worked with port-verify + deletion-audit in the loop. 2 landed (`cpdu-48j`, `cpdu-ijc`); 22 batches (~230 commits) still parked. |
+| Sub-B Slice 1 | 🟢 **resumed** | Deferred clusters worked with port-verify + deletion-audit in the loop. Landed: dark-gold log, foresight refresh, and the whole regeneration-pause epic (15 call sites). 22 batches (~230 commits) still parked. |
 | deletion-audit backlog | ✅ **zero** | 16 findings triaged against tag v2.5.4; 15 verified superseded, 1 was a real regression and is fixed. CI ceiling back to 0. |
 | CI | ✅ **green** | Run 31446047082. Found and fixed 3 real issues on the way: gradlew exec bit, a Windows-only test assumption, and a malformed step. |
 
 ## Next
 
-1. Continue the Slice 1 deferred-cluster burndown (Barkskin, regeneration-pause, Cached Rations, Provoked Anger, save-version precheck) (`cpdu-6lz`) — the design insight is that `services/tools/namespace-transform` is the missing link for comparing an upstream diff against its CPDU port.
+1. Continue the Slice 1 deferred-cluster burndown (Barkskin multi-source, Cached Rations, Provoked Anger, save-version precheck, FloatingText damage icons) (`cpdu-6lz`) — the design insight is that `services/tools/namespace-transform` is the missing link for comparing an upstream diff against its CPDU port.
 3. Resume the Slice 1 batch burndown with Mergiraf in place.
 4. `gdx-backend-headless` bootstrap spike — still needed for levelgen invariants (reachability, solvability), just no longer blocking the P0.
 5. Sub-C modding API design — gated on a vision-decomposition pass that has not happened yet.
@@ -32,7 +32,7 @@ For the release-facing change list, see [CHANGELOG.md](CHANGELOG.md).
 |---|---|---|
 | — | — | No open defects. |
 
-**Closed 2026-08-10:** `cpdu-yaa` (both determinism layers), `cpdu-48j` + `cpdu-ijc` (Slice 1 Hero clusters), `cpdu-6lz` (port-verify built and validated both directions), `cpdu-5p6` (DM201 — verified faithful port, upstream has the same dead
+**Closed 2026-08-10:** `cpdu-q7t` epic + its 4 subtasks (regeneration-pause consolidation), `cpdu-yaa` (both determinism layers), `cpdu-48j` + `cpdu-ijc` (Slice 1 Hero clusters), `cpdu-6lz` (port-verify built and validated both directions), `cpdu-5p6` (DM201 — verified faithful port, upstream has the same dead
 `canVent` override), `cpdu-jm4` (Noisemaker — faithful port; unresolvable classes are dropped
 not crashed, and an alias would have been actively wrong), `cpdu-c4w` (RNG sweep — 2 defects
 fixed, rest verified safe), `cpdu-bnp` (8 shrinks triaged; 1 was a real regression, fixed),
@@ -73,6 +73,12 @@ and every new gate ships with a negative control proving it can fail.
 **CI, from nothing.** Every step asserts it analysed something.
 
 **Upstream-sync tooling.** `git rerere` enabled, Mergiraf + difftastic installed and validated.
+
+**Spec defects found while porting.** Two deferred-cluster beads specified the wrong thing,
+both caught by checking upstream rather than trusting the spec: `cpdu-48j` said "edit Hero.java
+only" but the localization key it depends on does not exist in CPDU, and `cpdu-q7t.1` put the
+new helper on the wrong class with the wrong signature. Check every remaining deferred-cluster
+spec against upstream before implementing it.
 
 **Defects fixed.** `List.of` on Android; same-seed nondeterminism in `WandOfCorruption` and
 `AlchemicalCatalyst`; Forbidden Runes (`Challenges.NO_SCROLLS` was defined but never consulted).
