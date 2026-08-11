@@ -6,7 +6,7 @@ commit as any substantive work.
 For the deeper "why" behind current state, see [PROJECT-STATUS.md](PROJECT-STATUS.md).
 For the release-facing change list, see [CHANGELOG.md](CHANGELOG.md).
 
-**Last updated:** 2026-08-10
+**Last updated:** 2026-08-11
 
 ---
 
@@ -30,7 +30,15 @@ For the release-facing change list, see [CHANGELOG.md](CHANGELOG.md).
 
 | ID | Pri | Summary |
 |---|---|---|
-| — | P2 | `depth/5` region math needs adapting to CPDU's layout model (not a live bug; breaks for custom packs and 200 floors) |
+| — | — | none open |
+
+**Closed 2026-08-11:** `cpdu-6xp` (`depth/5` region math — fixed the 3 sites that actually threw/broke
+past the vanilla 25-floor range: `TrapsRoom.levelTraps[depth/5]`, `SecretRoom.regionSecretsThisRun[region]`,
+and `WeakFloorRoom`'s tile lookup, all now clamped to the last of the 5 vanilla regions. The other
+`depth/5` call sites were already safe (`Generator` clamps via `GameMath.gate`; `Dungeon.enchStoneNeeded`/
+`labRoomNeeded` don't index anything and degrade gracefully). Left open on purpose: whether a shared
+`Dungeon.region()` should read `CustomLevelLayout.getRegion()` for gameplay scaling — an undecided
+product/API question, not needed to fix the crash).
 
 **Closed 2026-08-10:** `cpdu-q0v` + `cpdu-h6p` clusters (Barkskin multi-source, save-version precheck), `cpdu-q7t` epic + its 4 subtasks (regeneration-pause consolidation), `cpdu-yaa` (both determinism layers), `cpdu-48j` + `cpdu-ijc` (Slice 1 Hero clusters), `cpdu-6lz` (port-verify built and validated both directions), `cpdu-5p6` (DM201 — verified faithful port, upstream has the same dead
 `canVent` override), `cpdu-jm4` (Noisemaker — faithful port; unresolvable classes are dropped

@@ -56,7 +56,8 @@ public class TrapsRoom extends SpecialRoom {
 				trapClass = null;
 				break;
 			default:
-				trapClass = Random.oneOf(levelTraps[Dungeon.depth/5]);
+				//custom packs can exceed the 5 vanilla regions; repeat the last region's traps beyond that
+				trapClass = Random.oneOf(levelTraps[Math.min(Dungeon.depth/5, levelTraps.length-1)]);
 				break;
 		}
 

@@ -83,7 +83,9 @@ public class WeakFloorRoom extends SpecialRoom {
 		@Override
 		public Tilemap create() {
 			Tilemap v = super.create();
-			v.map( new int[]{Dungeon.depth/5}, 1);
+			//weak_floor.png has 5 frames, one per vanilla region; custom packs can exceed that depth,
+			//so clamp to the last frame instead of an out-of-bounds/missing tile lookup
+			v.map( new int[]{Math.min(Dungeon.depth/5, 4)}, 1);
 			return v;
 		}
 
