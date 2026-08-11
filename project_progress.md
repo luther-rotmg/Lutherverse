@@ -16,7 +16,7 @@ For the release-facing change list, see [CHANGELOG.md](CHANGELOG.md).
 |---|---|---|
 | **P0 — seeded runs are not seeded** (`cpdu-yaa`) | 🔴 open | Guaranteed-item and quest-NPC floors are computed before the seed exists, with an unseeded Kotlin RNG. Blocks seed sharing, daily runs, coop. Should land *with* a determinism test. |
 | Sub-B Slice 1 remainder | 🟡 paused | 22 batches (~230 commits) parked; 27 ready beads |
-| CI first green | 🟡 in flight | Workflow pushed; iterating on Windows→Linux issues |
+| CI | ✅ **green** | Run 31446047082. Found and fixed 3 real issues on the way: gradlew exec bit, a Windows-only test assumption, and a malformed step. |
 
 ## Next
 

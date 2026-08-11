@@ -14,6 +14,7 @@
   <img alt="Platforms: Android and Desktop" src="https://img.shields.io/badge/platforms-android%20%C2%B7%20desktop-lightgrey.svg">
   <img alt="Base: SPD v3.3.8" src="https://img.shields.io/badge/base-SPD%20v3.3.8-informational.svg">
   <img alt="Java: 17+" src="https://img.shields.io/badge/java-17%2B-red.svg">
+  <a href="https://github.com/luther-rotmg/CustomPixelDungeonUltimate/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/luther-rotmg/CustomPixelDungeonUltimate/actions/workflows/ci.yml/badge.svg"></a>
   <a href="https://github.com/luther-rotmg/CustomPixelDungeonUltimate/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/luther-rotmg/CustomPixelDungeonUltimate?style=social"></a>
   <a href="https://github.com/luther-rotmg/CustomPixelDungeonUltimate/watchers"><img alt="GitHub watchers" src="https://img.shields.io/github/watchers/luther-rotmg/CustomPixelDungeonUltimate?style=social"></a>
 </p>
@@ -85,7 +86,6 @@ Short bulletin. Full detail in [project_progress.md](project_progress.md).
 - 🔴 **P0 — seeded runs aren't actually seeded.** Guaranteed item and quest-NPC floors are computed before the dungeon seed exists, using an unseeded RNG. Same seed, two runs, different dungeon composition. Blocks seed sharing, daily runs and coop.
 - 🟡 **Seeded-determinism test harness** for `core`, which the P0 fix should land on top of rather than before.
 - 🟡 **Sub-B Slice 1 remainder** — 22 batches (~230 commits) and 27 ready beads, now with syntax-aware merge tooling in place.
-- 🟡 **CI to first green** — the workflow exists and runs; shaking out Windows→Linux differences.
 - ⏳ **`port-verify`** — prove a ported upstream commit kept every hunk, which nothing currently checks.
 
 ---
@@ -104,7 +104,8 @@ negative control proving they can fail.
 - **Android Lint** wired as a ratcheted gate over `core` and `android`. It ships inside AGP and had never been run.
 - **`options.release = 8`** — constrains the Java 8 modules to the Java 8 *API*, not just the language level.
 - **First tests in `core`** — `core:test` was `NO-SOURCE` across 1019 Java and 49 Kotlin files.
-- **CI**, where the repo previously had none. Every step asserts it analysed something.
+- **CI**, where the repo previously had none — **green as of 2026-08-10**. Every step asserts it analysed something, and it caught three real defects on its first three runs.
+- **Syntax-aware merge tooling** (Mergiraf + difftastic + `git rerere`) for the upstream-sync backlog.
 
 </details>
 
