@@ -14,16 +14,16 @@
   <img alt="Platforms: Android and Desktop" src="https://img.shields.io/badge/platforms-android%20%C2%B7%20desktop-lightgrey.svg">
   <img alt="Base: SPD v3.3.8" src="https://img.shields.io/badge/base-SPD%20v3.3.8-informational.svg">
   <img alt="Java: 17+" src="https://img.shields.io/badge/java-17%2B-red.svg">
-  <a href="https://github.com/luther-rotmg/CustomPixelDungeonUltimate/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/luther-rotmg/CustomPixelDungeonUltimate/actions/workflows/ci.yml/badge.svg"></a>
-  <a href="https://github.com/luther-rotmg/CustomPixelDungeonUltimate/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/luther-rotmg/CustomPixelDungeonUltimate?style=social"></a>
-  <a href="https://github.com/luther-rotmg/CustomPixelDungeonUltimate/watchers"><img alt="GitHub watchers" src="https://img.shields.io/github/watchers/luther-rotmg/CustomPixelDungeonUltimate?style=social"></a>
+  <a href="https://github.com/luther-rotmg/Lutherverse/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/luther-rotmg/Lutherverse/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/luther-rotmg/Lutherverse/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/luther-rotmg/Lutherverse?style=social"></a>
+  <a href="https://github.com/luther-rotmg/Lutherverse/watchers"><img alt="GitHub watchers" src="https://img.shields.io/github/watchers/luther-rotmg/Lutherverse?style=social"></a>
 </p>
 
 ---
 
 ## What is this
 
-Lutherverse (repo name: `CustomPixelDungeonUltimate`) is a fork of [Custom Pixel Dungeon](https://github.com/QuasiStellar/custom-pixel-dungeon), which is itself a fork of [Shattered Pixel Dungeon](https://github.com/00-Evan/shattered-pixel-dungeon). It uses CPD's marketplace-mod framework and extends the game on top of it. I want it to be the kind of project a small group of people obsess over for a long time.
+Lutherverse (formerly `CustomPixelDungeonUltimate`; old links redirect) is a fork of [Custom Pixel Dungeon](https://github.com/QuasiStellar/custom-pixel-dungeon), which is itself a fork of [Shattered Pixel Dungeon](https://github.com/00-Evan/shattered-pixel-dungeon). It uses CPD's marketplace-mod framework and extends the game on top of it. I want it to be the kind of project a small group of people obsess over for a long time.
 
 Shattered Pixel Dungeon is about 25 floors of tight, replayable dungeon crawling. Lutherverse stretches that into a 200-floor run that keeps shifting tone as it goes: a hyper-utopian future with something wrong underneath, a version of Zanarkand you weren't supposed to see, calm plains that stop feeling calm. There's a story running through the whole thing, cameos of characters you'll recognize, keyblades as their own weapon type, save zones between big fights, towns every ten floors, a sphere-grid progression system, and coop you can play with a friend on their phone.
 

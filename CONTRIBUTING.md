@@ -6,8 +6,8 @@
 
 | Type | Status | How |
 |---|---|---|
-| ⭐ Stars & watches | **Yes, please** | [Star the repo](https://github.com/luther-rotmg/CustomPixelDungeonUltimate) · [Watch → Custom → Releases](https://github.com/luther-rotmg/CustomPixelDungeonUltimate/subscription) |
-| 🐛 Bug reports | Yes | [File an issue](https://github.com/luther-rotmg/CustomPixelDungeonUltimate/issues/new/choose) with the Bug Report template |
+| ⭐ Stars & watches | **Yes, please** | [Star the repo](https://github.com/luther-rotmg/Lutherverse) · [Watch → Custom → Releases](https://github.com/luther-rotmg/Lutherverse/subscription) |
+| 🐛 Bug reports | Yes | [File an issue](https://github.com/luther-rotmg/Lutherverse/issues/new/choose) with the Bug Report template |
 | 💡 Feature ideas | Yes | Feature Request template — especially for content you want to see (biomes, mechanics, addons) |
 | 🎭 Cameo suggestions | **Yes, please** | Cameo Suggestion template — who should Lutherverse Easter-egg? |
 | 🌍 Translation contributions | Not yet | Wait until Sub-B ships (upstream sync); string keys are unstable until then |

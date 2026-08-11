@@ -1,11 +1,11 @@
 blank_issues_enabled: false
 contact_links:
   - name: 📖 Project status & roadmap
-    url: https://github.com/luther-rotmg/CustomPixelDungeonUltimate/blob/main/PROJECT-STATUS.md
+    url: https://github.com/luther-rotmg/Lutherverse/blob/main/PROJECT-STATUS.md
     about: Check current status and roadmap before filing — your question might already be answered.
   - name: 📜 Changelog
-    url: https://github.com/luther-rotmg/CustomPixelDungeonUltimate/blob/main/CHANGELOG.md
+    url: https://github.com/luther-rotmg/Lutherverse/blob/main/CHANGELOG.md
     about: Recent changes and what's shipped.
   - name: 🎨 Design specs
-    url: https://github.com/luther-rotmg/CustomPixelDungeonUltimate/tree/main/docs/superpowers/specs
+    url: https://github.com/luther-rotmg/Lutherverse/tree/main/docs/superpowers/specs
     about: Sub-project design docs.

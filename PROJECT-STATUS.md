@@ -1,6 +1,9 @@
 # Project Status
 
-*Snapshot of where Lutherverse (repo: `CustomPixelDungeonUltimate`) is right now. Updated in the same commit as any substantive work — treat as ground truth for near-term state.*
+*Snapshot of where Lutherverse is right now. The repo was renamed from
+`CustomPixelDungeonUltimate` to `Lutherverse` on 2026-08-10; GitHub redirects the old URLs,
+and dated design docs, plans and CHANGELOG entries deliberately keep the original name as a
+historical record. Updated in the same commit as any substantive work — treat as ground truth for near-term state.*
 
 **Last update:** 2026-07-25
 **Current tip:** `main` at the tip of this commit (run `git log -1 main` for the exact SHA; this file is updated in every substantive commit).
