@@ -267,6 +267,34 @@ public class TalismanOfForesight extends Artifact {
 		public boolean act() {
 			spend( TICK );
 
+			checkAwareness();
+
+			LockedFloor lock = target.buff(LockedFloor.class);
+			if (charge < chargeCap
+					&& !cursed
+					&& target.buff(MagicImmune.class) == null
+					&& (lock == null || lock.regenOn())) {
+				//fully charges in 2000 turns at +0, scaling to 1000 turns at +10.
+				float chargeGain = (0.05f+(level()*0.005f));
+				chargeGain *= RingOfEnergy.artifactChargeMultiplier(target);
+				partialCharge += chargeGain;
+
+				if (partialCharge > 1 && charge < chargeCap) {
+					partialCharge--;
+					charge++;
+					updateQuickslot();
+				} else if (charge >= chargeCap) {
+					partialCharge = 0;
+					GLog.p( Messages.get(TalismanOfForesight.class, "full_charge") );
+				}
+			}
+
+			return true;
+		}
+
+		//split out of act() so the hero can force an awareness scan on level load and when
+		//moving fast enough to skip turns -- see Hero.act() and Hero.search()
+		public void checkAwareness(){
 			boolean smthFound = false;
 
 			int distance = 3;
@@ -316,28 +344,6 @@ public class TalismanOfForesight extends Artifact {
 			} else {
 				warn = false;
 			}
-
-			LockedFloor lock = target.buff(LockedFloor.class);
-			if (charge < chargeCap
-					&& !cursed
-					&& target.buff(MagicImmune.class) == null
-					&& (lock == null || lock.regenOn())) {
-				//fully charges in 2000 turns at +0, scaling to 1000 turns at +10.
-				float chargeGain = (0.05f+(level()*0.005f));
-				chargeGain *= RingOfEnergy.artifactChargeMultiplier(target);
-				partialCharge += chargeGain;
-
-				if (partialCharge > 1 && charge < chargeCap) {
-					partialCharge--;
-					charge++;
-					updateQuickslot();
-				} else if (charge >= chargeCap) {
-					partialCharge = 0;
-					GLog.p( Messages.get(TalismanOfForesight.class, "full_charge") );
-				}
-			}
-
-			return true;
 		}
 
 		public void charge(int boost){

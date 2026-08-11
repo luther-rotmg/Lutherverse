@@ -785,6 +785,8 @@ public class Hero extends Char {
 			if(Actor.now() == 0){
 				if (buff(Foresight.class) != null){
 					search(false);
+				} else if (buff(TalismanOfForesight.Foresight.class) != null){
+					buff(TalismanOfForesight.Foresight.class).checkAwareness();
 				}
 			}
 			actResult = false;
@@ -2292,6 +2294,12 @@ public class Hero extends Char {
 
 		if (foresight){
 			GameScene.updateFog(pos, Foresight.DISTANCE+1);
+		}
+
+		//at high movespeed the hero can skip the turns the talisman buff would have acted on,
+		//so scan here too rather than relying solely on Foresight.act()
+		if (talisman != null){
+			talisman.checkAwareness();
 		}
 		
 		return smthFound;
