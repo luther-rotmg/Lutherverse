@@ -52,7 +52,7 @@
 - Consumes: nothing.
 - Produces: `GitCommands.readBlob(String ref, String path) -> String` (throws `IOException`); `GitCommands.isPathNotFound(IOException) -> boolean`; `GitCommands.listTree(String ref) -> List<String>`; `GitCommands.repoRoot() -> java.io.File` (nullable).
 
-- [ ] **Step 1: Create the module build file**
+- [x] **Step 1: Create the module build file**
 
 Create `services/tools/deletion-audit/build.gradle`:
 
@@ -79,7 +79,7 @@ test {
 }
 ```
 
-- [ ] **Step 2: Register the module**
+- [x] **Step 2: Register the module**
 
 In `settings.gradle`, add the new include directly after the `pack-smoke` line so the tools block stays alphabetical-ish and grouped:
 
@@ -91,7 +91,7 @@ In `settings.gradle`, add the new include directly after the `pack-smoke` line s
     include ':services:tools:pack-smoke'
 ```
 
-- [ ] **Step 3: Write the failing test**
+- [x] **Step 3: Write the failing test**
 
 Create `services/tools/deletion-audit/src/test/java/com/qsr/customspd/tools/deletionaudit/GitCommandsTest.java`:
 
@@ -143,12 +143,12 @@ class GitCommandsTest {
 }
 ```
 
-- [ ] **Step 4: Run the test to verify it fails**
+- [x] **Step 4: Run the test to verify it fails**
 
 Run: `.\gradlew.bat :services:tools:deletion-audit:test`
 Expected: FAIL — compilation error, `GitCommands` does not exist.
 
-- [ ] **Step 5: Implement GitCommands**
+- [x] **Step 5: Implement GitCommands**
 
 Create `services/tools/deletion-audit/src/main/java/com/qsr/customspd/tools/deletionaudit/GitCommands.java`:
 
@@ -292,12 +292,12 @@ public final class GitCommands {
 }
 ```
 
-- [ ] **Step 6: Run the test to verify it passes**
+- [x] **Step 6: Run the test to verify it passes**
 
 Run: `.\gradlew.bat :services:tools:deletion-audit:test`
 Expected: PASS, 4 tests.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add settings.gradle services/tools/deletion-audit
@@ -323,7 +323,7 @@ git commit -m "feat(tools): add deletion-audit module with repo-root-anchored gi
 
 **Why this exists:** api-diff inventories *public and protected declarations only*. It cannot see private members, and it cannot see method bodies at all. The `CorpseDust.actions()` regression was caught only because it happened to be a visible override. A statement dropped from inside a body passes every gate this project currently has.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `services/tools/deletion-audit/src/test/java/com/qsr/customspd/tools/deletionaudit/InventoryExtractorTest.java`:
 
@@ -439,12 +439,12 @@ class InventoryExtractorTest {
 }
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `.\gradlew.bat :services:tools:deletion-audit:test --tests '*InventoryExtractorTest*'`
 Expected: FAIL — compilation error, `CallableInventory` and `InventoryExtractor` do not exist.
 
-- [ ] **Step 3: Implement CallableInventory**
+- [x] **Step 3: Implement CallableInventory**
 
 Create `services/tools/deletion-audit/src/main/java/com/qsr/customspd/tools/deletionaudit/CallableInventory.java`:
 
@@ -482,7 +482,7 @@ public record CallableInventory(List<Entry> entries) {
 }
 ```
 
-- [ ] **Step 4: Implement InventoryExtractor**
+- [x] **Step 4: Implement InventoryExtractor**
 
 Create `services/tools/deletion-audit/src/main/java/com/qsr/customspd/tools/deletionaudit/InventoryExtractor.java`:
 
@@ -576,14 +576,14 @@ public final class InventoryExtractor {
 }
 ```
 
-- [ ] **Step 5: Run the test to verify it passes**
+- [x] **Step 5: Run the test to verify it passes**
 
 Run: `.\gradlew.bat :services:tools:deletion-audit:test --tests '*InventoryExtractorTest*'`
 Expected: PASS, 7 tests.
 
 If `countsStatementsIncludingNestedOnes` fails on the expected value, do NOT change the production code to match — read the actual count JavaParser reports, confirm by hand which nodes it counted, and correct the test's expectation. The invariant that matters is that the count is deterministic and decreases when statements are removed, not its exact absolute value.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add services/tools/deletion-audit
@@ -606,7 +606,7 @@ git commit -m "feat(tools): inventory callables including private members and bo
   - `record InventoryDiff.Report(List<Deleted> deleted, List<Shrunk> shrunk)` with `boolean isEmpty()`
   - `InventoryDiff.compare(CallableInventory before, CallableInventory after, int minShrink) -> Report`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `services/tools/deletion-audit/src/test/java/com/qsr/customspd/tools/deletionaudit/InventoryDiffTest.java`:
 
@@ -679,12 +679,12 @@ class InventoryDiffTest {
 }
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `.\gradlew.bat :services:tools:deletion-audit:test --tests '*InventoryDiffTest*'`
 Expected: FAIL — compilation error, `InventoryDiff` does not exist.
 
-- [ ] **Step 3: Implement InventoryDiff**
+- [x] **Step 3: Implement InventoryDiff**
 
 Create `services/tools/deletion-audit/src/main/java/com/qsr/customspd/tools/deletionaudit/InventoryDiff.java`:
 
@@ -750,12 +750,12 @@ public final class InventoryDiff {
 }
 ```
 
-- [ ] **Step 4: Run the test to verify it passes**
+- [x] **Step 4: Run the test to verify it passes**
 
 Run: `.\gradlew.bat :services:tools:deletion-audit:test --tests '*InventoryDiffTest*'`
 Expected: PASS, 4 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add services/tools/deletion-audit
@@ -776,7 +776,7 @@ git commit -m "feat(tools): compare callable inventories for deletions and body 
 
 **Why this exists:** most removals during upstream integration are legitimate — CPDU code is replaced by upstream code on purpose. Without an allowlist the tool reports the same reviewed removals on every run and gets ignored, which is how the previous gates died.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `services/tools/deletion-audit/src/test/java/com/qsr/customspd/tools/deletionaudit/AllowlistTest.java`.
 
@@ -842,12 +842,12 @@ class AllowlistTest {
 }
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `.\gradlew.bat :services:tools:deletion-audit:test --tests '*AllowlistTest*'`
 Expected: FAIL — compilation error, `Allowlist` does not exist.
 
-- [ ] **Step 3: Implement Allowlist**
+- [x] **Step 3: Implement Allowlist**
 
 Create `services/tools/deletion-audit/src/main/java/com/qsr/customspd/tools/deletionaudit/Allowlist.java`:
 
@@ -898,12 +898,12 @@ public final class Allowlist {
 }
 ```
 
-- [ ] **Step 4: Run the test to verify it passes**
+- [x] **Step 4: Run the test to verify it passes**
 
 Run: `.\gradlew.bat :services:tools:deletion-audit:test --tests '*AllowlistTest*'`
 Expected: PASS, 5 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add services/tools/deletion-audit
@@ -922,7 +922,7 @@ git commit -m "feat(tools): add reviewed-removal allowlist to deletion-audit"
 - Consumes: `GitCommands` (Task 1), `InventoryExtractor` / `CallableInventory` (Task 2), `InventoryDiff` (Task 3), `Allowlist` (Task 4).
 - Produces: `DeletionAuditCli.run(String base, String head, String filesGlob, int minShrink, Allowlist allowlist) -> Result`, where `record Result(int filesScanned, int deleted, int shrunk, List<String> detailLines)` has `boolean hasFindings()`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `services/tools/deletion-audit/src/test/java/com/qsr/customspd/tools/deletionaudit/DeletionAuditCliTest.java`:
 
@@ -968,12 +968,12 @@ class DeletionAuditCliTest {
 }
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `.\gradlew.bat :services:tools:deletion-audit:test --tests '*DeletionAuditCliTest*'`
 Expected: FAIL — compilation error, `DeletionAuditCli` does not exist.
 
-- [ ] **Step 3: Implement DeletionAuditCli**
+- [x] **Step 3: Implement DeletionAuditCli**
 
 Create `services/tools/deletion-audit/src/main/java/com/qsr/customspd/tools/deletionaudit/DeletionAuditCli.java`:
 
@@ -1183,12 +1183,12 @@ public final class DeletionAuditCli {
 }
 ```
 
-- [ ] **Step 4: Run the whole module's tests**
+- [x] **Step 4: Run the whole module's tests**
 
 Run: `.\gradlew.bat :services:tools:deletion-audit:test`
 Expected: PASS, 23 tests across five test classes (`GitCommandsTest` 4, `InventoryExtractorTest` 7, `InventoryDiffTest` 4, `AllowlistTest` 5, `DeletionAuditCliTest` 3).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add services/tools/deletion-audit
@@ -1209,7 +1209,7 @@ git commit -m "feat(tools): wire deletion-audit CLI with glob, min-shrink, and a
 
 **Expect a large number of findings.** Upstream integration legitimately removes CPDU code and replaces it with upstream code, so this is a *review queue*, not a pass/fail oracle on first run. The job is to triage it once, allowlist what is legitimate with a reason, and fix what is not.
 
-- [ ] **Step 1: Run the audit over the Slice 1 range**
+- [x] **Step 1: Run the audit over the Slice 1 range**
 
 ```bash
 ./gradlew :services:tools:deletion-audit:run --args="--base 7d9c139c8 --head HEAD --min-shrink 3" --quiet
@@ -1219,13 +1219,13 @@ Expected: a `Files scanned:` count in the high hundreds (Phase 4's api-diff run 
 
 **If `Files scanned: 0`, stop.** That is the exact api-diff failure mode reproducing; fix `GitCommands.repoRoot()` before going further. A zero here means the tool is lying, not that the code is clean.
 
-- [ ] **Step 2: Capture the report for triage**
+- [x] **Step 2: Capture the report for triage**
 
 ```bash
 ./gradlew :services:tools:deletion-audit:run --args="--base 7d9c139c8 --head HEAD --min-shrink 3" --quiet > deletion-audit-report.txt
 ```
 
-- [ ] **Step 3: Triage every DELETED entry**
+- [x] **Step 3: Triage every DELETED entry**
 
 For each `DELETED` line, decide one of three outcomes and record it:
 
@@ -1235,7 +1235,7 @@ For each `DELETED` line, decide one of three outcomes and record it:
 
 Prioritise `public` and `protected` entries first: those are the ones with external callers, so a wrong call there breaks the most.
 
-- [ ] **Step 4: Triage SHRUNK entries**
+- [x] **Step 4: Triage SHRUNK entries**
 
 Same three outcomes. A body that lost 3+ statements while keeping its signature is the failure class no existing gate can see, so do not skim these. Read the actual diff for each:
 
@@ -1243,7 +1243,7 @@ Same three outcomes. A body that lost 3+ statements while keeping its signature 
 git diff 7d9c139c8..HEAD -- <path>
 ```
 
-- [ ] **Step 5: Write the allowlist file**
+- [x] **Step 5: Write the allowlist file**
 
 Create `services/tools/deletion-audit/reviewed-removals.txt` in this format:
 
@@ -1260,7 +1260,7 @@ Create `services/tools/deletion-audit/reviewed-removals.txt` in this format:
 
 Replace the placeholder block with the real entries from Steps 3 and 4. Do not ship the placeholder.
 
-- [ ] **Step 6: Verify the gate now passes**
+- [x] **Step 6: Verify the gate now passes**
 
 ```bash
 ./gradlew :services:tools:deletion-audit:run --args="--base 7d9c139c8 --head HEAD --min-shrink 3 --allowlist services/tools/deletion-audit/reviewed-removals.txt" --quiet
@@ -1268,7 +1268,7 @@ Replace the placeholder block with the real entries from Steps 3 and 4. Do not s
 
 Expected: `RESULT: PASS`, exit 0. If any entry remains, it is either an un-triaged removal or a genuine regression still to fix.
 
-- [ ] **Step 7: Write the tool README**
+- [x] **Step 7: Write the tool README**
 
 Create `services/tools/deletion-audit/README.md`:
 
@@ -1313,7 +1313,7 @@ api-diff failure mode: git invocations must be anchored to the repository root v
 scan nothing.
 ```
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add services/tools/deletion-audit/reviewed-removals.txt services/tools/deletion-audit/README.md
@@ -1337,7 +1337,7 @@ Any regressions found in Steps 3–4 are committed separately, one `fix:` commit
 
 It cannot test the *registrations*: `core` depends on `SPD-classes`, never the reverse, so no test here may reference `EntranceRoom`, `ExitRoom`, or core's terrain constants. Auditing the actual registrations and the `CUSTOM_DECO`-takes-`SIGN`-id-23 terrain reuse needs either a test source set on `core` or a static checker, and is filed as a follow-up bead in Task 9 rather than bodged in here.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `SPD-classes/src/test/java/com/watabou/utils/BundleAliasRoundtripTest.java`:
 
@@ -1421,12 +1421,12 @@ class BundleAliasRoundtripTest {
 }
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `.\gradlew.bat :SPD-classes:test --tests '*BundleAliasRoundtripTest*'`
 Expected: FAIL — the class does not exist yet, then once compiled, the assertions exercise real behavior.
 
-- [ ] **Step 3: Run and interpret**
+- [x] **Step 3: Run and interpret**
 
 Run: `.\gradlew.bat :SPD-classes:test --tests '*BundleAliasRoundtripTest*'`
 
@@ -1437,7 +1437,7 @@ Two legitimate outcomes:
 
 If the failure is instead a `Game.reportException` NPE from `Bundle`'s error path, that means an earlier assertion already failed; fix the reading of the test, not the test's intent.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add SPD-classes/src/test/java/com/watabou/utils/BundleAliasRoundtripTest.java
@@ -1459,7 +1459,7 @@ git commit -m "test: pin Bundle alias resolution that Slice 1's package moves de
 
 **Why this replaces the Android smoke.** `smoke-boot.ps1` has never executed the APK: the emulator never reaches `sys.boot_completed`, so the run dies before `adb install`. Even when it did run it was only a PID-alive check. The desktop path exercises the same `core` module and actually runs.
 
-- [ ] **Step 1: Confirm the insertion point**
+- [x] **Step 1: Confirm the insertion point**
 
 Run: `grep -n "void main\|new Lwjgl3Application" desktop/src/main/java/com/qsr/customspd/desktop/DesktopLauncher.java`
 
@@ -1471,7 +1471,7 @@ Expected: `main` at line 49, and the application constructed on line 189:
 
 **This constructor blocks.** LWJGL3 runs the whole render loop inside it and does not return until the application exits. The watchdog must therefore be started on the line *before* it — a watchdog installed "after the app is created" would never run at all.
 
-- [ ] **Step 2: Add the smoke-exit hook**
+- [x] **Step 2: Add the smoke-exit hook**
 
 In `DesktopLauncher.java`, add the method below to the class, and call it on the line immediately **before** `new Lwjgl3Application(...)`:
 
@@ -1529,7 +1529,7 @@ Two deliberate choices, do not "simplify" either:
 - `Runtime.halt` rather than `System.exit` — `exit` runs shutdown hooks that may block on the GL thread and hang the smoke.
 - The watchdog is a **daemon** thread started before the blocking constructor, so a normal (non-smoke) launch is completely unaffected: with `smoke.frames` unset the method returns immediately and no thread is created.
 
-- [ ] **Step 3: Write the smoke script**
+- [x] **Step 3: Write the smoke script**
 
 Create `services/tools/desktop-smoke/desktop-smoke.ps1`:
 
@@ -1606,14 +1606,14 @@ Write-Host "desktop-smoke: PASS"
 exit 0
 ```
 
-- [ ] **Step 4: Run the smoke**
+- [x] **Step 4: Run the smoke**
 
 Run: `pwsh services/tools/desktop-smoke/desktop-smoke.ps1`
 Expected: `desktop-smoke: PASS`, exit 0.
 
 This needs a display. It will fail on a headless machine, which is a real constraint to document, not to work around today.
 
-- [ ] **Step 5: Write the README**
+- [x] **Step 5: Write the README**
 
 Create `services/tools/desktop-smoke/README.md`:
 
@@ -1650,7 +1650,7 @@ Exit 0 on a confirmed boot, 1 otherwise.
   must not be cited as one.
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add desktop/src/main/java/com/qsr/customspd/desktop/DesktopLauncher.java services/tools/desktop-smoke
@@ -1670,7 +1670,7 @@ git commit -m "feat(tools): add desktop boot smoke to replace the never-running 
 - Consumes: findings from Tasks 6, 7, and 8.
 - Produces: the recorded gate set that T2 and T5 run against.
 
-- [ ] **Step 1: File follow-up beads**
+- [x] **Step 1: File follow-up beads**
 
 ```bash
 bd create --title "Add a test source set to core so core:test stops being vacuous" --labels worker,size:small
@@ -1680,7 +1680,7 @@ bd create --title "Audit Task 9 asset batches for the assets-landed/code-deferre
 
 The second one covers what Task 7 could not: `core` depends on `SPD-classes`, so no test there can reference `EntranceRoom`, `ExitRoom`, or the `CUSTOM_DECO`-takes-`SIGN`-id-23 terrain reuse. It needs a static checker or a `core` test source set.
 
-- [ ] **Step 2: Update PROJECT-STATUS.md**
+- [x] **Step 2: Update PROJECT-STATUS.md**
 
 Replace the "Known tool limitations found while running these gates" section's stale claims with the current state:
 
@@ -1689,7 +1689,7 @@ Replace the "Known tool limitations found while running these gates" section's s
 - Android runtime smoke is superseded by desktop-smoke for automation and downgraded to a documented manual pre-release check.
 - Leave the `core:test` is `NO-SOURCE` note in place — it is still true — and add the follow-up bead id.
 
-- [ ] **Step 3: Update the spec's verification table**
+- [x] **Step 3: Update the spec's verification table**
 
 In `docs/superpowers/specs/2026-08-10-lutherverse-push-design.md`, the verification table lists the desktop boot smoke as "reaches title screen, exits clean". Replace with the real command:
 
@@ -1703,7 +1703,7 @@ And replace the save-roundtrip row, which claimed more coverage than Task 7 deli
 | Bundle alias resolution *(new)* | `gradlew SPD-classes:test` — mechanism only; core registrations tracked separately |
 ```
 
-- [ ] **Step 4: Add a CHANGELOG entry**
+- [x] **Step 4: Add a CHANGELOG entry**
 
 Under an `### Added` heading in the current unreleased section:
 
@@ -1716,7 +1716,7 @@ Under an `### Added` heading in the current unreleased section:
   package moves depend on.
 ```
 
-- [ ] **Step 5: Run the full gate set**
+- [x] **Step 5: Run the full gate set** *(historical — see note below)*
 
 ```bash
 ./gradlew core:compileJava --rerun-tasks SPD-classes:test :services:tools:api-diff:test :services:tools:pack-smoke:test :services:tools:namespace-transform:test :services:tools:deletion-audit:test desktop:release android:assembleDebug
@@ -1730,12 +1730,22 @@ Expected: all tasks PASS. Then:
 
 Expected: `RESULT: PASS`.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add PROJECT-STATUS.md CHANGELOG.md docs/superpowers/specs/2026-08-10-lutherverse-push-design.md
 git commit -m "docs: record the repaired gate set and T1 findings"
 ```
+
+> **2026-08-11 reconciliation note:** Steps 2–4 and 6 were already done and committed
+> as `f8adf6fda` ("docs: record the repaired gate set and T1 findings", 2026-08-10
+> 12:57) — the checkboxes just weren't ticked afterward. Step 1's three follow-up
+> beads (`core:test` source set, terrain-ID/alias static checker, Task 9 asset-batch
+> audit) had *not* actually been filed; they were created now as `cpdu-4o8`,
+> `cpdu-fld`, `cpdu-5z7`. Step 5 (full gate set) was not re-run in this session —
+> Bash/gradle execution is denied under the current permission mode — but
+> PROJECT-STATUS.md's own "the three open gates are now closed" heading, written in
+> the same commit, is strong evidence it was run when the docs were authored.
 
 ---
 

@@ -99,7 +99,7 @@ Expected: three remote pairs (origin, upstream-cpd, upstream-spd) each with (fet
 
 If HEAD is NOT `c97fb83...`, stop and escalate — CPD may have pushed new commits since the brainstorming session; the fork-base pin decision needs re-review.
 
-- [ ] **Step 7: Commit — none needed for this task**
+- [x] **Step 7: Commit — none needed for this task**
 
 No git commit for Task 1. The local repo is in its clean-clone state; the pinning tag comes in Task 2. Confirm working tree is clean:
 
