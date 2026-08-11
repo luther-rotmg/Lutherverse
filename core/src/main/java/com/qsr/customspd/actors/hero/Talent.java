@@ -71,7 +71,6 @@ import com.qsr.customspd.scenes.GameScene;
 import com.qsr.customspd.ui.BuffIndicator;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
-import com.watabou.noosa.particles.Emitter;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.GameMath;
 import com.watabou.utils.PathFinder;
@@ -87,7 +86,7 @@ import kotlin.Pair;
 public enum Talent {
 
 	//Warrior T1
-	HEARTY_MEAL(GeneralAsset.TALENT_ICON_HEARTY_MEAL), VETERANS_INTUITION(GeneralAsset.TALENT_ICON_VETERANS_INTUITION), TEST_SUBJECT(GeneralAsset.TALENT_ICON_TEST_SUBJECT), IRON_WILL(GeneralAsset.TALENT_ICON_IRON_WILL),
+	HEARTY_MEAL(GeneralAsset.TALENT_ICON_HEARTY_MEAL), VETERANS_INTUITION(GeneralAsset.TALENT_ICON_VETERANS_INTUITION), PROVOKED_ANGER(GeneralAsset.TALENT_ICON_TEST_SUBJECT), IRON_WILL(GeneralAsset.TALENT_ICON_IRON_WILL),
 	//Warrior T2
 	IRON_STOMACH(GeneralAsset.TALENT_ICON_IRON_STOMACH), RESTORED_WILLPOWER(GeneralAsset.TALENT_ICON_RESTORED_WILLPOWER), RUNIC_TRANSFERENCE(GeneralAsset.TALENT_ICON_RUNIC_TRANSFERENCE), LETHAL_MOMENTUM(GeneralAsset.TALENT_ICON_LETHAL_MOMENTUM), IMPROVISED_PROJECTILES(GeneralAsset.TALENT_ICON_IMPROVISED_PROJECTILES),
 	//Warrior T3
@@ -104,7 +103,7 @@ public enum Talent {
 	SUSTAINED_RETRIBUTION(GeneralAsset.TALENT_ICON_SUSTAINED_RETRIBUTION, 4), SHRUG_IT_OFF(GeneralAsset.TALENT_ICON_SHRUG_IT_OFF, 4), EVEN_THE_ODDS(GeneralAsset.TALENT_ICON_EVEN_THE_ODDS, 4),
 
 	//Mage T1
-	EMPOWERING_MEAL(GeneralAsset.TALENT_ICON_EMPOWERING_MEAL), SCHOLARS_INTUITION(GeneralAsset.TALENT_ICON_SCHOLARS_INTUITION), TESTED_HYPOTHESIS(GeneralAsset.TALENT_ICON_TESTED_HYPOTHESIS), BACKUP_BARRIER(GeneralAsset.TALENT_ICON_BACKUP_BARRIER),
+	EMPOWERING_MEAL(GeneralAsset.TALENT_ICON_EMPOWERING_MEAL), SCHOLARS_INTUITION(GeneralAsset.TALENT_ICON_SCHOLARS_INTUITION), LINGERING_MAGIC(GeneralAsset.TALENT_ICON_TESTED_HYPOTHESIS), BACKUP_BARRIER(GeneralAsset.TALENT_ICON_BACKUP_BARRIER),
 	//Mage T2
 	ENERGIZING_MEAL(GeneralAsset.TALENT_ICON_ENERGIZING_MEAL), ENERGIZING_UPGRADE(GeneralAsset.TALENT_ICON_ENERGIZING_UPGRADE), WAND_PRESERVATION(GeneralAsset.TALENT_ICON_WAND_PRESERVATION), ARCANE_VISION(GeneralAsset.TALENT_ICON_ARCANE_VISION), SHIELD_BATTERY(GeneralAsset.TALENT_ICON_SHIELD_BATTERY),
 	//Mage T3
@@ -660,22 +659,23 @@ public enum Talent {
 
 	//note that IDing can happen in alchemy scene, so be careful with VFX here
 	public static void onItemIdentified( Hero hero, Item item ){
-		if (hero.hasTalent(TEST_SUBJECT)){
-			//heal for 2/3 HP
-			hero.HP = Math.min(hero.HP + 1 + hero.pointsInTalent(TEST_SUBJECT), hero.HT);
-			if (hero.sprite != null) {
-				Emitter e = hero.sprite.emitter();
-				if (e != null) e.burst(Speck.factory(Speck.HEALING), hero.pointsInTalent(TEST_SUBJECT));
-			}
-		}
-		if (hero.hasTalent(TESTED_HYPOTHESIS)){
-			//2/3 turns of wand recharging
-			Buff.affect(hero, Recharging.class, 1f + hero.pointsInTalent(TESTED_HYPOTHESIS));
-			ScrollOfRecharging.charge(hero);
-		}
+		//currently no talents that trigger here, it wasn't a very popular trigger =(
 	}
 
 	public static int onAttackProc( Hero hero, Char enemy, int dmg ){
+
+		if (hero.hasTalent(Talent.PROVOKED_ANGER)
+				&& hero.buff(ProvokedAngerTracker.class) != null){
+			dmg += Random.IntRange(hero.pointsInTalent(Talent.PROVOKED_ANGER), 2);
+			hero.buff(ProvokedAngerTracker.class).detach();
+		}
+
+		if (hero.hasTalent(Talent.LINGERING_MAGIC)
+				&& hero.buff(LingeringMagicTracker.class) != null){
+			dmg += Random.IntRange(hero.pointsInTalent(Talent.LINGERING_MAGIC), 2);
+			hero.buff(LingeringMagicTracker.class).detach();
+		}
+
 		if (hero.hasTalent(Talent.SUCKER_PUNCH)
 				&& enemy instanceof Mob && ((Mob) enemy).surprisedBy(hero)
 				&& enemy.buff(SuckerPunchTracker.class) == null){
@@ -722,6 +722,18 @@ public enum Talent {
 		return dmg;
 	}
 
+	public static class ProvokedAngerTracker extends FlavourBuff{
+		{ type = Buff.buffType.POSITIVE; }
+		public Pair<Asset, Asset> icon() { return BuffIndicator.WEAPON; }
+		public void tintIcon(Image icon) { icon.hardlight(1.43f, 1.43f, 1.43f); }
+		public float iconFadePercent() { return Math.max(0, 1f - (visualcooldown() / 5)); }
+	}
+	public static class LingeringMagicTracker extends FlavourBuff{
+		{ type = Buff.buffType.POSITIVE; }
+		public Pair<Asset, Asset> icon() { return BuffIndicator.WEAPON; }
+		public void tintIcon(Image icon) { icon.hardlight(1.43f, 1.43f, 0f); }
+		public float iconFadePercent() { return Math.max(0, 1f - (visualcooldown() / 5)); }
+	}
 	public static class SuckerPunchTracker extends Buff{};
 	public static class FollowupStrikeTracker extends FlavourBuff{
 		public int object;
@@ -762,10 +774,10 @@ public enum Talent {
 		//tier 1
 		switch (cls){
 			case WARRIOR: default:
-				Collections.addAll(tierTalents, HEARTY_MEAL, VETERANS_INTUITION, TEST_SUBJECT, IRON_WILL);
+				Collections.addAll(tierTalents, HEARTY_MEAL, VETERANS_INTUITION, PROVOKED_ANGER, IRON_WILL);
 				break;
 			case MAGE:
-				Collections.addAll(tierTalents, EMPOWERING_MEAL, SCHOLARS_INTUITION, TESTED_HYPOTHESIS, BACKUP_BARRIER);
+				Collections.addAll(tierTalents, EMPOWERING_MEAL, SCHOLARS_INTUITION, LINGERING_MAGIC, BACKUP_BARRIER);
 				break;
 			case ROGUE:
 				Collections.addAll(tierTalents, CACHED_RATIONS, THIEFS_INTUITION, SUCKER_PUNCH, PROTECTIVE_SHADOWS);
