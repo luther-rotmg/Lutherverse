@@ -23,6 +23,7 @@ public final class DeletionAuditCli {
 
     static final String DEFAULT_FILES_GLOB = "core/src/main/java/**/*.java";
     static final int DEFAULT_MIN_SHRINK = 3;
+    static final int DEFAULT_MAX_FINDINGS = 0;
 
     private DeletionAuditCli() {
     }
@@ -33,7 +34,8 @@ public final class DeletionAuditCli {
             parsed = Args.parse(args);
         } catch (IllegalArgumentException e) {
             System.err.println("Usage: DeletionAuditCli --base <ref> --head <ref> "
-                    + "[--files <glob>] [--min-shrink <n>] [--allowlist <path>]");
+                    + "[--files <glob>] [--min-shrink <n>] [--allowlist <path>] "
+                    + "[--max-findings <n>]");
             System.err.println(e.getMessage());
             System.exit(2);
             return;
@@ -52,7 +54,7 @@ public final class DeletionAuditCli {
         Result result = run(parsed.base, parsed.head, parsed.filesGlob, parsed.minShrink,
                 Allowlist.load(allowlistPath));
         print(parsed, result);
-        System.exit(result.hasFindings() ? 1 : 0);
+        System.exit(result.exceeds(parsed.maxFindings) ? 1 : 0);
     }
 
     /**
@@ -149,9 +151,15 @@ public final class DeletionAuditCli {
             }
         }
 
-        System.out.println(result.hasFindings()
-                ? "RESULT: FAIL (unreviewed removals detected; review then add to --allowlist)"
-                : "RESULT: PASS (no unreviewed removals)");
+        if (result.exceeds(args.maxFindings)) {
+            System.out.println("RESULT: FAIL (" + result.total() + " findings exceeds ceiling "
+                    + args.maxFindings + "; review then allowlist, or raise the ceiling deliberately)");
+        } else if (result.hasFindings()) {
+            System.out.println("RESULT: PASS (" + result.total() + " known findings, ceiling "
+                    + args.maxFindings + " -- these are TRACKED, NOT ACCEPTED; lower the ceiling as they are resolved)");
+        } else {
+            System.out.println("RESULT: PASS (no unreviewed removals)");
+        }
     }
 
     /**
@@ -192,6 +200,20 @@ public final class DeletionAuditCli {
         public boolean hasFindings() {
             return deleted > 0 || shrunk > 0;
         }
+
+        public int total() {
+            return deleted + shrunk;
+        }
+
+        /**
+         * Ratchet, matching the lint baselines: a known backlog is parked by a ceiling so
+         * anything NEW fails. Unlike the allowlist this keeps every finding in the printed
+         * output, because "tracked in a bead" and "reviewed and accepted" are different
+         * states and only the latter belongs in reviewed-removals.txt.
+         */
+        public boolean exceeds(int maxFindings) {
+            return total() > maxFindings;
+        }
     }
 
     private static final class Args {
@@ -199,6 +221,7 @@ public final class DeletionAuditCli {
         String head;
         String filesGlob = DEFAULT_FILES_GLOB;
         int minShrink = DEFAULT_MIN_SHRINK;
+        int maxFindings = DEFAULT_MAX_FINDINGS;
         Path allowlist;
 
         static Args parse(String[] args) {
@@ -210,6 +233,8 @@ public final class DeletionAuditCli {
                     case "--files" -> result.filesGlob = requireValue(args, ++i, "--files");
                     case "--min-shrink" ->
                             result.minShrink = Integer.parseInt(requireValue(args, ++i, "--min-shrink"));
+                    case "--max-findings" ->
+                            result.maxFindings = Integer.parseInt(requireValue(args, ++i, "--max-findings"));
                     case "--allowlist" ->
                             result.allowlist = Path.of(requireValue(args, ++i, "--allowlist"));
                     default -> throw new IllegalArgumentException("Unrecognized argument: " + args[i]);
