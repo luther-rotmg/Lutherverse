@@ -98,7 +98,7 @@ jobs:
         # the audit is reporting clean because it looked at nothing - the original api-diff bug.
         run: |
           ./gradlew :services:tools:deletion-audit:run --quiet \
-            --args="--base 7d9c139c8 --head HEAD --min-shrink 3 --allowlist services/tools/deletion-audit/reviewed-removals.txt --max-findings 16" \
+            --args="--base 7d9c139c8 --head HEAD --min-shrink 3 --allowlist services/tools/deletion-audit/reviewed-removals.txt --max-findings 0" \
             | tee /tmp/da.log || true
           scanned=$(grep -oP 'Files scanned: \K[0-9]+' /tmp/da.log || echo 0)
           echo "deletion-audit scanned $scanned files"
