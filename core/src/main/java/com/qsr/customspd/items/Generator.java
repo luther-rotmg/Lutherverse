@@ -183,6 +183,7 @@ import com.watabou.utils.Reflection;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 
 public class Generator {
 
@@ -748,10 +749,10 @@ public class Generator {
 		for (Category cat : Category.values()){
 			if (cat.defaultProbs == null) continue;
 
-			bundle.put(cat.name().toLowerCase() + CATEGORY_PROBS,   cat.probs);
+			bundle.put(cat.name().toLowerCase(Locale.ROOT) + CATEGORY_PROBS,   cat.probs);
 			if (cat.seed != null) {
-				bundle.put(cat.name().toLowerCase() + CATEGORY_SEED, cat.seed);
-				bundle.put(cat.name().toLowerCase() + CATEGORY_DROPPED, cat.dropped);
+				bundle.put(cat.name().toLowerCase(Locale.ROOT) + CATEGORY_SEED, cat.seed);
+				bundle.put(cat.name().toLowerCase(Locale.ROOT) + CATEGORY_DROPPED, cat.dropped);
 			}
 		}
 	}
@@ -769,14 +770,14 @@ public class Generator {
 		}
 
 		for (Category cat : Category.values()){
-			if (bundle.contains(cat.name().toLowerCase() + CATEGORY_PROBS)){
-				float[] probs = bundle.getFloatArray(cat.name().toLowerCase() + CATEGORY_PROBS);
+			if (bundle.contains(cat.name().toLowerCase(Locale.ROOT) + CATEGORY_PROBS)){
+				float[] probs = bundle.getFloatArray(cat.name().toLowerCase(Locale.ROOT) + CATEGORY_PROBS);
 				if (cat.defaultProbs != null && probs.length == cat.defaultProbs.length){
 					cat.probs = probs;
 				}
-				if (bundle.contains(cat.name().toLowerCase() + CATEGORY_SEED)){
-					cat.seed = bundle.getLong(cat.name().toLowerCase() + CATEGORY_SEED);
-					cat.dropped = bundle.getInt(cat.name().toLowerCase() + CATEGORY_DROPPED);
+				if (bundle.contains(cat.name().toLowerCase(Locale.ROOT) + CATEGORY_SEED)){
+					cat.seed = bundle.getLong(cat.name().toLowerCase(Locale.ROOT) + CATEGORY_SEED);
+					cat.dropped = bundle.getInt(cat.name().toLowerCase(Locale.ROOT) + CATEGORY_DROPPED);
 				}
 			}
 		}

@@ -318,7 +318,7 @@ public abstract class RegularLevel extends Level {
 				Buff.affect(m, Reflection.forName("com.qsr.customspd.actors.buffs.ChampionEnemy$" + mobSpawn.getChampion()));
 			}
 			if (mobSpawn.getAiState() != null) {
-				switch (mobSpawn.getAiState().toUpperCase()) {
+				switch (mobSpawn.getAiState().toUpperCase(Locale.ROOT)) {
 					case "SLEEPING":
 						m.state = m.SLEEPING;
 						break;

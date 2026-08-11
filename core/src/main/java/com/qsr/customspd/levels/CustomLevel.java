@@ -299,7 +299,7 @@ public class CustomLevel extends Level {
 				Buff.affect(mob, Reflection.forName("com.qsr.customspd.actors.buffs.ChampionEnemy$" + mobSpawn.getChampion()));
 			}
 			if (mobSpawn.getAiState() != null) {
-				switch (mobSpawn.getAiState().toUpperCase()) {
+				switch (mobSpawn.getAiState().toUpperCase(Locale.ROOT)) {
 					case "SLEEPING":
 						mob.state = mob.SLEEPING;
 						break;

@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 
 public class News {
 
@@ -125,8 +126,8 @@ public class News {
 		Calendar cal = GregorianCalendar.getInstance();
 		cal.setTime(article.date);
 		return cal.get(Calendar.YEAR)
-				+ "-" + String.format("%02d", cal.get(Calendar.MONTH)+1)
-				+ "-" + String.format("%02d", cal.get(Calendar.DAY_OF_MONTH));
+				+ "-" + String.format(Locale.ROOT, "%02d", cal.get(Calendar.MONTH)+1)
+				+ "-" + String.format(Locale.ROOT, "%02d", cal.get(Calendar.DAY_OF_MONTH));
 	}
 
 }

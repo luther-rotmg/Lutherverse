@@ -9,13 +9,13 @@ apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.android.lint'
 
 lint {
-    //Ratchet, not a cliff: the 12 inherited DefaultLocale findings are parked in the baseline
-    //so NEW violations fail the build while the existing backlog is worked down separately.
+    //No baseline: :core is genuinely clean. The 12 inherited DefaultLocale findings this
+    //started with were fixed rather than parked, so there is nothing to hide behind and any
+    //new violation fails immediately.
     //
-    //A baseline is itself a gate that can lie -- it hides everything recorded in it. Review it
-    //on a schedule and shrink it; do not let it grow. Deleting the file and re-running
-    //regenerates it, which silently forgives regressions, so treat it as a tracked artifact.
-    baseline = file('lint-baseline.xml')
+    //Do NOT reintroduce a baseline to get past a failure. A baseline is a gate that lies by
+    //construction -- it suppresses exactly what it records -- and regenerating one silently
+    //forgives regressions. Fix the finding, or disable that specific check with a reason.
     abortOnError = true
     warningsAsErrors = true
 }
