@@ -36,6 +36,26 @@ gradlew      text eol=lf
 *.zip        binary
 *.so         binary
 
+# Syntax-aware merging via Mergiraf (tree-sitter structural merge, not line-based).
+#
+# This exists for the upstream sync: ~541 commits remain to port from Shattered PD, and the
+# conflicts that dominate that work are ones a line merge cannot resolve but a structural one
+# can -- two sides adding different methods to the same class, reordered imports, independent
+# keys in messages/*.properties, sibling entries in the JSON mod manifests.
+#
+# Only the extensions this repo actually contains are listed (mergiraf supports ~40).
+# Requires the driver to be configured locally, which is NOT carried by this file:
+#   git config merge.mergiraf.name "mergiraf syntax-aware merge"
+#   git config merge.mergiraf.driver "mergiraf merge --git %O %A %B -s %S -x %X -y %Y -p %P"
+# Without that config git silently falls back to the default merge, so a fresh clone gets
+# ordinary behaviour rather than an error. See services/tools/README-merge.md.
+*.java       merge=mergiraf
+*.kt         merge=mergiraf
+*.kts        merge=mergiraf
+*.json       merge=mergiraf
+*.xml        merge=mergiraf
+*.properties merge=mergiraf
+
 # Better diff hunk headers: git shows the enclosing class/function on each hunk.
 *.java       diff=java
 *.kt         diff=java
