@@ -62,6 +62,58 @@ ShadowCaster#scanOctant(int, boolean[], boolean[], int, int, int, double, double
 StandardRoom.SizeCategory#connectionWeight()
 
 
+# --- DM201 vent logic moved into a Hunting state class (1 entry) ---
+# Reviewed 2026-08-10 (cpdu-5p6). Verified against upstream-spd/master: CPDU's
+# DM201.Hunting.act is byte-for-byte identical to upstream's, upstream likewise has no
+# act() override, and upstream ALSO leaves canVent as an overridden-but-never-called
+# method. The dropped canVent/adjacency guards are upstream's own change, not a CPDU
+# integration error. Faithful port; nothing to restore.
+DM201#act()
+
+# --- Noisemaker Trigger -> NoisemakerFuse (7 entries) ---
+# Reviewed 2026-08-10 (cpdu-jm4). Verified against upstream-spd/master: upstream replaced
+# the Trigger buff with NoisemakerFuse extends Fuse and dropped setTrigger/glowing. CPDU
+# matches.
+#
+# Save compatibility was the real question, since the old Trigger extended Buff and was
+# persisted via Buff.affect(). Deliberately NOT aliased:
+#   - Verified the failure is safe, not a crash. Reflection.forName catches and returns
+#     null, and Bundle.get() returns null when the class is unresolvable, so an old save
+#     silently drops an in-flight noisemaker trigger rather than failing to load.
+#   - An alias would be actively WRONG: Trigger extended Buff and attached to the hero,
+#     NoisemakerFuse extends Fuse and attaches to the bomb. Restoring Buff-shaped data
+#     into a Fuse would produce a corrupt actor. Dropping is strictly safer.
+# Impact is one transient in-run buff on saves made before the change.
+Noisemaker#setTrigger(int)
+Noisemaker#glowing()
+Noisemaker.Trigger#set(int)
+Noisemaker.Trigger#act()
+Noisemaker.Trigger#storeInBundle(Bundle)
+Noisemaker.Trigger#restoreFromBundle(Bundle)
+Noisemaker#doPickUp(Hero, int)
+
+# --- Superseded by upstream, verified against v2.5.4 (7 entries) ---
+# Reviewed 2026-08-10 (cpdu-bnp). Compared against the tag v2.5.4, which is Slice 1's actual
+# target -- NOT upstream-spd/master, which is v3.3.8 and contains later slices' work that
+# would show up as spurious divergence.
+#
+#   Bomb#onThrow(int)        CPDU HEAD is BYTE-IDENTICAL to v2.5.4. The 13->5 shrink was
+#                            CPDU's old custom body correctly replaced by upstream's.
+#   Bomb#explode / Fuse#act  same integration batch and same direction as onThrow.
+#   YogDzewa#act()           193 lines in both CPDU HEAD and v2.5.4 -- exact size match.
+#   Level#create()           CPDU is LONGER than upstream (130 vs 103): CPDU's layout-driven
+#                            level model diverges here by design. Nothing lost.
+#   Terrain#convertTilesFrom0_6_0b   zero occurrences upstream; a legacy 0.6.0b save
+#                            converter upstream also deleted.
+#   WndTextInput#update()    zero occurrences upstream; removed there too.
+Bomb#onThrow(int)
+Bomb#explode(int)
+Bomb.Fuse#act()
+YogDzewa#act()
+Level#create()
+Terrain#convertTilesFrom0_6_0b(int[])
+WndTextInput#update()
+
 # --- Extract-method refactor (1 entry) ---
 # Wraith#spawnAt(int, boolean) shrank 24 -> 2 statements because its body moved to
 # a new private spawnAt(int, boolean, boolean) overload; the 2-arg form delegates.

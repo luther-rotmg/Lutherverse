@@ -23,6 +23,19 @@ package com.qsr.customspd.tiles;
 
 import com.qsr.customspd.Assets;
 import com.qsr.customspd.Dungeon;
+import com.qsr.customspd.levels.CavesBossLevel;
+import com.qsr.customspd.levels.CavesLevel;
+import com.qsr.customspd.levels.CityBossLevel;
+import com.qsr.customspd.levels.CityLevel;
+import com.qsr.customspd.levels.CustomLevel;
+import com.qsr.customspd.levels.HallsBossLevel;
+import com.qsr.customspd.levels.HallsLevel;
+import com.qsr.customspd.levels.LastLevel;
+import com.qsr.customspd.levels.PrisonBossLevel;
+import com.qsr.customspd.levels.PrisonLevel;
+import com.qsr.customspd.levels.SewerBossLevel;
+import com.qsr.customspd.levels.SewerLevel;
+import com.qsr.customspd.levels.Terrain;
 import com.qsr.customspd.levels.traps.Trap;
 import com.qsr.customspd.plants.Plant;
 import com.watabou.noosa.Image;
@@ -60,6 +73,34 @@ public class TerrainFeaturesTilemap extends DungeonTilemap {
 
 		if (plants.get(pos) != null){
 			return plants.get(pos).image + 7*16;
+		}
+
+		//Region-tinted grass, high grass, furrowed grass and embers.
+		//
+		//This is CPDU's adaptation of upstream's stage logic: upstream derives the stage from
+		//Dungeon.depth, which CPDU does not carry, so the region comes from the layout graph
+		//for custom levels and from the concrete level type otherwise. Upstream v2.5.4 still
+		//has the equivalent block; dropping it made every grass and ember tile render with no
+		//feature-layer visual.
+		int stage;
+		if (Dungeon.level instanceof CustomLevel) stage = Dungeon.layout.getDungeon().get(Dungeon.levelName).getCustomLayout().getRegion() - 1;
+		else if (Dungeon.level instanceof SewerLevel || Dungeon.level instanceof SewerBossLevel) stage = 0;
+		else if (Dungeon.level instanceof PrisonLevel || Dungeon.level instanceof PrisonBossLevel) stage = 1;
+		else if (Dungeon.level instanceof CavesLevel || Dungeon.level instanceof CavesBossLevel) stage = 2;
+		else if (Dungeon.level instanceof CityLevel || Dungeon.level instanceof CityBossLevel) stage = 3;
+		else if (Dungeon.level instanceof HallsLevel || Dungeon.level instanceof HallsBossLevel || Dungeon.level instanceof LastLevel) stage = 4;
+		else stage = 1;
+		if (tile == Terrain.HIGH_GRASS){
+			return 9 + 16*stage + (DungeonTileSheet.tileVariance[pos] >= 50 ? 1 : 0);
+		} else if (tile == Terrain.FURROWED_GRASS){
+			return 11 + 16*stage + (DungeonTileSheet.tileVariance[pos] >= 50 ? 1 : 0);
+		} else if (tile == Terrain.GRASS) {
+			return 13 + 16*stage + (DungeonTileSheet.tileVariance[pos] >= 50 ? 1 : 0);
+		} else if (tile == Terrain.EMBERS) {
+			//NB '+' not '*'. The pre-removal CPDU line read `9 * (16*5)`, which yields 720 --
+			//far outside the tileset -- so embers never resolved a tile even before this was
+			//deleted. Upstream v2.5.4 has `9 + (16*5)`; restoring the correct operator.
+			return 9 + (16*5) + (DungeonTileSheet.tileVariance[pos] >= 50 ? 1 : 0);
 		}
 
 		return -1;
