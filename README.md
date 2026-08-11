@@ -98,7 +98,7 @@ Short bulletin. Full detail in [project_progress.md](project_progress.md).
 The project's gates were passing without checking anything. All of these now ship with a
 negative control proving they can fail.
 
-- **`deletion-audit`** — catches removals the API-surface diff structurally cannot see: private members, and statements dropped from a method whose signature never changed. First run: 1,021 files, 43 findings, 27 triaged as legitimate.
+- **`deletion-audit`** — catches removals the API-surface diff structurally cannot see: private members, and statements dropped from a method whose signature never changed. Its first run found 43 findings across 1,021 files; all are now triaged and it reports **zero**. It caught a real regression: region-tinted grass and ember tiles had silently stopped rendering.
 - **`desktop-smoke`** — boots the real jar to 120 rendered frames. The first automated proof that the game starts. Replaces an Android emulator smoke that had never once executed the APK.
 - **`manifest-audit`** — seven checks over the manifests defining Slice 1's entire scope.
 - **Android Lint** wired as a ratcheted gate over `core` and `android`. It ships inside AGP and had never been run.

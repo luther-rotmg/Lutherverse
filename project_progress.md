@@ -16,6 +16,7 @@ For the release-facing change list, see [CHANGELOG.md](CHANGELOG.md).
 |---|---|---|
 | **P0 — seeded runs are not seeded** (`cpdu-yaa`) | 🔴 open | Guaranteed-item and quest-NPC floors are computed before the seed exists, with an unseeded Kotlin RNG. Blocks seed sharing, daily runs, coop. Should land *with* a determinism test. |
 | Sub-B Slice 1 remainder | 🟡 paused | 22 batches (~230 commits) parked; 27 ready beads |
+| deletion-audit backlog | ✅ **zero** | 16 findings triaged against tag v2.5.4; 15 verified superseded, 1 was a real regression and is fixed. CI ceiling back to 0. |
 | CI | ✅ **green** | Run 31446047082. Found and fixed 3 real issues on the way: gradlew exec bit, a Windows-only test assumption, and a malformed step. |
 
 ## Next
@@ -31,12 +32,14 @@ For the release-facing change list, see [CHANGELOG.md](CHANGELOG.md).
 | ID | Pri | Summary |
 |---|---|---|
 | `cpdu-yaa` | P0 | Guaranteed-item and quest-NPC floors are seed-independent |
-| `cpdu-5p6` | P1 | `DM201.canVent` guard dropped in the Hunting refactor; the override is now dead code |
-| `cpdu-jm4` | P1 | `Noisemaker.Trigger` (a `Bundlable`) removed — check for a save migration |
-| `cpdu-c4w` | P1 | Sweep remaining unordered collections in RNG paths |
 | `cpdu-6lz` | P1 | Build `port-verify` |
-| `cpdu-bnp` | P2 | Triage 8 remaining deletion-audit body-shrink findings |
-| — | P2 | 12 `DefaultLocale` violations parked in the lint baselines |
+
+**Closed 2026-08-10:** `cpdu-5p6` (DM201 — verified faithful port, upstream has the same dead
+`canVent` override), `cpdu-jm4` (Noisemaker — faithful port; unresolvable classes are dropped
+not crashed, and an alias would have been actively wrong), `cpdu-c4w` (RNG sweep — 2 defects
+fixed, rest verified safe), `cpdu-bnp` (8 shrinks triaged; 1 was a real regression, fixed),
+`cpdu-bqr` (Mergiraf + difftastic), and the 12 `DefaultLocale` violations (all fixed, core's
+lint baseline removed entirely).
 
 ---
 
