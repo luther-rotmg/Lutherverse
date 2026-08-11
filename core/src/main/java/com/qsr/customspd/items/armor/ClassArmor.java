@@ -27,7 +27,7 @@ import com.qsr.customspd.Dungeon;
 import com.qsr.customspd.actors.Actor;
 import com.qsr.customspd.actors.Char;
 import com.qsr.customspd.actors.buffs.Buff;
-import com.qsr.customspd.actors.buffs.LockedFloor;
+import com.qsr.customspd.actors.buffs.Regeneration;
 import com.qsr.customspd.actors.hero.Hero;
 import com.qsr.customspd.actors.hero.abilities.ArmorAbility;
 import com.qsr.customspd.assets.GeneralAsset;
@@ -304,8 +304,7 @@ abstract public class ClassArmor extends Armor {
 
 		@Override
 		public boolean act() {
-			LockedFloor lock = target.buff(LockedFloor.class);
-			if (lock == null || lock.regenOn()) {
+			if (Regeneration.regenOn()) {
 				float chargeGain = 100 / 500f; //500 turns to full charge
 				chargeGain *= RingOfEnergy.armorChargeMultiplier(target);
 				charge += chargeGain;

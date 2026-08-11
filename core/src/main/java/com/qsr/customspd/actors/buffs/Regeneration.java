@@ -35,14 +35,32 @@ public class Regeneration extends Buff {
 	}
 	
 	private static final float REGENERATION_DELAY = 10;
+
+	//Single source of truth for "is passive regeneration currently allowed".
+	//
+	//The `LockedFloor lock = buff(LockedFloor.class); lock == null || lock.regenOn()` pattern
+	//was duplicated across 14 files, which is what upstream f39a859 consolidates. Callers
+	//should use this rather than re-deriving the check.
+	//
+	//Deliberately matches upstream's shape exactly -- static, no argument, reading
+	//Dungeon.hero -- because later upstream ports call Regeneration.regenOn() by name. An
+	//equivalent-but-differently-shaped helper here would silently diverge from every one of
+	//them. (Upstream also short-circuits on MiningLevel; CPDU has no such level, so that
+	//branch is omitted until the level exists.)
+	public static boolean regenOn(){
+		LockedFloor lock = Dungeon.hero.buff(LockedFloor.class);
+		if (lock != null && !lock.regenOn()){
+			return false;
+		}
+		return true;
+	}
 	
 	@Override
 	public boolean act() {
 		if (target.isAlive()) {
 
 			if (target.HP < regencap() && !((Hero)target).isStarving()) {
-				LockedFloor lock = target.buff(LockedFloor.class);
-				if (lock == null || lock.regenOn()) {
+				if (regenOn()) {
 					target.HP += 1;
 					if (target.HP == regencap()) {
 						((Hero) target).resting = false;

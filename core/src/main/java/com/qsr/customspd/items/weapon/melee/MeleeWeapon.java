@@ -25,10 +25,10 @@ import com.qsr.customspd.Assets;
 import com.qsr.customspd.Dungeon;
 import com.qsr.customspd.actors.Char;
 import com.qsr.customspd.actors.buffs.ArtifactRecharge;
+import com.qsr.customspd.actors.buffs.Regeneration;
 import com.qsr.customspd.actors.buffs.Barrier;
 import com.qsr.customspd.actors.buffs.Buff;
 import com.qsr.customspd.actors.buffs.Haste;
-import com.qsr.customspd.actors.buffs.LockedFloor;
 import com.qsr.customspd.actors.buffs.MonkEnergy;
 import com.qsr.customspd.actors.buffs.Recharging;
 import com.qsr.customspd.actors.hero.Hero;
@@ -455,9 +455,8 @@ public class MeleeWeapon extends Weapon {
 
 		@Override
 		public boolean act() {
-			LockedFloor lock = target.buff(LockedFloor.class);
 			if (charges < chargeCap()){
-				if (lock == null || lock.regenOn()){
+				if (Regeneration.regenOn()){
 					partialCharge += 1/(40f-(chargeCap()-charges)); // 40 to 30 turns per charge
 				}
 
@@ -478,7 +477,7 @@ public class MeleeWeapon extends Weapon {
 
 			if (Dungeon.hero.subClass == HeroSubClass.CHAMPION
 					&& secondCharges < secondChargeCap()) {
-				if (lock == null || lock.regenOn()) {
+				if (Regeneration.regenOn()) {
 					// 80 to 60 turns per charge without talent
 					// up to 53.333 to 40 turns per charge at max talent level
 					secondPartialCharge += secondChargeMultiplier() / (40f-(secondChargeCap()-secondCharges));

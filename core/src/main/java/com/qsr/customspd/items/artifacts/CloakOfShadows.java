@@ -26,7 +26,7 @@ import com.qsr.customspd.Assets;
 import com.qsr.customspd.Dungeon;
 import com.qsr.customspd.actors.Char;
 import com.qsr.customspd.actors.buffs.Buff;
-import com.qsr.customspd.actors.buffs.LockedFloor;
+import com.qsr.customspd.actors.buffs.Regeneration;
 import com.qsr.customspd.actors.buffs.MagicImmune;
 import com.qsr.customspd.actors.buffs.Preparation;
 import com.qsr.customspd.actors.hero.Hero;
@@ -230,8 +230,7 @@ public class CloakOfShadows extends Artifact {
 		@Override
 		public boolean act() {
 			if (charge < chargeCap && !cursed && target.buff(MagicImmune.class) == null) {
-				LockedFloor lock = target.buff(LockedFloor.class);
-				if (activeBuff == null && (lock == null || lock.regenOn())) {
+				if (activeBuff == null && Regeneration.regenOn()) {
 					float missing = (chargeCap - charge);
 					if (level() > 7) missing += 5*(level() - 7)/3f;
 					float turnsToCharge = (45 - missing);
