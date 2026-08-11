@@ -215,17 +215,6 @@ public class Dungeon {
 		challenges = SPDSettings.challenges();
 		mobsToChampion = -1;
 
-		posLevels = RandomGenUtils.calculateLevels(layout.getPosDistribution());
-		//Forbidden Runes challenge: half of the dungeon's upgrade scrolls are removed (v2.2 levelgen-safe behavior)
-		souLevels = RandomGenUtils.calculateLevels(isChallenged(Challenges.NO_SCROLLS) ?
-				RandomGenUtils.halveQuantities(layout.getSouDistribution()) : layout.getSouDistribution());
-		asLevels = RandomGenUtils.calculateLevels(layout.getAsDistribution());
-
-		ghostLevel = RandomGenUtils.calculateQuestLevel(layout.getGhostSpawnLevels());
-		wandmakerLevel = RandomGenUtils.calculateQuestLevel(layout.getWandmakerSpawnLevels());
-		blacksmithLevel = RandomGenUtils.calculateQuestLevel(layout.getBlacksmithSpawnLevels());
-		impLevel = RandomGenUtils.calculateQuestLevel(layout.getImpSpawnLevels());
-
 		if (daily) {
 			//Ensures that daily seeds are not in the range of user-enterable seeds
 			seed = SPDSettings.lastDaily() + DungeonSeed.TOTAL_SEEDS;
@@ -254,6 +243,29 @@ public class Dungeon {
 			SecretRoom.initForRun();
 
 			Generator.fullReset();
+
+			//Guaranteed-drop floors and quest-NPC floors MUST be drawn here, inside the
+			//pushed generator, or they are not seeded at all.
+			//
+			//These used to run ~30 lines above, before `seed` was even assigned and long
+			//before pushGenerator, using Kotlin stdlib RNG. The same seed therefore produced
+			//different scroll/potion/ankh floors and different quest-NPC floors on every run,
+			//which defeats labelled seed sharing, daily runs, deterministic coop and replay.
+			//
+			//Placed at the END of this block on purpose: the consumers above (scroll labels,
+			//potion colours, ring gems, room reservations) were already seeded and already
+			//deterministic, so appending rather than inserting leaves their output for any
+			//given seed unchanged.
+			posLevels = RandomGenUtils.calculateLevels(layout.getPosDistribution());
+			//Forbidden Runes challenge: half of the dungeon's upgrade scrolls are removed (v2.2 levelgen-safe behavior)
+			souLevels = RandomGenUtils.calculateLevels(isChallenged(Challenges.NO_SCROLLS) ?
+					RandomGenUtils.halveQuantities(layout.getSouDistribution()) : layout.getSouDistribution());
+			asLevels = RandomGenUtils.calculateLevels(layout.getAsDistribution());
+
+			ghostLevel = RandomGenUtils.calculateQuestLevel(layout.getGhostSpawnLevels());
+			wandmakerLevel = RandomGenUtils.calculateQuestLevel(layout.getWandmakerSpawnLevels());
+			blacksmithLevel = RandomGenUtils.calculateQuestLevel(layout.getBlacksmithSpawnLevels());
+			impLevel = RandomGenUtils.calculateQuestLevel(layout.getImpSpawnLevels());
 
 		Random.resetGenerators();
 		
