@@ -130,3 +130,14 @@ Wraith#spawnAt(int, boolean)
 # which was deliberately NOT taken -- that belongs to the deferred regeneration-pause
 # cluster (cpdu-q7t), so CPDU's LockedFloor form is preserved for now.
 TalismanOfForesight.Foresight#act()
+
+# --- Talent.onItemIdentified emptied by upstream (1 entry) ---
+# Reviewed 2026-08-11 (cpdu-8o4.1). Shrank 13 -> 1 statements because upstream bfee2fb9
+# replaced TEST_SUBJECT and TESTED_HYPOTHESIS, the only two talents that triggered on item
+# identification, with PROVOKED_ANGER and LINGERING_MAGIC which trigger elsewhere. Verified
+# byte-identical to v2.5.4, comment included:
+#     public static void onItemIdentified( Hero hero, Item item ){
+#         //currently no talents that trigger here, it wasn't a very popular trigger =(
+#     }
+# The method is kept as an extension point, exactly as upstream keeps it.
+Talent#onItemIdentified(Hero, Item)
