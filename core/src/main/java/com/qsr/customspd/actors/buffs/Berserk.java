@@ -152,7 +152,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 				}
 			}
 		} else if (state == State.RECOVERING && levelRecovery == 0
-				&& (target.buff(LockedFloor.class) == null || target.buff(LockedFloor.class).regenOn())){
+				&& Regeneration.regenOn()){
 			turnRecovery--;
 			if (turnRecovery <= 0){
 				turnRecovery = 0;

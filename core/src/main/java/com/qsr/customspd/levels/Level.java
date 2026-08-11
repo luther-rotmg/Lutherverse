@@ -33,6 +33,7 @@ import com.qsr.customspd.actors.blobs.SmokeScreen;
 import com.qsr.customspd.actors.blobs.Web;
 import com.qsr.customspd.actors.blobs.WellWater;
 import com.qsr.customspd.actors.buffs.Awareness;
+import com.qsr.customspd.actors.buffs.Regeneration;
 import com.qsr.customspd.actors.buffs.Blindness;
 import com.qsr.customspd.actors.buffs.Buff;
 import com.qsr.customspd.actors.buffs.Burning;
@@ -1140,7 +1141,7 @@ public abstract class Level implements Bundlable {
 					&& ch == Dungeon.hero && Dungeon.hero.hasTalent(Talent.REJUVENATING_STEPS)
 					&& ch.buff(Talent.RejuvenatingStepsCooldown.class) == null){
 
-				if (Dungeon.hero.buff(LockedFloor.class) != null && !Dungeon.hero.buff(LockedFloor.class).regenOn()){
+				if (!Regeneration.regenOn()){
 					set(ch.pos, Terrain.FURROWED_GRASS);
 				} else if (ch.buff(Talent.RejuvenatingStepsFurrow.class) != null && ch.buff(Talent.RejuvenatingStepsFurrow.class).count() >= 200) {
 					set(ch.pos, Terrain.FURROWED_GRASS);
