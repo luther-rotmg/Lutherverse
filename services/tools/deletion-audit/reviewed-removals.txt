@@ -119,3 +119,13 @@ WndTextInput#update()
 # a new private spawnAt(int, boolean, boolean) overload; the 2-arg form delegates.
 # Verified at Wraith.java:106-110. Behavior preserved.
 Wraith#spawnAt(int, boolean)
+
+# --- Foresight extract-method (1 entry) ---
+# Reviewed 2026-08-10 (cpdu-ijc). TalismanOfForesight.Foresight#act() shrank 58 -> 19
+# statements because upstream fae73101 splits the awareness scan out into a new
+# checkAwareness(), which the hero calls on level load and at high movespeed. Nothing was
+# lost: the statements moved to checkAwareness() in the same class. port-verify reports
+# 96.2% against fae73101, and its single unaccounted line is `&& Regeneration.regenOn()) {`,
+# which was deliberately NOT taken -- that belongs to the deferred regeneration-pause
+# cluster (cpdu-q7t), so CPDU's LockedFloor form is preserved for now.
+TalismanOfForesight.Foresight#act()
