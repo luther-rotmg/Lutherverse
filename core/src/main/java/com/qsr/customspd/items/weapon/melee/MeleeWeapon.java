@@ -28,7 +28,7 @@ import com.qsr.customspd.actors.buffs.ArtifactRecharge;
 import com.qsr.customspd.actors.buffs.Regeneration;
 import com.qsr.customspd.actors.buffs.Barrier;
 import com.qsr.customspd.actors.buffs.Buff;
-import com.qsr.customspd.actors.buffs.Haste;
+import com.qsr.customspd.actors.buffs.GreaterHaste;
 import com.qsr.customspd.actors.buffs.MonkEnergy;
 import com.qsr.customspd.actors.buffs.Recharging;
 import com.qsr.customspd.actors.hero.Hero;
@@ -257,8 +257,8 @@ public class MeleeWeapon extends Weapon {
 
 	public static void onAbilityKill( Hero hero, Char killed ){
 		if (killed.alignment == Char.Alignment.ENEMY && hero.hasTalent(Talent.LETHAL_HASTE)){
-			//effectively 2/3 turns of haste
-			Buff.prolong(hero, Haste.class, 1.67f+hero.pointsInTalent(Talent.LETHAL_HASTE));
+			//effectively 3/5 turns of greater haste
+			Buff.affect(hero, GreaterHaste.class).set(2 + 2*hero.pointsInTalent(Talent.LETHAL_HASTE));
 		}
 	}
 
@@ -310,29 +310,6 @@ public class MeleeWeapon extends Weapon {
 			}
 		}
 		return super.buffedLvl();
-	}
-
-	@Override
-	public float accuracyFactor(Char owner, Char target) {
-		float ACC = super.accuracyFactor(owner, target);
-
-		if (owner instanceof Hero
-				&& ((Hero) owner).hasTalent(Talent.PRECISE_ASSAULT)
-				//does not trigger on ability attacks
-				&& ((Hero) owner).belongings.abilityWeapon != this) {
-			if (((Hero) owner).heroClass != HeroClass.DUELIST) {
-				//persistent +10%/20%/30% ACC for other heroes
-				ACC *= 1f + 0.1f * ((Hero) owner).pointsInTalent(Talent.PRECISE_ASSAULT);
-			} else if (this instanceof Flail && owner.buff(Flail.SpinAbilityTracker.class) != null){
-				//do nothing, this is not a regular attack so don't consume preciase assault
-			} else if (owner.buff(Talent.PreciseAssaultTracker.class) != null) {
-				// 2x/4x/8x ACC for duelist if she just used a weapon ability
-				ACC *= Math.pow(2, ((Hero) owner).pointsInTalent(Talent.PRECISE_ASSAULT));
-				owner.buff(Talent.PreciseAssaultTracker.class).detach();
-			}
-		}
-
-		return ACC;
 	}
 
 	@Override

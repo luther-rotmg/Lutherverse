@@ -37,7 +37,7 @@ import com.qsr.customspd.actors.buffs.ChampionEnemy;
 import com.qsr.customspd.actors.buffs.Charm;
 import com.qsr.customspd.actors.buffs.Corruption;
 import com.qsr.customspd.actors.buffs.Dread;
-import com.qsr.customspd.actors.buffs.Haste;
+import com.qsr.customspd.actors.buffs.GreaterHaste;
 import com.qsr.customspd.actors.buffs.Hunger;
 import com.qsr.customspd.actors.buffs.Invisibility;
 import com.qsr.customspd.actors.buffs.MindVision;
@@ -841,7 +841,7 @@ public abstract class Mob extends Char {
 						&& Dungeon.hero.hasTalent(Talent.LETHAL_HASTE)
 						&& Dungeon.hero.buff(Talent.LethalHasteCooldown.class) == null){
 					Buff.affect(Dungeon.hero, Talent.LethalHasteCooldown.class, 100f);
-					Buff.affect(Dungeon.hero, Haste.class, 1.67f + Dungeon.hero.pointsInTalent(Talent.LETHAL_HASTE));
+					Buff.affect(Dungeon.hero, GreaterHaste.class).set(2 + 2*Dungeon.hero.pointsInTalent(Talent.LETHAL_HASTE));
 				}
 			}
 

@@ -48,6 +48,7 @@ import com.qsr.customspd.actors.buffs.Charm;
 import com.qsr.customspd.actors.buffs.Combo;
 import com.qsr.customspd.actors.buffs.Drowsy;
 import com.qsr.customspd.actors.buffs.Foresight;
+import com.qsr.customspd.actors.buffs.GreaterHaste;
 import com.qsr.customspd.actors.buffs.HoldFast;
 import com.qsr.customspd.actors.buffs.Hunger;
 import com.qsr.customspd.actors.buffs.Invisibility;
@@ -125,6 +126,7 @@ import com.qsr.customspd.items.wands.Wand;
 import com.qsr.customspd.items.wands.WandOfLivingEarth;
 import com.qsr.customspd.items.weapon.SpiritBow;
 import com.qsr.customspd.items.weapon.Weapon;
+import com.qsr.customspd.items.weapon.melee.Crossbow;
 import com.qsr.customspd.items.weapon.melee.Flail;
 import com.qsr.customspd.items.weapon.melee.MagesStaff;
 import com.qsr.customspd.items.weapon.melee.Quarterstaff;
@@ -479,6 +481,41 @@ public class Hero extends Char {
 				accuracy *= (0.5f + 0.2f*pointsInTalent(Talent.POINT_BLANK));
 			} else {
 				accuracy *= 1.5f;
+			}
+		//precise assault and restored agility
+		} else {
+			if ((hasTalent(Talent.PRECISE_ASSAULT) || hasTalent(Talent.RESTORED_AGILITY))
+					//does not trigger on ability attacks
+					&& belongings.abilityWeapon != wep && buff(MonkEnergy.MonkAbility.UnarmedAbilityTracker.class) == null){
+				//non-duelist benefit for precise assault, can stack with restored agility
+				if (heroClass != HeroClass.DUELIST) {
+					//persistent +10%/20%/30% ACC for other heroes
+					accuracy *= 1f + 0.1f * pointsInTalent(Talent.PRECISE_ASSAULT);
+				}
+				if (wep instanceof Flail && buff(Flail.SpinAbilityTracker.class) != null){
+					//do nothing, this is not a regular attack so don't consume talent fx
+				} else if (wep instanceof Crossbow && buff(Crossbow.ChargedShot.class) != null){
+					//do nothing, this is not a regular attack so don't consume talent fx
+				} else if (buff(Talent.PreciseAssaultTracker.class) != null) {
+					// 2x/5x/inf. ACC for duelist if she just used a weapon ability
+					switch (pointsInTalent(Talent.PRECISE_ASSAULT)){
+						default: case 1:
+							accuracy *= 2; break;
+						case 2:
+							accuracy *= 5; break;
+						case 3:
+							accuracy *= Float.POSITIVE_INFINITY; break;
+					}
+					buff(Talent.PreciseAssaultTracker.class).detach();
+				} else if (buff(Talent.RestoredAgilACCTracker.class) != null){
+					// 3x/inf. ACC, depending on talent level
+					accuracy *= pointsInTalent(Talent.RESTORED_AGILITY) == 2 ? Float.POSITIVE_INFINITY : 3f;
+					Talent.RestoredAgilACCTracker buff = buff(Talent.RestoredAgilACCTracker.class);
+					buff.uses--;
+					if (buff.uses <= 0) {
+						buff.detach();
+					}
+				}
 			}
 		}
 
@@ -1575,6 +1612,9 @@ public class Hero extends Char {
 		if (step != -1) {
 
 			float delay = 1 / speed();
+			if (buff(GreaterHaste.class) != null){
+				delay = 0;
+			}
 
 			if (Dungeon.level.pit[step] && !Dungeon.level.solid[step]
 					&& (!flying || buff(Levitation.class) != null && buff(Levitation.class).detachesWithinDelay(delay))){
@@ -1588,6 +1628,10 @@ public class Hero extends Char {
 				}
 				canSelfTrample = false;
 				return false;
+			}
+
+			if (buff(GreaterHaste.class) != null){
+				buff(GreaterHaste.class).spendMove();
 			}
 
 			if (subClass == HeroSubClass.FREERUNNER){

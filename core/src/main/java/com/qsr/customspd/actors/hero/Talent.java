@@ -266,6 +266,26 @@ public enum Talent {
 		public float iconFadePercent() { return Math.max(0, visualcooldown() / 50); }
 	};
 	public static class RestoredAgilityTracker extends FlavourBuff{};
+	//upstream splits its liquid-agility tracker into EVA and ACC halves; CPDU keeps its own
+	//RESTORED_AGILITY flavour and trigger, so only the new ACC half is added here
+	public static class RestoredAgilACCTracker extends FlavourBuff{
+		public int uses;
+		{ type = buffType.POSITIVE; }
+		public Pair<Asset, Asset> icon() { return BuffIndicator.INVERT_MARK; }
+		public void tintIcon(Image icon) { icon.hardlight(0f, 0.6f, 1f); }
+		public float iconFadePercent() { return Math.max(0, 1f - (visualcooldown() / 5)); }
+		private static final String USES = "uses";
+		@Override
+		public void storeInBundle(Bundle bundle) {
+			super.storeInBundle(bundle);
+			bundle.put(USES, uses);
+		}
+		@Override
+		public void restoreFromBundle(Bundle bundle) {
+			super.restoreFromBundle(bundle);
+			uses = bundle.getInt(USES);
+		}
+	};
 	public static class LethalHasteCooldown extends FlavourBuff{
 		public Pair<Asset, Asset> icon() { return BuffIndicator.TIME; }
 		public void tintIcon(Image icon) { icon.hardlight(0.35f, 0f, 0.7f); }
@@ -597,6 +617,7 @@ public enum Talent {
 		}
 		if (hero.hasTalent(RESTORED_AGILITY)){
 			Buff.prolong(hero, RestoredAgilityTracker.class, hero.cooldown());
+			Buff.prolong(hero, RestoredAgilACCTracker.class, 5f).uses = 1;
 		}
 	}
 
