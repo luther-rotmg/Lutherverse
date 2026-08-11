@@ -76,6 +76,29 @@ class DeletionAuditCliTest {
     }
 
     @Test
+    void aRenameToADifferentFileNameIsRejected(@TempDir Path repoDir)
+            throws IOException, InterruptedException {
+        // git -M defaults to 50% similarity, which is loose enough to mis-pair unrelated
+        // files. Over this project's own Slice 1 range it reports
+        //   standard/ExitRoom.java -> standard/LibraryRingRoom.java   (55%)
+        // even though ExitRoom actually moved to standard/exit/ExitRoom.java. Acting on that
+        // would compare one class's inventory against a different class's content.
+        //
+        // A Java class move always keeps the file name, so a changed basename means it is
+        // not a class move and must not be treated as one.
+        String source = "package p; class Foo { void bar() { int x = 1; int y = 2; int z = 3; } }";
+        String baseSha = commitFile(repoDir, "old/Foo.java", source, "add Foo");
+        renameFile(repoDir, "old/Foo.java", "old/CompletelyDifferentName.java");
+        String headSha = commitAll(repoDir, "rename Foo to something else");
+
+        Map<String, String> renames = GitCommands.detectRenames(repoDir.toFile(), baseSha, headSha);
+
+        assertFalse(renames.containsKey("old/Foo.java"),
+                "a rename that changes the file name is not a class move and must be "
+                        + "rejected, or the audit compares unrelated classes");
+    }
+
+    @Test
     void renamedFileWithUnchangedContentsYieldsZeroFindings(@TempDir Path repoDir)
             throws IOException, InterruptedException {
         String source = "package p; class Foo { void bar() { int x = 1; int y = 2; } }";

@@ -102,11 +102,35 @@ public final class GitCommands {
                 continue;
             }
             String[] fields = trimmed.split("\t");
-            if (fields.length == 3 && fields[0].startsWith("R")) {
+            if (fields.length == 3 && fields[0].startsWith("R") && isSameFileName(fields[1], fields[2])) {
                 renames.put(fields[1], fields[2]);
             }
         }
         return renames;
+    }
+
+    /**
+     * Guards against git's similarity heuristic pairing two unrelated files.
+     *
+     * <p>{@code git -M} defaults to a 50% threshold, loose enough to mis-pair real files in
+     * this repo: over the Slice 1 range it reports
+     * {@code standard/ExitRoom.java -> standard/LibraryRingRoom.java} at 55% similarity,
+     * even though ExitRoom actually moved to {@code standard/exit/ExitRoom.java}. Acting on
+     * that would compare one class's inventory against a different class's content and
+     * report nonsense.
+     *
+     * <p>A Java class move always preserves the file name, since a public class must live in
+     * a file of the same name. Requiring an unchanged basename therefore keeps genuine
+     * package moves ({@code EntranceRoom.java -> entrance/EntranceRoom.java}) and rejects the
+     * mis-pairings, without having to guess at a similarity threshold.
+     */
+    private static boolean isSameFileName(String from, String to) {
+        return fileName(from).equals(fileName(to));
+    }
+
+    private static String fileName(String path) {
+        int slash = path.lastIndexOf('/');
+        return slash < 0 ? path : path.substring(slash + 1);
     }
 
     /**
