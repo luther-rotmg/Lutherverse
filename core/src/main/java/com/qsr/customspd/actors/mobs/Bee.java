@@ -33,6 +33,7 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 //FIXME the AI for these things is becoming a complete mess, should refactor
 public class Bee extends Mob {
@@ -156,7 +157,9 @@ public class Bee extends Mob {
 					|| (buff( Amok.class ) == null && enemy.isInvulnerable(getClass()))){
 				
 				//find all mobs near the pot
-				HashSet<Char> enemies = new HashSet<>();
+				//LinkedHashSet: this set is fed to Random.element below, so its iteration order picks
+				//the target. Identity-hash order would vary between runs of the same seed.
+				HashSet<Char> enemies = new LinkedHashSet<>();
 				for (Mob mob : Dungeon.level.mobs) {
 					if (!(mob == this)
 							&& Dungeon.level.distance(mob.pos, potPos) <= 3

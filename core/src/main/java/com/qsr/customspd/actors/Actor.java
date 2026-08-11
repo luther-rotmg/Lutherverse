@@ -32,6 +32,7 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.SparseArray;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 public abstract class Actor implements Bundlable {
 	
@@ -138,8 +139,11 @@ public abstract class Actor implements Bundlable {
 	// *** Static members ***
 	// **********************
 	
-	private static HashSet<Actor> all = new HashSet<>();
-	private static HashSet<Char> chars = new HashSet<>();
+	//LinkedHashSet, not HashSet: this is the actor scheduling set. Actor and Char do not
+	//override hashCode, so plain-HashSet iteration follows identity hash and varies between
+	//JVM runs -- which makes TURN RESOLUTION ORDER itself nondeterministic for a given seed.
+	private static HashSet<Actor> all = new LinkedHashSet<>();
+	private static HashSet<Char> chars = new LinkedHashSet<>();
 	private static volatile Actor current;
 
 	private static SparseArray<Actor> ids = new SparseArray<>();

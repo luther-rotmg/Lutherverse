@@ -69,6 +69,7 @@ import com.watabou.utils.Reflection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 public class YogDzewa extends Mob {
 
@@ -196,7 +197,7 @@ public class YogDzewa extends Mob {
 		} else {
 
 			boolean terrainAffected = false;
-			HashSet<Char> affected = new HashSet<>();
+			HashSet<Char> affected = new LinkedHashSet<>();
 			//delay fire on a rooted hero
 			if (!Dungeon.hero.rooted) {
 				for (int i : targetedCells) {

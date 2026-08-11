@@ -917,7 +917,7 @@ public abstract class Char extends Actor {
 	@SuppressWarnings("unchecked")
 	//returns all buffs assignable from the given buff class
 	public synchronized <T extends Buff> HashSet<T> buffs( Class<T> c ) {
-		HashSet<T> filtered = new HashSet<>();
+		LinkedHashSet<T> filtered = new LinkedHashSet<>();
 		for (Buff b : buffs) {
 			if (c.isInstance( b )) {
 				filtered.add( (T)b );
@@ -1117,10 +1117,10 @@ public abstract class Char extends Actor {
 		return buff(Challenge.SpectatorFreeze.class) != null;
 	}
 
-	protected HashSet<Property> properties = new HashSet<>();
+	protected HashSet<Property> properties = new LinkedHashSet<>();
 
 	public HashSet<Property> properties() {
-		HashSet<Property> props = new HashSet<>(properties);
+		HashSet<Property> props = new LinkedHashSet<>(properties);
 		//TODO any more of these and we should make it a property of the buff, like with resistances/immunities
 		if (buff(ChampionEnemy.Giant.class) != null) {
 			props.add(Property.LARGE);

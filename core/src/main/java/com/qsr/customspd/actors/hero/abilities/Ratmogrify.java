@@ -53,6 +53,7 @@ import com.watabou.utils.Random;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 public class Ratmogrify extends ArmorAbility {
 
@@ -140,7 +141,7 @@ public class Ratmogrify extends ArmorAbility {
 		rat.pos = ch.pos;
 
 		//preserve some buffs
-		HashSet<Buff> persistentBuffs = new HashSet<>();
+		HashSet<Buff> persistentBuffs = new LinkedHashSet<>();
 		for (Buff b : ch.buffs()){
 			if (b.revivePersists){
 				persistentBuffs.add(b);

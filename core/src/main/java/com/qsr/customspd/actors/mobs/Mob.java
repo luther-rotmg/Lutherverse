@@ -94,6 +94,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 public abstract class Mob extends Char {
 
@@ -326,7 +327,7 @@ public abstract class Mob extends Char {
 
 		if ( newEnemy ) {
 
-			HashSet<Char> enemies = new HashSet<>();
+			HashSet<Char> enemies = new LinkedHashSet<>();
 
 			//if we are amoked...
 			if ( buff(Amok.class) != null) {
