@@ -15,7 +15,7 @@ For the release-facing change list, see [CHANGELOG.md](CHANGELOG.md).
 | Item | Status | Notes |
 |---|---|---|
 | **P0 — seeded runs** (`cpdu-yaa`) | 🟢 **fixed**, scope open | Both halves landed (right RNG + inside the pushed generator), with 8 tests and a negative control. *Same seed now reproduces the same dungeon layout.* Still open: `Level.mobs` is a `HashSet`, byte-identical to upstream, so *same seed reproduces the same run* does not yet hold — closing that means diverging from upstream and touching serialised state. |
-| Sub-B Slice 1 | 🟢 **resumed** | Deferred clusters worked with port-verify + deletion-audit in the loop. Landed: dark-gold log, foresight refresh, the regeneration-pause epic (15 call sites), the save-version precheck, and the Barkskin multi-source rewrite (6 call sites). 22 batches (~230 commits) still parked. |
+| Sub-B Slice 1 | 🟢 **resumed** | Deferred clusters worked with port-verify + deletion-audit in the loop. Landed: dark-gold log, foresight refresh, the regeneration-pause epic (15 call sites), the save-version precheck, the Barkskin multi-source rewrite (6 call sites), and — reviewed out of the 2026-08-11 AFK run — the T1 talent replacement, invalid-hero-position guards, seed-independent guaranteed generation, and deletion-audit rename detection. 22 batches (~230 commits) still parked. |
 | deletion-audit backlog | ✅ **zero** | 16 findings triaged against tag v2.5.4; 15 verified superseded, 1 was a real regression and is fixed. CI ceiling back to 0. |
 | CI | ✅ **green** | Run 31446047082. Found and fixed 3 real issues on the way: gradlew exec bit, a Windows-only test assumption, and a malformed step. |
 
@@ -30,7 +30,7 @@ For the release-facing change list, see [CHANGELOG.md](CHANGELOG.md).
 
 | ID | Pri | Summary |
 |---|---|---|
-| — | — | No open defects. |
+| — | P2 | `depth/5` region math needs adapting to CPDU's layout model (not a live bug; breaks for custom packs and 200 floors) |
 
 **Closed 2026-08-10:** `cpdu-q0v` + `cpdu-h6p` clusters (Barkskin multi-source, save-version precheck), `cpdu-q7t` epic + its 4 subtasks (regeneration-pause consolidation), `cpdu-yaa` (both determinism layers), `cpdu-48j` + `cpdu-ijc` (Slice 1 Hero clusters), `cpdu-6lz` (port-verify built and validated both directions), `cpdu-5p6` (DM201 — verified faithful port, upstream has the same dead
 `canVent` override), `cpdu-jm4` (Noisemaker — faithful port; unresolvable classes are dropped
