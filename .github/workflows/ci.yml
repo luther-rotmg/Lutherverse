@@ -84,7 +84,11 @@ jobs:
         # Java files. If the source set is ever removed, the assertion above would pass
         # vacuously on a missing directory, so check the directory itself.
         run: |
-          [ -d core/src/test ] \n            || { echo "::error::core/src/test is gone - core:test is NO-SOURCE and gates nothing"; exit 1; }
+          if [ ! -d core/src/test ]; then
+            echo "::error::core/src/test is gone - core:test is NO-SOURCE and gates nothing"
+            exit 1
+          fi
+          echo "core test source set present"
 
       - name: Lint
         run: ./gradlew :core:lint :android:lint
