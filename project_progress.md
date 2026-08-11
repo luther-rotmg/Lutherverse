@@ -14,24 +14,23 @@ For the release-facing change list, see [CHANGELOG.md](CHANGELOG.md).
 
 | Item | Status | Notes |
 |---|---|---|
-| **P0 — seeded runs are not seeded** (`cpdu-yaa`) | 🔴 open | Guaranteed-item and quest-NPC floors are computed before the seed exists, with an unseeded Kotlin RNG. Blocks seed sharing, daily runs, coop. Should land *with* a determinism test. |
+| **P0 — seeded runs** (`cpdu-yaa`) | 🟢 **fixed**, scope open | Both halves landed (right RNG + inside the pushed generator), with 8 tests and a negative control. *Same seed now reproduces the same dungeon layout.* Still open: `Level.mobs` is a `HashSet`, byte-identical to upstream, so *same seed reproduces the same run* does not yet hold — closing that means diverging from upstream and touching serialised state. |
 | Sub-B Slice 1 remainder | 🟡 paused | 22 batches (~230 commits) parked; 27 ready beads |
 | deletion-audit backlog | ✅ **zero** | 16 findings triaged against tag v2.5.4; 15 verified superseded, 1 was a real regression and is fixed. CI ceiling back to 0. |
 | CI | ✅ **green** | Run 31446047082. Found and fixed 3 real issues on the way: gradlew exec bit, a Windows-only test assumption, and a malformed step. |
 
 ## Next
 
-1. Seeded-determinism harness for `:core` — needs the `gdx-backend-headless` bootstrap spike (do this by hand, 1–3 days, not a bead).
-2. Fix `cpdu-yaa` on top of that harness.
-3. `port-verify` (`cpdu-6lz`) — the design insight is that `services/tools/namespace-transform` is the missing link for comparing an upstream diff against its CPDU port.
-4. Resume the Slice 1 batch burndown with Mergiraf in place.
+1. `port-verify` (`cpdu-6lz`) — the design insight is that `services/tools/namespace-transform` is the missing link for comparing an upstream diff against its CPDU port.
+2. Decide the determinism guarantee: layout-only (done) vs whole-run (needs the `Level.mobs` call).
+3. Resume the Slice 1 batch burndown with Mergiraf in place.
+4. `gdx-backend-headless` bootstrap spike — still needed for levelgen invariants (reachability, solvability), just no longer blocking the P0.
 5. Sub-C modding API design — gated on a vision-decomposition pass that has not happened yet.
 
 ## Open defects
 
 | ID | Pri | Summary |
 |---|---|---|
-| `cpdu-yaa` | P0 | Guaranteed-item and quest-NPC floors are seed-independent |
 | `cpdu-6lz` | P1 | Build `port-verify` |
 
 **Closed 2026-08-10:** `cpdu-5p6` (DM201 — verified faithful port, upstream has the same dead

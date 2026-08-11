@@ -83,8 +83,8 @@ Two coop modes for two kinds of session:
 
 Short bulletin. Full detail in [project_progress.md](project_progress.md).
 
-- 🔴 **P0 — seeded runs aren't actually seeded.** Guaranteed item and quest-NPC floors are computed before the dungeon seed exists, using an unseeded RNG. Same seed, two runs, different dungeon composition. Blocks seed sharing, daily runs and coop.
-- 🟡 **Seeded-determinism test harness** for `core`, which the P0 fix should land on top of rather than before.
+- 🟢 **Seeded runs are now actually seeded.** Guaranteed item and quest-NPC floors were being picked before the dungeon seed existed, with an unseeded RNG — same seed, different dungeon every time. Fixed, with tests. Same seed now reproduces the same layout.
+- 🟡 **How strong should determinism be?** Mob iteration order still varies per run (inherited from upstream), so *same seed, same run* does not hold yet. Closing that means diverging from upstream.
 - 🟡 **Sub-B Slice 1 remainder** — 22 batches (~230 commits) and 27 ready beads, now with syntax-aware merge tooling in place.
 - ⏳ **`port-verify`** — prove a ported upstream commit kept every hunk, which nothing currently checks.
 
