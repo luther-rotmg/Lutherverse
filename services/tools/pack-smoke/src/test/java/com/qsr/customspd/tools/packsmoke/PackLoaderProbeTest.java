@@ -108,9 +108,14 @@ class PackLoaderProbeTest {
 
     @Test
     void manifestWithUnresolvableAssetPathReturnsFailedLoadException() throws IOException {
-        // '?' is not a legal Windows path character; resolving it throws
-        // InvalidPathException — a genuine unexpected-exception condition
-        // distinct from "file simply doesn't exist".
+        // A NUL character is illegal in a path on EVERY platform, so resolving it throws
+        // InvalidPathException — a genuine unexpected-exception condition, distinct from
+        // "the file simply doesn't exist".
+        //
+        // This used to use '?', which is illegal only on Windows. On Linux '?' is a
+        // perfectly legal filename character, so the path resolved, the file was merely
+        // absent, and the probe returned FAILED_ASSET_MISSING instead. The test passed
+        // locally and failed on the first CI run.
         Path packDir = tempDir.resolve("bad-asset-path-pack");
         Files.createDirectories(packDir);
         Files.writeString(packDir.resolve("mod_info.json"), """
@@ -118,7 +123,7 @@ class PackLoaderProbeTest {
                   "name": "Bad Path Pack",
                   "version": 1,
                   "min_cpd_version": 10,
-                  "assets": ["sprites/inval?d.png"]
+                  "assets": ["sprites/inval\\u0000d.png"]
                 }
                 """);
 
