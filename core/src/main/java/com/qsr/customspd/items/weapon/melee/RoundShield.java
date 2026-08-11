@@ -31,6 +31,7 @@ import com.qsr.customspd.assets.Asset;
 import com.qsr.customspd.messages.Messages;
 import com.qsr.customspd.assets.GeneralAsset;
 import com.qsr.customspd.ui.BuffIndicator;
+import com.watabou.noosa.Image;
 
 import kotlin.Pair;
 
@@ -70,7 +71,7 @@ public class RoundShield extends MeleeWeapon {
 
 	public static void guardAbility(Hero hero, int duration, MeleeWeapon wep){
 		wep.beforeAbilityUsed(hero, null);
-		Buff.prolong(hero, GuardTracker.class, duration);
+		Buff.prolong(hero, GuardTracker.class, duration).hasBlocked = false;
 		hero.sprite.operate(hero.pos);
 		hero.spendAndNext(Actor.TICK);
 		wep.afterAbilityUsed(hero);
@@ -83,9 +84,20 @@ public class RoundShield extends MeleeWeapon {
 			type = buffType.POSITIVE;
 		}
 
+		public boolean hasBlocked = false;
+
 		@Override
 		public Pair<Asset, Asset> icon() {
 			return BuffIndicator.DUEL_GUARD;
+		}
+
+		@Override
+		public void tintIcon(Image icon) {
+			if (hasBlocked){
+				icon.tint(0x651f66, 0.5f);
+			} else {
+				icon.resetColor();
+			}
 		}
 
 		@Override
