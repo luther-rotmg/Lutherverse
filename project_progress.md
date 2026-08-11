@@ -21,8 +21,7 @@ For the release-facing change list, see [CHANGELOG.md](CHANGELOG.md).
 
 ## Next
 
-1. `port-verify` (`cpdu-6lz`) — the design insight is that `services/tools/namespace-transform` is the missing link for comparing an upstream diff against its CPDU port.
-2. Decide the determinism guarantee: layout-only (done) vs whole-run (needs the `Level.mobs` call).
+1. Decide the determinism guarantee: layout-only (done) vs whole-run (needs the `Level.mobs` call) (`cpdu-6lz`) — the design insight is that `services/tools/namespace-transform` is the missing link for comparing an upstream diff against its CPDU port.
 3. Resume the Slice 1 batch burndown with Mergiraf in place.
 4. `gdx-backend-headless` bootstrap spike — still needed for levelgen invariants (reachability, solvability), just no longer blocking the P0.
 5. Sub-C modding API design — gated on a vision-decomposition pass that has not happened yet.
@@ -31,9 +30,9 @@ For the release-facing change list, see [CHANGELOG.md](CHANGELOG.md).
 
 | ID | Pri | Summary |
 |---|---|---|
-| `cpdu-6lz` | P1 | Build `port-verify` |
+| `cpdu-yaa` | P0→open | Layout determinism **fixed**; whole-run determinism still open pending the `Level.mobs` decision |
 
-**Closed 2026-08-10:** `cpdu-5p6` (DM201 — verified faithful port, upstream has the same dead
+**Closed 2026-08-10:** `cpdu-6lz` (port-verify built and validated both directions), `cpdu-5p6` (DM201 — verified faithful port, upstream has the same dead
 `canVent` override), `cpdu-jm4` (Noisemaker — faithful port; unresolvable classes are dropped
 not crashed, and an alias would have been actively wrong), `cpdu-c4w` (RNG sweep — 2 defects
 fixed, rest verified safe), `cpdu-bnp` (8 shrinks triaged; 1 was a real regression, fixed),

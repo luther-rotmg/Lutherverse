@@ -86,7 +86,7 @@ Short bulletin. Full detail in [project_progress.md](project_progress.md).
 - 🟢 **Seeded runs are now actually seeded.** Guaranteed item and quest-NPC floors were being picked before the dungeon seed existed, with an unseeded RNG — same seed, different dungeon every time. Fixed, with tests. Same seed now reproduces the same layout.
 - 🟡 **How strong should determinism be?** Mob iteration order still varies per run (inherited from upstream), so *same seed, same run* does not hold yet. Closing that means diverging from upstream.
 - 🟡 **Sub-B Slice 1 remainder** — 22 batches (~230 commits) and 27 ready beads, now with syntax-aware merge tooling in place.
-- ⏳ **`port-verify`** — prove a ported upstream commit kept every hunk, which nothing currently checks.
+- ⏳ **Resume the Slice 1 burndown** — 22 batches (~230 commits), now with structural merge and port-verify in place.
 
 ---
 
@@ -101,6 +101,7 @@ negative control proving they can fail.
 - **`deletion-audit`** — catches removals the API-surface diff structurally cannot see: private members, and statements dropped from a method whose signature never changed. Its first run found 43 findings across 1,021 files; all are now triaged and it reports **zero**. It caught a real regression: region-tinted grass and ember tiles had silently stopped rendering.
 - **`desktop-smoke`** — boots the real jar to 120 rendered frames. The first automated proof that the game starts. Replaces an Android emulator smoke that had never once executed the APK.
 - **`manifest-audit`** — seven checks over the manifests defining Slice 1's entire scope.
+- **`port-verify`** — answers "did we port all of it", which nothing else could: api-diff sees only the API surface, deletion-audit has no upstream reference, and `git range-diff` can't pair commits across the namespace rename.
 - **Android Lint** wired as a ratcheted gate over `core` and `android`. It ships inside AGP and had never been run.
 - **`options.release = 8`** — constrains the Java 8 modules to the Java 8 *API*, not just the language level.
 - **First tests in `core`** — `core:test` was `NO-SOURCE` across 1019 Java and 49 Kotlin files.
