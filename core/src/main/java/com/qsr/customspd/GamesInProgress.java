@@ -99,13 +99,19 @@ public class GamesInProgress {
 			try {
 				
 				Bundle bundle = FileUtils.bundleFromFile(gameFile(slot));
-				info = new Info();
-				info.slot = slot;
-				Dungeon.preview(info, bundle);
-				
-				//saves from before this version are not supported
-				if (info.version < ShatteredPixelDungeon.LAST_SUPPORTED_SAVES_VERSION) {
+
+				//saves from before this version are not supported.
+				//
+				//Checked BEFORE Dungeon.preview() rather than after: preview() runs
+				//Hero.preview() and Statistics.preview() over the bundle, so testing
+				//info.version afterwards meant an unsupported save format had already been
+				//parsed by code that does not expect it, and the result was then discarded.
+				if (bundle.getInt(Dungeon.VERSION) < ShatteredPixelDungeon.LAST_SUPPORTED_SAVES_VERSION) {
 					info = null;
+				} else {
+					info = new Info();
+					info.slot = slot;
+					Dungeon.preview(info, bundle);
 				}
 
 			} catch (IOException e) {

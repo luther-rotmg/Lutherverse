@@ -456,7 +456,10 @@ public class Dungeon {
 	}
 
 	private static final String INIT_VER	= "init_ver";
-	private static final String VERSION		= "version";
+	//public so GamesInProgress can read the save version BEFORE parsing the rest of the
+	//bundle -- see upstream 3b79b0c2. Exposing the key alone is not the fix; the reordered
+	//precheck in GamesInProgress.check() is.
+	public  static final String VERSION		= "version";
 	private static final String SEED		= "seed";
 	private static final String CUSTOM_SEED	= "custom_seed";
 	private static final String DAILY	    = "daily";
