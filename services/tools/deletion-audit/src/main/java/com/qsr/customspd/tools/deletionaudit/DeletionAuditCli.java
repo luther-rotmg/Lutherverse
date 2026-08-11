@@ -5,7 +5,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
@@ -76,16 +79,39 @@ public final class DeletionAuditCli {
     /** Runs the audit without printing or exiting. Exposed for testability. */
     public static Result run(String base, String head, String filesGlob, int minShrink,
                              Allowlist allowlist) throws IOException {
+        return run(GitCommands.repoRoot(), base, head, filesGlob, minShrink, allowlist);
+    }
+
+    /**
+     * Overload taking an explicit repository root, so a test can point the audit at an
+     * isolated fixture repo instead of this project's own history.
+     */
+    static Result run(File repoRoot, String base, String head, String filesGlob, int minShrink,
+                       Allowlist allowlist) throws IOException {
         Pattern globPattern = globToPattern(filesGlob);
 
         TreeSet<String> candidatePaths = new TreeSet<>();
-        candidatePaths.addAll(GitCommands.listTree(base));
-        candidatePaths.addAll(GitCommands.listTree(head));
+        candidatePaths.addAll(GitCommands.listTree(repoRoot, base));
+        candidatePaths.addAll(GitCommands.listTree(repoRoot, head));
 
         List<String> matchedPaths = new ArrayList<>();
         for (String path : candidatePaths) {
             if (globPattern.matcher(path).matches()) {
                 matchedPaths.add(path);
+            }
+        }
+        Set<String> matchedPathSet = new HashSet<>(matchedPaths);
+
+        // A moved file has no path in common between base and head, so comparing
+        // each path against itself reports every one of its callables as DELETED.
+        // Where git recognises a pure rename, compare the old path's inventory
+        // against the new path's content instead, and skip auditing the new path
+        // a second time as if it were an unrelated addition.
+        Map<String, String> renames = GitCommands.detectRenames(repoRoot, base, head);
+        Set<String> renameTargetsToSkip = new HashSet<>();
+        for (Map.Entry<String, String> rename : renames.entrySet()) {
+            if (matchedPathSet.contains(rename.getKey()) && matchedPathSet.contains(rename.getValue())) {
+                renameTargetsToSkip.add(rename.getValue());
             }
         }
 
@@ -94,8 +120,12 @@ public final class DeletionAuditCli {
         List<String> detailLines = new ArrayList<>();
 
         for (String path : matchedPaths) {
+            if (renameTargetsToSkip.contains(path)) {
+                continue;
+            }
+            String headPath = renames.getOrDefault(path, path);
             InventoryDiff.Report report = InventoryDiff.compare(
-                    inventoryAt(base, path), inventoryAt(head, path), minShrink);
+                    inventoryAt(repoRoot, base, path), inventoryAt(repoRoot, head, headPath), minShrink);
 
             List<InventoryDiff.Deleted> deleted = report.deleted().stream()
                     .filter(d -> !allowlist.permits(d.key())).toList();
@@ -125,10 +155,10 @@ public final class DeletionAuditCli {
      * A file absent at a ref (added or removed by the range) is an empty
      * inventory rather than an error. A genuine git failure propagates.
      */
-    private static CallableInventory inventoryAt(String ref, String path) throws IOException {
+    private static CallableInventory inventoryAt(File repoRoot, String ref, String path) throws IOException {
         String source;
         try {
-            source = GitCommands.readBlob(ref, path);
+            source = GitCommands.readBlob(repoRoot, ref, path);
         } catch (IOException e) {
             if (GitCommands.isPathNotFound(e)) {
                 return new CallableInventory(List.of());

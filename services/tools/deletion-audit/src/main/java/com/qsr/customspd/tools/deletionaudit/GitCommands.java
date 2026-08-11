@@ -7,7 +7,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Repo-root-anchored git invocations.
@@ -46,16 +48,24 @@ public final class GitCommands {
 
     /** Reads a file's content at {@code ref} via {@code git show ref:path}. */
     public static String readBlob(String ref, String path) throws IOException {
+        return readBlob(repoRoot(), ref, path);
+    }
+
+    static String readBlob(File repoRoot, String ref, String path) throws IOException {
         String blobSpec = ref + ":" + path;
         ProcessBuilder builder = new ProcessBuilder("git", "show", blobSpec);
-        builder.directory(repoRoot());
+        builder.directory(repoRoot);
         return runCapturingStdout(builder, "git show " + blobSpec);
     }
 
     /** Lists every path in the tree at {@code ref}, repo-root-relative. */
     public static List<String> listTree(String ref) throws IOException {
+        return listTree(repoRoot(), ref);
+    }
+
+    static List<String> listTree(File repoRoot, String ref) throws IOException {
         ProcessBuilder builder = new ProcessBuilder("git", "ls-tree", "-r", "--name-only", ref);
-        builder.directory(repoRoot());
+        builder.directory(repoRoot);
         String stdout = runCapturingStdout(builder, "git ls-tree " + ref);
 
         List<String> paths = new ArrayList<>();
@@ -66,6 +76,37 @@ public final class GitCommands {
             }
         }
         return paths;
+    }
+
+    /**
+     * Maps each renamed file's path at {@code base} to its path at {@code head},
+     * using git's own similarity heuristic ({@code -M}, default 50% threshold).
+     * Only pure renames (status {@code R}) are included; a path git could not
+     * confidently match is left for the ordinary deleted/added handling.
+     */
+    public static Map<String, String> detectRenames(String base, String head) throws IOException {
+        return detectRenames(repoRoot(), base, head);
+    }
+
+    static Map<String, String> detectRenames(File repoRoot, String base, String head) throws IOException {
+        ProcessBuilder builder = new ProcessBuilder(
+                "git", "diff", "--name-status", "-M", "--diff-filter=R", base, head);
+        builder.directory(repoRoot);
+        String stdout = runCapturingStdout(builder,
+                "git diff --name-status -M --diff-filter=R " + base + " " + head);
+
+        Map<String, String> renames = new LinkedHashMap<>();
+        for (String line : stdout.split("\n")) {
+            String trimmed = line.strip();
+            if (trimmed.isEmpty()) {
+                continue;
+            }
+            String[] fields = trimmed.split("\t");
+            if (fields.length == 3 && fields[0].startsWith("R")) {
+                renames.put(fields[1], fields[2]);
+            }
+        }
+        return renames;
     }
 
     /**

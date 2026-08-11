@@ -40,8 +40,12 @@ Expect these legitimate patterns to show up as findings:
 | File moved | `DELETED` for every callable | `EntranceRoom`/`ExitRoom` package move, 11 entries |
 | Extract method | `SHRUNK` | `Wraith#spawnAt(int, boolean)` 24 → 2, body moved to a 3-arg overload |
 
-The moved-file case is a **tool limitation**: there is no rename detection yet, so a
-moved file reports all of its callables as deleted. Tracked as a follow-up bead.
+The moved-file case was a **tool limitation**: without rename detection, a moved file
+reported all of its callables as deleted. Fixed via `git diff -M`-based rename mapping
+(`GitCommands.detectRenames`) — a renamed file with unchanged content now compares
+against its post-rename path instead of an empty inventory, so it produces zero findings.
+The 11 `EntranceRoom`/`ExitRoom` entries below predate the fix and stay allowlisted for
+this historical range; they are not re-derived retroactively.
 
 ## First run, 2026-08-10
 

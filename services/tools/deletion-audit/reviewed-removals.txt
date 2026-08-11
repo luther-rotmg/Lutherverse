@@ -31,9 +31,10 @@ StandardRoom#canMerge(Level, Point, int)
 # and .../exit/, with Bundle.addAlias registered for save compat. Verified at HEAD:
 # both classes exist at the new paths alongside their 20 region variants.
 #
-# TOOL LIMITATION, not a code defect: deletion-audit compares per-path and has no
-# rename detection, so a moved file reports every one of its callables as DELETED.
-# Follow-up bead filed to add rename following.
+# TOOL LIMITATION at the time, not a code defect: deletion-audit compared per-path with
+# no rename detection, so a moved file reported every one of its callables as DELETED.
+# Fixed in a follow-up (git diff -M rename mapping); these entries predate the fix and
+# stay allowlisted for this historical range rather than being re-derived retroactively.
 EntranceRoom#minWidth()
 EntranceRoom#minHeight()
 EntranceRoom#canMerge(Level, Point, int)
