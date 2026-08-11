@@ -141,3 +141,13 @@ TalismanOfForesight.Foresight#act()
 #     }
 # The method is kept as an extension point, exactly as upstream keeps it.
 Talent#onItemIdentified(Hero, Item)
+
+# --- MeleeWeapon.accuracyFactor moved to Hero.attackSkill (1 entry) ---
+# Reviewed 2026-08-11 (cpdu-flc.1). Upstream d167ce29 moves the melee accuracy-talent logic
+# out of MeleeWeapon.accuracyFactor into Hero.attackSkill so it also fires for unarmed
+# attacks -- that relocation is the entire point of the commit. The override is gone, not the
+# behaviour: its body is now the else-branch of the MissileWeapon check in Hero.attackSkill,
+# with Precise Assault retiered from Math.pow(2, points) to an explicit 2x/5x/infinite switch
+# as upstream specifies. Deleting the override also restores the inherited
+# Weapon.accuracyFactor, which the old body called through via super.
+MeleeWeapon#accuracyFactor(Char, Char)
