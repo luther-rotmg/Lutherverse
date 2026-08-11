@@ -21,6 +21,8 @@
 
 package com.qsr.customspd.actors.buffs;
 
+import com.qsr.customspd.actors.Char;
+
 import com.qsr.customspd.actors.hero.Hero;
 import com.qsr.customspd.actors.hero.Talent;
 import com.qsr.customspd.assets.Asset;
@@ -62,8 +64,10 @@ public class Barkskin extends Buff {
 	}
 	
 	public void set( int value, int time ) {
-		//decide whether to override, preferring high value + low interval
-		if (Math.sqrt(interval)*level <= Math.sqrt(time)*value) {
+		//with multiple instances now allowed, the old sqrt(interval)*level heuristic is no
+		//longer needed to trade duration against strength -- duration stacks across instances
+		//and only the strongest level applies, so a plain level comparison is correct
+		if (level <= value) {
 			level = value;
 			interval = time;
 			spend(time - cooldown() - 1);
@@ -110,5 +114,27 @@ public class Barkskin extends Buff {
 		super.restoreFromBundle( bundle );
 		interval = bundle.getInt( INTERVAL );
 		level = bundle.getInt( LEVEL );
+	}
+
+	//These two methods allow multiple instances of barkskin to stack in terms of duration
+	//while only the strongest bonus is applied.
+
+	public static int currentLevel( Char ch ){
+		int level = 0;
+		for (Barkskin b : ch.buffs(Barkskin.class)){
+			level = Math.max(level, b.level);
+		}
+		return level;
+	}
+
+	//reset if a matching buff exists, otherwise append
+	public static void conditionallyAppend( Char ch, int level, int interval ){
+		for (Barkskin b : ch.buffs(Barkskin.class)){
+			if (b.interval == interval){
+				b.set(level, interval);
+				return;
+			}
+		}
+		Buff.append(ch, Barkskin.class).set(level, interval);
 	}
 }

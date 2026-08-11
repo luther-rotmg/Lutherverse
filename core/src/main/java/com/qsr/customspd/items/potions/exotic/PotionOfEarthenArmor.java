@@ -36,7 +36,7 @@ public class PotionOfEarthenArmor extends ExoticPotion {
 	public void apply( Hero hero ) {
 		identify();
 		
-		Buff.affect(hero, Barkskin.class).set( 2 + hero.lvl/3, 50 );
+		Barkskin.conditionallyAppend( hero, 2 + hero.lvl/3, 50 );
 	}
 	
 }
