@@ -83,10 +83,9 @@ Two coop modes for two kinds of session:
 
 Short bulletin. Full detail in [project_progress.md](project_progress.md).
 
-- 🟢 **Seeded runs are now actually seeded.** Guaranteed item and quest-NPC floors were being picked before the dungeon seed existed, with an unseeded RNG — same seed, different dungeon every time. Fixed, with tests. Same seed now reproduces the same layout.
-- 🟡 **How strong should determinism be?** Mob iteration order still varies per run (inherited from upstream), so *same seed, same run* does not hold yet. Closing that means diverging from upstream.
+- 🟢 **Same seed now reproduces the same run.** Guaranteed item and quest-NPC floors were being picked before the dungeon seed existed with an unseeded RNG, and actor scheduling order varied between runs — so turn resolution itself was nondeterministic. Both fixed.
 - 🟡 **Sub-B Slice 1 remainder** — 22 batches (~230 commits) and 27 ready beads, now with syntax-aware merge tooling in place.
-- ⏳ **Resume the Slice 1 burndown** — 22 batches (~230 commits), now with structural merge and port-verify in place.
+- 🟡 **Slice 1 burndown resumed** — 22 batches (~230 commits), now with structural merge and port-verify in place.
 
 ---
 
