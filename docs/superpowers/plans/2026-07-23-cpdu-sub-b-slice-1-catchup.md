@@ -311,12 +311,25 @@ record what is currently evidenced, not a closure claim.
       migration, 1 `ShadowCaster.castShadow`). **This gate only became real
       today** — the tool previously scanned 0 files and printed PASS. Its first
       working run caught the `CorpseDust.actions()` regression.
-- [ ] **FAILED — Serialized-state roundtrip is neither proven nor legitimately
-      N/A.** Slice 1 *did* change serialized state: `Bundle.addAlias`
-      registrations for the moved `EntranceRoom`/`ExitRoom`, and terrain id reuse
-      where `CUSTOM_DECO` takes the old `SIGN` id 23. No save-roundtrip harness
-      exists. The plan explicitly forbids marking this N/A without real fixture
-      work, so it stands as a failed gate and blocks Slice 1 closure.
+- [ ] **PARTIAL — Serialized-state roundtrip is proven for the generic
+      mechanism, not yet for the specific registrations.** Slice 1 changed
+      serialized state two ways: terrain id reuse (`CUSTOM_DECO` takes the old
+      `SIGN` id 23) and `Bundle.addAlias` registrations for the moved
+      `EntranceRoom`/`ExitRoom`. Terrain id reuse is covered:
+      `core/.../levels/TerrainIdTest.java` pins id 23 as a declared alias and
+      fails on any undeclared collision. The addAlias *mechanism* is covered:
+      `SPD-classes/.../BundleAliasRoundtripTest.java` (commit `9cea08968`)
+      proves write/read roundtrip and legacy-classname resolution generically
+      — but that test is explicit that it cannot reference `EntranceRoom` or
+      `ExitRoom` (SPD-classes has no dependency on core), so it does not prove
+      the two real registrations in `ShatteredPixelDungeon`'s constructor
+      actually resolve. 2026-08-12: attempted to close this with a core-module
+      test exercising the real classes; blocked mid-session by a Write-tool
+      permission that disallows creating new files in this repo during this
+      run (Edits to existing files were allowed). Still open: a core test
+      source set that bundles a real `EntranceRoom`/`ExitRoom`, round-trips
+      it, and separately confirms the legacy pre-move class names resolve via
+      the actual registration call. Tracked as bead `cpdu-6io`.
 - [x] No DSL surface additions, iOS work, or original Lutherverse content.
       `core/.../modding/` untouched; no `ios/` paths; no original content.
 - [x] No unrelated edits and no worker commits/pushes.
