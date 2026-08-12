@@ -27,6 +27,7 @@ import com.qsr.customspd.assets.Asset;
 import com.qsr.customspd.messages.Messages;
 import com.qsr.customspd.ui.BuffIndicator;
 import com.watabou.noosa.Image;
+import com.watabou.utils.Bundle;
 
 import kotlin.Pair;
 
@@ -57,6 +58,20 @@ public class GreaterHaste extends Buff {
 
 	public void set(int time){
 		left = time;
+	}
+
+	private static final String LEFT = "left";
+
+	@Override
+	public void storeInBundle(Bundle bundle) {
+		super.storeInBundle(bundle);
+		bundle.put( LEFT, left );
+	}
+
+	@Override
+	public void restoreFromBundle(Bundle bundle) {
+		super.restoreFromBundle(bundle);
+		left = bundle.getInt( LEFT );
 	}
 
 	@Override
