@@ -44,6 +44,12 @@ now reproduces the same run.
 
 **The queue's real blocker is no longer capacity — it is two decisions.**
 
+0. **Conditional music now has a measured cost.** `asset-audit` (new) finds **9,783 KB of
+   orphaned `.ogg` files — ~54% of the game's music, ~30% of a 31 MB APK** — every one a
+   conditional-music track whose naming code is `cpdu-15l`, blocked on the pack-config
+   question. That decision is no longer just a design preference; it is a third of the
+   download.
+
 1. **Asset strategy.** The remaining ready clusters (Cached Rations, FloatingText damage icons)
    port upstream commits that ship binary sprite sheets. CPDU drives sprites from pack config, so
    each needs a call on whether to take upstream's sheet, extend pack config, or defer. The parked
