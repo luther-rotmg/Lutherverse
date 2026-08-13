@@ -140,17 +140,27 @@ public final class ContentScaffoldCli {
         return new GenResult(created, modified, skipped);
     }
 
-    /** Post-generate wiring check: run content-audit and print the new entity's findings. */
-    static void auditNewEntity(File repoRoot, String name) throws IOException {
-        var result = com.qsr.customspd.tools.contentaudit.ContentAuditCli.run(
-                repoRoot, com.qsr.customspd.tools.contentaudit.Allowlist.load(null));
-        var mine = result.findings().stream().filter(f -> f.key().contains(" " + name + "#")).toList();
-        if (mine.isEmpty()) {
-            System.out.println("content-audit: " + name + " is fully wired.");
-        } else {
-            System.out.println("content-audit: " + name + " still has open touchpoints "
-                    + "(M3/I3 registration findings are expected until the content-audit heuristic bead lands):");
-            mine.forEach(f -> System.out.println("  " + f.message()));
+    /**
+     * Post-generate wiring check: run content-audit and print the new entity's findings.
+     * The audit is a convenience on top of an already-successful generation, not part of
+     * generation itself -- if it can't run (IOException), report it and continue rather
+     * than letting the failure escape to the JVM default handler and mask the successful
+     * generation with a stack trace and exit 1.
+     */
+    static void auditNewEntity(File repoRoot, String name) {
+        try {
+            var result = com.qsr.customspd.tools.contentaudit.ContentAuditCli.run(
+                    repoRoot, com.qsr.customspd.tools.contentaudit.Allowlist.load(null));
+            var mine = result.findings().stream().filter(f -> f.key().contains(" " + name + "#")).toList();
+            if (mine.isEmpty()) {
+                System.out.println("content-audit: " + name + " is fully wired.");
+            } else {
+                System.out.println("content-audit: " + name + " still has open touchpoints "
+                        + "(M3/I3 registration findings are expected until the content-audit heuristic bead lands):");
+                mine.forEach(f -> System.out.println("  " + f.message()));
+            }
+        } catch (IOException e) {
+            System.err.println("content-scaffold: post-generate audit could not run: " + e.getMessage());
         }
     }
 

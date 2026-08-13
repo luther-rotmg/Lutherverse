@@ -14,7 +14,8 @@ public final class GeneratorCategoryInserter {
         // in scope unqualified. Requiring "Category." unconditionally would never match
         // the real file, only test fixtures that happened to include it.
         Matcher m = Pattern.compile(
-                "(?:Category\\.)?" + Pattern.quote(category) + "\\.classes\\s*=\\s*new\\s+Class<\\?>\\[\\]\\{")
+                "(?<![A-Za-z0-9_$.])(?:Category\\.)?" + Pattern.quote(category)
+                        + "\\.classes\\s*=\\s*new\\s+Class<\\?>\\[\\]\\{")
                 .matcher(generatorJava);
         if (!m.find()) {
             throw new IllegalArgumentException("No Category." + category + ".classes assignment found");

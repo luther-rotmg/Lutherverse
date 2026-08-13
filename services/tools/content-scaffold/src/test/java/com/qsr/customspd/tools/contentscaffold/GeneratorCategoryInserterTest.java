@@ -47,6 +47,16 @@ class GeneratorCategoryInserterTest {
     }
 
     @Test
+    void compoundNameSelectorDoesNotFalseMatchAsBareCategory() {
+        // "SUPER_FOOD.classes = ..." must NOT be matched by the unqualified "FOOD"
+        // lookup -- without a left-boundary check, the optional "(?:Category\.)?"
+        // matches zero-width and "FOOD\.classes" matches the tail of
+        // "SUPER_FOOD.classes", silently inserting Berry into the wrong category.
+        String gen = "static {\n  SUPER_FOOD.classes = new Class<?>[]{\n    Existing.class\n  };\n}\n";
+        assertThrows(IllegalArgumentException.class, () -> GeneratorCategoryInserter.addItem(gen, "FOOD", "Berry"));
+    }
+
+    @Test
     void unknownCategoryThrows() {
         assertThrows(IllegalArgumentException.class, () -> GeneratorCategoryInserter.addItem(GEN, "WAND", "Berry"));
     }
