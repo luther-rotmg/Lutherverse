@@ -47,4 +47,19 @@ class ContentClassParserTest {
     void returnsNullForNoTopLevelClass() {
         assertNull(ContentClassParser.parse("package x;\n"));
     }
+
+    @Test
+    void skipsLeadingInterfaceToFindTheClass() {
+        String src = "package com.qsr.customspd.actors.mobs;\n"
+                + "public interface Flying {}\n"
+                + "public class Bat extends Mob {}\n";
+        ContentClass c = ContentClassParser.parse(src);
+        assertEquals("Bat", c.simpleName());
+        assertEquals("Mob", c.superSimpleName());
+    }
+
+    @Test
+    void returnsNullForUnparseableSource() {
+        assertNull(ContentClassParser.parse("class {"));
+    }
 }

@@ -20,8 +20,8 @@ public final class ContentClassParser {
         } catch (RuntimeException e) {
             return null; // unparseable source is not content; callers skip nulls
         }
-        ClassOrInterfaceDeclaration type = cu.findFirst(ClassOrInterfaceDeclaration.class)
-                .filter(t -> !t.isInterface()).orElse(null);
+        ClassOrInterfaceDeclaration type = cu.findAll(ClassOrInterfaceDeclaration.class).stream()
+                .filter(t -> !t.isInterface()).findFirst().orElse(null);
         if (type == null) return null;
 
         String pkg = cu.getPackageDeclaration().map(p -> p.getNameAsString()).orElse("");
