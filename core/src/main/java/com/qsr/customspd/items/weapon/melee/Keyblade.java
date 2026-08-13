@@ -28,16 +28,19 @@ import com.qsr.customspd.Assets;
 import com.qsr.customspd.actors.Char;
 import com.qsr.customspd.actors.buffs.Buff;
 import com.qsr.customspd.actors.buffs.Burning;
+import com.qsr.customspd.actors.hero.Hero;
+import com.qsr.customspd.actors.hero.spheregrid.SphereGrid;
 import com.qsr.customspd.assets.GeneralAsset;
 
 /**
  * Prototype keyblade for the Keybearer (build-craft ARPG spine).
  *
- * First increment implements the FIRE element axis only: every damaging strike
- * reignites the target, so the weapon plays visibly differently from a plain blade.
- * The signature-ability axis and the sphere-grid amplification hook onto this later;
- * for now the burn IS the keyblade's identity. Art reuses the sword sprite as a
- * placeholder until a real keyblade PNG exists.
+ * FIRE element: every damaging strike reignites the target. The sphere grid amplifies
+ * this build:
+ *  - MIGHT nodes add flat melee damage ({@link #damageRoll}).
+ *  - EMBER nodes add bonus fire damage on the burning hit ({@link #proc}).
+ * So "spec fire" and "spec might" visibly change how the keyblade plays. The signature
+ * ability axis, real art, and Vigor's effect land in later increments.
  */
 public class Keyblade extends MeleeWeapon {
 
@@ -50,12 +53,32 @@ public class Keyblade extends MeleeWeapon {
 	}
 
 	@Override
-	public int proc(Char attacker, Char defender, int damage) {
-		damage = super.proc(attacker, defender, damage);
-		// Fire element: a damaging strike sets the target alight.
-		if (damage > 0 && defender.isAlive()) {
-			Buff.affect(defender, Burning.class).reignite(defender);
+	public int damageRoll(Char owner) {
+		int damage = super.damageRoll(owner);
+		SphereGrid grid = gridOf(owner);
+		if (grid != null) {
+			damage += grid.mightLevel(); // Might nodes: raw melee damage
 		}
 		return damage;
+	}
+
+	@Override
+	public int proc(Char attacker, Char defender, int damage) {
+		damage = super.proc(attacker, defender, damage);
+		if (damage > 0 && defender.isAlive()) {
+			// Fire element: a damaging strike sets the target alight.
+			Buff.affect(defender, Burning.class).reignite(defender);
+
+			SphereGrid grid = gridOf(attacker);
+			if (grid != null && grid.emberLevel() > 0) {
+				// Ember nodes: bonus fire damage on top of the burn.
+				defender.damage(grid.emberLevel(), this);
+			}
+		}
+		return damage;
+	}
+
+	private static SphereGrid gridOf(Char ch) {
+		return (ch instanceof Hero) ? ((Hero) ch).sphereGrid : null;
 	}
 }
