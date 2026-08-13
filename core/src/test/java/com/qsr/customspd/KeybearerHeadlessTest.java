@@ -5,6 +5,8 @@ import com.qsr.customspd.actors.buffs.Burning;
 import com.qsr.customspd.actors.buffs.Chill;
 import com.qsr.customspd.actors.hero.Hero;
 import com.qsr.customspd.actors.hero.HeroClass;
+import com.qsr.customspd.actors.hero.abilities.ArmorAbility;
+import com.qsr.customspd.actors.hero.abilities.keybearer.KeybladeNova;
 import com.qsr.customspd.actors.hero.spheregrid.SphereGrid;
 import com.qsr.customspd.actors.hero.spheregrid.SphereNode;
 import com.qsr.customspd.actors.mobs.Mob;
@@ -300,6 +302,28 @@ class KeybearerHeadlessTest {
 		} finally {
 			Dungeon.hero = prevHero;
 		}
+	}
+
+	@Test
+	void keybearerOffersKeybladeNovaClassAbility() {
+		boolean hasNova = false;
+		for (ArmorAbility a : HeroClass.KEYBEARER.armorAbilities()) {
+			if (a instanceof KeybladeNova) hasNova = true;
+		}
+		assertTrue(hasNova, "the Keybearer must offer its own Keyblade Nova class ability");
+	}
+
+	@Test
+	void keybladeNovaDamageScalesWithGridInvestment() {
+		assertEquals(0, KeybladeNova.gridBonus(null), "null grid = no bonus");
+		SphereGrid grid = new SphereGrid();
+		assertEquals(0, KeybladeNova.gridBonus(grid));
+		grid.grantPoints(4);
+		grid.activate(SphereNode.ATTUNEMENT); // Might 1
+		grid.activate(SphereNode.EMBER_I);    // Ember 1
+		grid.activate(SphereNode.ABILITY_I);  // Ability 1 (weighted x2)
+		// bonus = ember(1) + frost(0) + might(1) + 2*ability(1) = 4
+		assertEquals(4, KeybladeNova.gridBonus(grid));
 	}
 
 	@Test

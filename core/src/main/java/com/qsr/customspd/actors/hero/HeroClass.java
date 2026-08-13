@@ -25,6 +25,7 @@ import com.qsr.customspd.Badges;
 import com.qsr.customspd.Dungeon;
 import com.qsr.customspd.SPDSettings;
 import com.qsr.customspd.actors.hero.abilities.ArmorAbility;
+import com.qsr.customspd.actors.hero.abilities.keybearer.KeybladeNova;
 import com.qsr.customspd.actors.hero.abilities.Ratmogrify;
 import com.qsr.customspd.actors.hero.abilities.duelist.Challenge;
 import com.qsr.customspd.actors.hero.abilities.duelist.ElementalStrike;
@@ -290,6 +291,8 @@ public enum HeroClass {
 				return new ArmorAbility[]{new SpectralBlades(), new NaturesPower(), new SpiritHawk()};
 			case DUELIST:
 				return new ArmorAbility[]{new Challenge(), new ElementalStrike(), new Feint()};
+			case KEYBEARER:
+				return new ArmorAbility[]{new KeybladeNova(), new HeroicLeap(), new Shockwave()};
 		}
 	}
 
