@@ -25,6 +25,16 @@ class GeneratorCategoryInserterTest {
     }
 
     @Test
+    void idempotencyDoesNotSuffixCollide() {
+        // "SuperBerry.class" already present must NOT count as "Berry.class" already present.
+        String gen = "static {\n  Category.FOOD.classes = new Class<?>[]{\n    Food.class,\n"
+                + "    SuperBerry.class\n  };\n}\n";
+        AnchorInserter.Result r = GeneratorCategoryInserter.addItem(gen, "FOOD", "Berry");
+        assertTrue(r.inserted());
+        assertTrue(r.newContent().contains("Berry.class"), () -> r.newContent());
+    }
+
+    @Test
     void unknownCategoryThrows() {
         assertThrows(IllegalArgumentException.class, () -> GeneratorCategoryInserter.addItem(GEN, "WAND", "Berry"));
     }
@@ -34,9 +44,8 @@ class GeneratorCategoryInserterTest {
         String gen = "static {\n  Category.WEAPON.classes = new Class<?>[]{ Dagger.class, Sword.class };\n}\n";
         AnchorInserter.Result r = GeneratorCategoryInserter.addItem(gen, "WEAPON", "Mace");
         assertTrue(r.inserted());
-        assertTrue(r.newContent().contains("Dagger.class"), () -> r.newContent());
-        assertTrue(r.newContent().contains("Sword.class"), () -> r.newContent());
-        assertTrue(r.newContent().contains("Mace.class"), () -> r.newContent());
+        assertTrue(r.newContent().contains("Dagger.class, Sword.class, Mace.class"),
+                () -> r.newContent());
     }
 
     @Test
@@ -44,6 +53,7 @@ class GeneratorCategoryInserterTest {
         String gen = "static {\n  Category.SCROLL.classes = new Class<?>[]{};\n}\n";
         AnchorInserter.Result r = GeneratorCategoryInserter.addItem(gen, "SCROLL", "ScrollOfMagicMapping");
         assertTrue(r.inserted());
-        assertTrue(r.newContent().contains("ScrollOfMagicMapping.class"), () -> r.newContent());
+        assertTrue(r.newContent().contains("{\n    ScrollOfMagicMapping.class\n  };"),
+                () -> r.newContent());
     }
 }

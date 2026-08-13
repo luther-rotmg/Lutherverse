@@ -19,7 +19,14 @@ public final class GeneratorCategoryInserter {
         int close = generatorJava.indexOf('}', open);
         if (close < 0) throw new IllegalArgumentException("Unterminated classes array for " + category);
         String body = generatorJava.substring(open, close);
-        if (body.contains(className + ".class")) {
+        // A bare body.contains(className + ".class") check would false-positive when
+        // className is a suffix of an existing class name (e.g. adding "Berry" while
+        // "SuperBerry.class" is already present) since there is no delimiter protecting
+        // the identifier boundary. Require a non-identifier character (or start-of-body)
+        // immediately before the class name.
+        Pattern present = Pattern.compile(
+                "(?<![A-Za-z0-9_$])" + Pattern.quote(className) + "\\.class\\b");
+        if (present.matcher(body).find()) {
             return new AnchorInserter.Result(generatorJava, false);
         }
         // Find the last "X.class" element (regardless of formatting) and insert after it.
