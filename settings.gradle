@@ -17,5 +17,6 @@ include ':services'
     //tools
     include ':services:tools:api-diff'
     include ':services:tools:deletion-audit'
+    include ':services:tools:content-audit'
     include ':services:tools:namespace-transform'
     include ':services:tools:pack-smoke'
