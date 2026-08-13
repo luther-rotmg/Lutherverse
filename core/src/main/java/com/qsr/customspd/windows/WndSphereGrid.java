@@ -20,6 +20,7 @@ package com.qsr.customspd.windows;
 
 import com.qsr.customspd.actors.hero.Hero;
 import com.qsr.customspd.actors.hero.spheregrid.SphereGrid;
+import com.qsr.customspd.actors.hero.spheregrid.SphereGridProgress;
 import com.qsr.customspd.actors.hero.spheregrid.SphereNode;
 import com.qsr.customspd.scenes.GameScene;
 import com.qsr.customspd.scenes.PixelScene;
@@ -28,17 +29,18 @@ import com.qsr.customspd.ui.RenderedTextBlock;
 import com.qsr.customspd.ui.Window;
 
 /**
- * Prototype sphere-grid screen for the Keybearer (build-craft spine).
+ * Prototype sphere-grid screen for the Keybearer (build-craft spine) — the hybrid grid's UI.
  *
- * A deliberately plain list UI: shows unspent points and every node as a button you
- * can activate (spending a point) when its prerequisite is met and you have a point.
- * Activated nodes are marked and disabled; locked nodes are disabled with a hint.
- * On each activation the window rebuilds itself (hide + reopen). The proper
- * branching-web visual is a later increment — this proves the spend loop.
+ * Two layers meet here. Every node is one of:
+ *  - LOCKED   -> spend persistent {@code Insight} to unlock it forever ({@link SphereGridProgress})
+ *  - UNLOCKED -> spend a run-scoped point to activate it this descent ({@link SphereGrid})
+ *  - ACTIVE   -> marked, done for the run
+ * The header shows both currencies. The window rebuilds itself (hide + reopen) after each action.
+ * The proper branching-web visual is a later increment; this proves the unlock/allocate loop.
  */
 public class WndSphereGrid extends Window {
 
-	private static final int WIDTH = 150;
+	private static final int WIDTH = 168;
 	private static final float GAP = 2;
 	private static final float BTN_H = 16;
 
@@ -55,24 +57,32 @@ public class WndSphereGrid extends Window {
 		title.setPos((WIDTH - title.width()) / 2f, 0);
 		add(title);
 
-		RenderedTextBlock points = PixelScene.renderTextBlock(7);
-		points.text("Unspent points: _" + (grid == null ? 0 : grid.unspentPoints()) + "_");
-		points.setPos(0, title.bottom() + 2 * GAP);
-		add(points);
+		RenderedTextBlock status = PixelScene.renderTextBlock(7);
+		status.text("Insight: _" + SphereGridProgress.insight() + "_    Points: _"
+				+ (grid == null ? 0 : grid.unspentPoints()) + "_");
+		status.setPos(0, title.bottom() + 2 * GAP);
+		add(status);
 
-		float pos = points.bottom() + 3 * GAP;
+		float pos = status.bottom() + 3 * GAP;
 
 		if (grid != null) {
 			for (final SphereNode node : SphereNode.values()) {
 				final boolean activated = grid.isActivated(node);
-				final boolean canAct = grid.canActivate(node);
+				final boolean unlocked = SphereGridProgress.isUnlocked(node);
+				final boolean canUnlock = SphereGridProgress.canUnlock(node);
+				final boolean canActivate = unlocked && grid.canActivate(node);
 
-				RedButton btn = new RedButton(nodeLabel(node, grid, activated), 6) {
+				RedButton btn = new RedButton(nodeLabel(node, grid, activated, unlocked), 6) {
 					@Override
 					protected void onClick() {
-						if (grid.activate(node)) {
-							//Apply HT-affecting nodes (Vigor) immediately; heals by the gain.
-							WndSphereGrid.this.hero.updateHT(true);
+						boolean changed;
+						if (!SphereGridProgress.isUnlocked(node)) {
+							changed = SphereGridProgress.unlock(node); // spend Insight (persistent)
+						} else {
+							changed = grid.activate(node);              // spend a point (this run)
+							if (changed) WndSphereGrid.this.hero.updateHT(true); // apply Vigor immediately
+						}
+						if (changed) {
 							hide();
 							GameScene.show(new WndSphereGrid(WndSphereGrid.this.hero));
 						}
@@ -80,7 +90,7 @@ public class WndSphereGrid extends Window {
 				};
 				btn.leftJustify = true;
 				btn.setRect(0, pos, WIDTH, BTN_H);
-				btn.enable(canAct);
+				btn.enable(!activated && (canUnlock || canActivate));
 				add(btn);
 
 				pos = btn.bottom() + GAP;
@@ -99,15 +109,18 @@ public class WndSphereGrid extends Window {
 		resize(WIDTH, (int) close.bottom());
 	}
 
-	private static String nodeLabel(SphereNode node, SphereGrid grid, boolean activated) {
+	private static String nodeLabel(SphereNode node, SphereGrid grid, boolean activated, boolean unlocked) {
 		String eff = "+" + node.magnitude + " " + effectName(node.effect);
 		if (activated) {
 			return "_" + node.name() + "_  (" + eff + ")  ✓";
 		}
-		if (!grid.prerequisiteMet(node)) {
-			return node.name() + "  (" + eff + ")  — needs " + node.requires;
+		if (!unlocked) {
+			return node.name() + "  (" + eff + ")  — unlock: " + SphereGridProgress.unlockCost(node) + " Insight";
 		}
-		return node.name() + "  (" + eff + ", " + node.cost + "pt)";
+		if (!grid.prerequisiteMet(node)) {
+			return node.name() + "  (" + eff + ")  — needs " + node.requires + " active";
+		}
+		return node.name() + "  (" + eff + ")  — activate: " + node.cost + "pt";
 	}
 
 	private static String effectName(SphereNode.Effect e) {

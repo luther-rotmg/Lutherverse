@@ -33,6 +33,14 @@ public final class HeadlessGdx {
 	public static synchronized void boot() {
 		if (booted) return;
 
+		File tmp;
+		try {
+			tmp = java.nio.file.Files.createTempDirectory("cpdu-headless-test").toFile();
+			tmp.deleteOnExit();
+		} catch (Exception e) {
+			throw new RuntimeException("could not create temp storage for the headless test harness", e);
+		}
+
 		HeadlessApplicationConfiguration config = new HeadlessApplicationConfiguration();
 		// The application listener does nothing; we only need Gdx.app/files initialised.
 		new HeadlessApplication(new ApplicationAdapter() {}, config);
@@ -40,13 +48,8 @@ public final class HeadlessGdx {
 			throw new IllegalStateException("HeadlessApplication did not initialise Gdx.files");
 		}
 
-		try {
-			File tmp = java.nio.file.Files.createTempDirectory("cpdu-headless-test").toFile();
-			tmp.deleteOnExit();
-			FileUtils.setDefaultFileProperties(Files.FileType.Absolute, tmp.getAbsolutePath() + File.separator);
-		} catch (Exception e) {
-			throw new RuntimeException("could not set up temp storage for the headless test harness", e);
-		}
+		// External/local file ops (ModManager's enabled-mods scan) -> the same temp dir.
+		FileUtils.setDefaultFileProperties(Files.FileType.Absolute, tmp.getAbsolutePath() + File.separator);
 
 		// General game state many runtime paths touch (e.g. item.identify() -> Catalog -> Badges).
 		// With no save file in the temp dir, this initialises an empty global badge set.

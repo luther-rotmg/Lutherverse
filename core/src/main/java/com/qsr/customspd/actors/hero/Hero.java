@@ -1801,7 +1801,10 @@ public class Hero extends Char {
 				lvl++;
 				levelUp = true;
 
-				if (sphereGrid != null) sphereGrid.grantPoints(1); //prototype: 1 sphere-grid point per level
+				if (sphereGrid != null) {
+					sphereGrid.grantPoints(1); //prototype: 1 run-scoped grid point per level
+					com.qsr.customspd.actors.hero.spheregrid.SphereGridProgress.earnInsight(1); //persistent Insight per level
+				}
 
 				if (buff(ElixirOfMight.HTBoost.class) != null){
 					buff(ElixirOfMight.HTBoost.class).onLevelUp();
