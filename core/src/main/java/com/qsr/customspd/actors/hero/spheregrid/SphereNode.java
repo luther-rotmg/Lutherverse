@@ -45,9 +45,13 @@ public enum SphereNode {
 
 	// Vigor branch — survivability
 	VIGOR_I(Effect.VIGOR, 3, 1, "ATTUNEMENT"),
-	VIGOR_II(Effect.VIGOR, 3, 1, "VIGOR_I");
+	VIGOR_II(Effect.VIGOR, 3, 1, "VIGOR_I"),
 
-	public enum Effect { EMBER, MIGHT, VIGOR }
+	// Frost branch — the second element (chill/slow); amplifies the frost keyblade
+	FROST_I(Effect.FROST, 1, 1, "ATTUNEMENT"),
+	FROST_II(Effect.FROST, 2, 1, "FROST_I");
+
+	public enum Effect { EMBER, FROST, MIGHT, VIGOR }
 
 	public final Effect effect;
 	public final int magnitude;

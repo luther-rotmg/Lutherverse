@@ -2,12 +2,14 @@ package com.qsr.customspd;
 
 import com.qsr.customspd.Dungeon;
 import com.qsr.customspd.actors.buffs.Burning;
+import com.qsr.customspd.actors.buffs.Chill;
 import com.qsr.customspd.actors.hero.Hero;
 import com.qsr.customspd.actors.hero.HeroClass;
 import com.qsr.customspd.actors.hero.spheregrid.SphereGrid;
 import com.qsr.customspd.actors.hero.spheregrid.SphereNode;
 import com.qsr.customspd.actors.mobs.Mob;
 import com.qsr.customspd.actors.mobs.Rat;
+import com.qsr.customspd.items.weapon.melee.FrostKeyblade;
 import com.qsr.customspd.items.weapon.melee.Keyblade;
 import com.qsr.customspd.items.weapon.melee.MeleeWeapon;
 import com.qsr.customspd.modding.HeroConfig;
@@ -153,6 +155,41 @@ class KeybearerHeadlessTest {
 			kb.proc(fiery, target, 10);
 			assertNotNull(target.buff(Burning.class), "a keyblade hit must ignite the target");
 			assertTrue(target.HP < 100, "Ember nodes must deal bonus fire damage on the hit");
+		} finally {
+			Dungeon.hero = prevHero;
+		}
+	}
+
+	@Test
+	void frostKeybladeChillsAndFrostNodesLengthenIt() {
+		Hero prevHero = Dungeon.hero;
+		try {
+			FrostKeyblade fkb = new FrostKeyblade();
+
+			// Control: no Frost specced -> base chill duration.
+			Hero plain = new Hero();
+			plain.sphereGrid = new SphereGrid();
+			Dungeon.hero = plain;
+			Mob control = new Rat();
+			control.HP = control.HT = 100;
+			fkb.proc(plain, control, 10);
+			Chill baseChill = control.buff(Chill.class);
+			assertNotNull(baseChill, "a frost keyblade hit must chill the target");
+			float baseTurns = baseChill.cooldown();
+
+			// Frost specced -> a longer chill from the same hit.
+			Hero cold = new Hero();
+			cold.sphereGrid = new SphereGrid();
+			cold.sphereGrid.grantPoints(2);
+			cold.sphereGrid.activate(SphereNode.ATTUNEMENT);
+			cold.sphereGrid.activate(SphereNode.FROST_I); // FROST magnitude 1
+			Dungeon.hero = cold;
+			Mob target = new Rat();
+			target.HP = target.HT = 100;
+			fkb.proc(cold, target, 10);
+			Chill frostChill = target.buff(Chill.class);
+			assertNotNull(frostChill, "a frost keyblade hit must chill the target");
+			assertTrue(frostChill.cooldown() > baseTurns, "Frost nodes must lengthen the chill");
 		} finally {
 			Dungeon.hero = prevHero;
 		}

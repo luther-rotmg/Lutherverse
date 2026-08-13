@@ -4,6 +4,13 @@
     "identified": true,
     "quickslot": true
   },
+  "items": [
+    {
+      "type": "weapon.melee.FrostKeyblade",
+      "identified": true,
+      "quickslot": true
+    }
+  ],
   "identified": [
     "potions.PotionOfStrength",
     "scrolls.ScrollOfMirrorImage"

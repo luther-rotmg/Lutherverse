@@ -77,6 +77,10 @@ public class SphereGrid implements Bundlable {
 		return sum(SphereNode.Effect.EMBER);
 	}
 
+	public int frostLevel() {
+		return sum(SphereNode.Effect.FROST);
+	}
+
 	public int mightLevel() {
 		return sum(SphereNode.Effect.MIGHT);
 	}

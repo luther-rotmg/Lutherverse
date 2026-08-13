@@ -113,6 +113,7 @@ public class WndSphereGrid extends Window {
 	private static String effectName(SphereNode.Effect e) {
 		switch (e) {
 			case EMBER: return "Ember (fire)";
+			case FROST: return "Frost (chill)";
 			case MIGHT: return "Might (dmg)";
 			case VIGOR: return "Vigor (hp)";
 			default:    return e.name();
