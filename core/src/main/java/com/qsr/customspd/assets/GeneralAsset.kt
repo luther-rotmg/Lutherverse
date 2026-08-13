@@ -733,6 +733,8 @@ enum class GeneralAsset(override val path: String) : Asset {
     DIRK("sprites/items/dirk.png"),
     SICKLE("sprites/items/sickle.png"),
     SWORD("sprites/items/sword.png"),
+    KEYBLADE("sprites/items/keyblade.png"),
+    FROST_KEYBLADE("sprites/items/frost_keyblade.png"),
     MACE("sprites/items/mace.png"),
     SCIMITAR("sprites/items/scimitar.png"),
     ROUND_SHIELD("sprites/items/round_shield.png"),

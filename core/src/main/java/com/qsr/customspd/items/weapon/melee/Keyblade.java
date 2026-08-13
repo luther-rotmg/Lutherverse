@@ -45,7 +45,7 @@ import com.qsr.customspd.assets.GeneralAsset;
 public class Keyblade extends MeleeWeapon {
 
 	{
-		image = GeneralAsset.SWORD; // placeholder art until a keyblade sprite exists
+		image = GeneralAsset.KEYBLADE; // original 16x16 keyblade sprite (fire variant)
 		hitSound = Assets.Sounds.HIT_SLASH;
 		hitSoundPitch = 1.1f;
 

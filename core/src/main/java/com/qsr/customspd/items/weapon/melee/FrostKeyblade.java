@@ -46,7 +46,7 @@ public class FrostKeyblade extends MeleeWeapon {
 	private static final float BASE_CHILL = 2f;
 
 	{
-		image = GeneralAsset.SWORD; // placeholder art until a frost keyblade sprite exists
+		image = GeneralAsset.FROST_KEYBLADE; // original 16x16 keyblade sprite (frost variant)
 		hitSound = Assets.Sounds.HIT_SLASH;
 		hitSoundPitch = 0.9f;
 
