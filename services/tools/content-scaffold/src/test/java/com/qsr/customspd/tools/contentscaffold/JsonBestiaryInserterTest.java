@@ -1,5 +1,6 @@
 package com.qsr.customspd.tools.contentscaffold;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,10 +28,30 @@ class JsonBestiaryInserterTest {
         AnchorInserter.Result first = JsonBestiaryInserter.addMob(JSON, 3, "Wisp");
         AnchorInserter.Result second = JsonBestiaryInserter.addMob(first.newContent(), 3, "Wisp");
         assertFalse(second.inserted());
+        assertEquals(first.newContent(), second.newContent());
     }
 
     @Test
     void unknownDepthThrows() {
         assertThrows(IllegalArgumentException.class, () -> JsonBestiaryInserter.addMob(JSON, 9, "Wisp"));
+    }
+
+    @Test
+    void throwsWhenMatchedLevelHasNoBestiary() {
+        String json =
+                "{\n  \"dungeon\": {\n    \"2\": {\n      \"depth\": 2\n    },\n"
+              + "    \"3\": {\n      \"depth\": 3,\n      \"bestiary\": [\n        \"Gnoll\"\n      ]\n    }\n  }\n}\n";
+        assertThrows(IllegalArgumentException.class, () -> JsonBestiaryInserter.addMob(json, 2, "Wisp"));
+    }
+
+    @Test
+    void singleLineArrayKeepsExistingEntries() {
+        String json = "{\n  \"dungeon\": {\n    \"5\": {\n      \"depth\": 5,\n"
+              + "      \"bestiary\": [\"Rat\", \"Snake\"]\n    }\n  }\n}\n";
+        AnchorInserter.Result r = JsonBestiaryInserter.addMob(json, 5, "Wisp");
+        assertTrue(r.inserted());
+        assertTrue(r.newContent().contains("\"Rat\""));
+        assertTrue(r.newContent().contains("\"Snake\""));
+        assertTrue(r.newContent().contains("\"Wisp\""));
     }
 }

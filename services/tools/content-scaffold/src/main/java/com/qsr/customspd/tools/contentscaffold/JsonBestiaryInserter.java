@@ -15,7 +15,8 @@ public final class JsonBestiaryInserter {
             throw new IllegalArgumentException("No dungeon level with depth " + depth);
         }
         int bestiaryKey = dungeonJson.indexOf("\"bestiary\"", depthM.end());
-        if (bestiaryKey < 0) {
+        int nextDepthKey = dungeonJson.indexOf("\"depth\"", depthM.end());
+        if (bestiaryKey < 0 || (nextDepthKey >= 0 && nextDepthKey < bestiaryKey)) {
             throw new IllegalArgumentException("Level at depth " + depth + " has no bestiary array");
         }
         int arrayOpen = dungeonJson.indexOf('[', bestiaryKey);
@@ -27,17 +28,28 @@ public final class JsonBestiaryInserter {
         if (arrayBody.contains("\"" + className + "\"")) {
             return new AnchorInserter.Result(dungeonJson, false); // idempotent
         }
-        // Find the last quoted element to copy its indentation and insert after it.
-        Matcher last = Pattern.compile("(\\n(\\s*)\"[^\"]+\")(\\s*)$").matcher(arrayBody);
+        // Find the last quoted element (regardless of formatting) and insert after it.
+        Matcher elems = Pattern.compile("\"[^\"]*\"").matcher(arrayBody);
+        int lastStart = -1, lastEnd = -1;
+        while (elems.find()) {
+            lastStart = elems.start();
+            lastEnd = elems.end();
+        }
         String newBody;
-        if (last.find()) {
-            String indent = last.group(2);
-            newBody = arrayBody.substring(0, last.end(1))
-                    + ",\n" + indent + "\"" + className + "\""
-                    + arrayBody.substring(last.end(1));
-        } else {
-            // empty array
+        if (lastEnd < 0) {
+            // genuinely empty array
             newBody = "\n        \"" + className + "\"\n      ";
+        } else {
+            int lineStart = arrayBody.lastIndexOf('\n', lastStart);
+            if (lineStart >= 0) {
+                // multi-line: mimic the last element's indentation
+                String indent = arrayBody.substring(lineStart + 1, lastStart);
+                newBody = arrayBody.substring(0, lastEnd) + ",\n" + indent + "\"" + className + "\""
+                        + arrayBody.substring(lastEnd);
+            } else {
+                // single-line: comma-separate
+                newBody = arrayBody.substring(0, lastEnd) + ", \"" + className + "\"" + arrayBody.substring(lastEnd);
+            }
         }
         String out = dungeonJson.substring(0, arrayOpen + 1) + newBody + dungeonJson.substring(arrayClose);
         return new AnchorInserter.Result(out, true);
