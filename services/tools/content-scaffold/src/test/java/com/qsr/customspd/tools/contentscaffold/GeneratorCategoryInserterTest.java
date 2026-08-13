@@ -35,6 +35,18 @@ class GeneratorCategoryInserterTest {
     }
 
     @Test
+    void matchesUnqualifiedAssignmentAsInTheRealGeneratorJava() {
+        // The real core/.../Generator.java assigns these fields from inside Category's
+        // own static block ("FOOD.classes = ..."), not "Category.FOOD.classes = ...".
+        // The compile-smoke step (Task 9) caught this: the qualified-only regex never
+        // matched the real file.
+        String gen = "static {\n  FOOD.classes = new Class<?>[]{\n    Food.class,\n    Pasty.class\n  };\n}\n";
+        AnchorInserter.Result r = GeneratorCategoryInserter.addItem(gen, "FOOD", "Berry");
+        assertTrue(r.inserted());
+        assertTrue(r.newContent().contains("Pasty.class,\n    Berry.class"), () -> r.newContent());
+    }
+
+    @Test
     void unknownCategoryThrows() {
         assertThrows(IllegalArgumentException.class, () -> GeneratorCategoryInserter.addItem(GEN, "WAND", "Berry"));
     }

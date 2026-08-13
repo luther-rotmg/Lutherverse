@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Generates a compilable, fully-wired Mob/Item skeleton. Item path lands in Task 9. */
+/** Generates a compilable, fully-wired Mob/Item skeleton. */
 public final class ContentScaffoldCli {
     private ContentScaffoldCli() {}
 
@@ -26,6 +26,25 @@ public final class ContentScaffoldCli {
             try {
                 GenResult r = generateMob(repoRoot, name, depth);
                 report(r);
+                auditNewEntity(repoRoot, name);
+                System.exit(0);
+            } catch (AnchorInserter.MissingAnchorException | IllegalArgumentException e) {
+                System.err.println("content-scaffold: " + e.getMessage());
+                System.exit(2);
+            }
+            return;
+        }
+        if (args.length >= 1 && args[0].equals("item")) {
+            String name = args.length > 1 ? args[1] : null;
+            String category = strFlag(args, "--category");
+            String tier = strFlag(args, "--tier");
+            if (name == null || category == null || tier == null) { usage(); return; }
+            File repoRoot = RepoRoot.find();
+            if (repoRoot == null) { System.err.println("Not in a git repository"); System.exit(2); return; }
+            try {
+                GenResult r = generateItem(repoRoot, name, category, tier);
+                report(r);
+                auditNewEntity(repoRoot, name);
                 System.exit(0);
             } catch (AnchorInserter.MissingAnchorException | IllegalArgumentException e) {
                 System.err.println("content-scaffold: " + e.getMessage());
@@ -81,6 +100,60 @@ public final class ContentScaffoldCli {
         return new GenResult(created, modified, skipped);
     }
 
+    static GenResult generateItem(File repoRoot, String name, String category, String tier) throws IOException {
+        Names n = Names.of(name);
+        Path base = repoRoot.toPath();
+        List<String> created = new ArrayList<>(), modified = new ArrayList<>(), skipped = new ArrayList<>();
+
+        writeIfAbsent(base.resolve("core/src/main/java/com/qsr/customspd/items/" + n.className() + ".java"),
+                Templates.itemClass(n), created, skipped);
+
+        Path png = base.resolve("core/src/main/assets/" + n.itemAssetPath());
+        if (Files.exists(png)) { skipped.add(png.toString()); }
+        else {
+            Files.createDirectories(png.getParent());
+            try (InputStream in = ContentScaffoldCli.class.getResourceAsStream("/placeholder.png")) {
+                if (in == null) throw new IOException("placeholder.png resource missing");
+                Files.copy(in, png);
+            }
+            created.add(png.toString());
+        }
+
+        // GeneralAsset entry. As with the mob path (see generateMob's comment), the
+        // idempotency token must be the FULL generated line, not a bare "<UPPER_SNAKE>("
+        // -- that would false-positive as a substring of a longer existing entry like
+        // "SUPER_BERRY(" and silently skip the insertion.
+        applyInsert(base.resolve("core/src/main/java/com/qsr/customspd/assets/GeneralAsset.kt"),
+                c -> AnchorInserter.insertAbove(c, "// @content-scaffold:items",
+                        Templates.generalAssetLine(n, false), Templates.generalAssetLine(n, false)),
+                "GeneralAsset:" + n.upperSnake(), modified, skipped);
+
+        applyInsert(base.resolve("core/src/main/assets/messages/items/items.properties"),
+                c -> AnchorInserter.insertAbove(c, "### @content-scaffold:items",
+                        Templates.messageLines(n, false).stripTrailing(), "items." + n.lower() + ".name="),
+                "items." + n.lower(), modified, skipped);
+
+        applyInsert(base.resolve("core/src/main/java/com/qsr/customspd/items/Generator.java"),
+                c -> GeneratorCategoryInserter.addItem(c, category, n.className()),
+                "Generator:" + category + ":" + n.className(), modified, skipped);
+
+        return new GenResult(created, modified, skipped);
+    }
+
+    /** Post-generate wiring check: run content-audit and print the new entity's findings. */
+    static void auditNewEntity(File repoRoot, String name) throws IOException {
+        var result = com.qsr.customspd.tools.contentaudit.ContentAuditCli.run(
+                repoRoot, com.qsr.customspd.tools.contentaudit.Allowlist.load(null));
+        var mine = result.findings().stream().filter(f -> f.key().contains(" " + name + "#")).toList();
+        if (mine.isEmpty()) {
+            System.out.println("content-audit: " + name + " is fully wired.");
+        } else {
+            System.out.println("content-audit: " + name + " still has open touchpoints "
+                    + "(M3/I3 registration findings are expected until the content-audit heuristic bead lands):");
+            mine.forEach(f -> System.out.println("  " + f.message()));
+        }
+    }
+
     private interface Insert { AnchorInserter.Result apply(String content); }
 
     private static void applyInsert(Path file, Insert ins, String label,
@@ -106,6 +179,11 @@ public final class ContentScaffoldCli {
         return null;
     }
 
+    private static String strFlag(String[] args, String flag) {
+        for (int i = 0; i < args.length - 1; i++) if (args[i].equals(flag)) return args[i + 1];
+        return null;
+    }
+
     private static void report(GenResult r) {
         r.created().forEach(c -> System.out.println("  created  " + c));
         r.modified().forEach(m -> System.out.println("  wired    " + m));
@@ -116,6 +194,7 @@ public final class ContentScaffoldCli {
 
     private static void usage() {
         System.err.println("Usage: content-scaffold mob <Name> --depth <n>");
+        System.err.println("       content-scaffold item <Name> --category <cat> --tier <n>");
         System.exit(2);
     }
 }

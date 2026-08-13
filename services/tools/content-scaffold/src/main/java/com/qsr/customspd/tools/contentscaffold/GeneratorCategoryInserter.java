@@ -8,9 +8,13 @@ public final class GeneratorCategoryInserter {
     private GeneratorCategoryInserter() {}
 
     public static AnchorInserter.Result addItem(String generatorJava, String category, String className) {
-        // Match: Category.<CAT>.classes = new Class<?>[]{  ...  };
+        // Match: Category.<CAT>.classes = new Class<?>[]{  ...  };  The "Category."
+        // qualifier is optional -- the real Generator.java assigns these fields from
+        // inside Category's own static block, where the enum constants (e.g. FOOD) are
+        // in scope unqualified. Requiring "Category." unconditionally would never match
+        // the real file, only test fixtures that happened to include it.
         Matcher m = Pattern.compile(
-                "Category\\." + Pattern.quote(category) + "\\.classes\\s*=\\s*new\\s+Class<\\?>\\[\\]\\{")
+                "(?:Category\\.)?" + Pattern.quote(category) + "\\.classes\\s*=\\s*new\\s+Class<\\?>\\[\\]\\{")
                 .matcher(generatorJava);
         if (!m.find()) {
             throw new IllegalArgumentException("No Category." + category + ".classes assignment found");
