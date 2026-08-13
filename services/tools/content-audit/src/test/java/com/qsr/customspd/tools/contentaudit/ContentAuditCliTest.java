@@ -56,6 +56,13 @@ class ContentAuditCliTest {
     }
 
     @Test
+    void canaryCatchesTheDeliberatelyBrokenEntity() {
+        // Standing negative control: if this ever returns non-zero, the checks have
+        // stopped flagging a deliberately-broken entity and the whole audit is inert.
+        assertEquals(0, ContentAuditCli.runCanary());
+    }
+
+    @Test
     void relativeAllowlistResolvesAgainstRepoRootAndAbsolutePassesThrough(@TempDir Path root) {
         java.io.File repo = root.toFile();
         // relative path resolves against the repo root, NOT the subproject CWD

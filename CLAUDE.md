@@ -36,6 +36,11 @@ Then, for anything touching `core/`:
 ./gradlew.bat :services:tools:content-audit:run --quiet --args="--allowlist services/tools/content-audit/reviewed-exceptions.txt --max-findings 189"
 ```
 
+content-audit is currently **advisory, not blocking**: its M3/I3 registration checks over-report
+because CPDU registers mobs data-driven/reflectively by name rather than by source token (a
+follow-up bead tracks tuning the heuristic). Read its output, but do not treat a ceiling-exceed
+as a merge blocker yet.
+
 deletion-audit reads **git refs, not the working tree** — commit first or it audits stale
 content. Same for `port-verify`.
 

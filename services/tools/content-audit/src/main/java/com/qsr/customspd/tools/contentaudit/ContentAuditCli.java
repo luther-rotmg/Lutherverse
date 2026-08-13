@@ -25,7 +25,10 @@ public final class ContentAuditCli {
             for (int i = 0; i < args.length; i++) {
                 switch (args[i]) {
                     case "--allowlist" -> allowlistPath = Path.of(args[++i]);
-                    case "--max-findings" -> maxFindings = Integer.parseInt(args[++i]);
+                    case "--max-findings" -> {
+                        maxFindings = Integer.parseInt(args[++i]);
+                        if (maxFindings < 0) throw new NumberFormatException("--max-findings must be >= 0");
+                    }
                     case "-Canary" -> canary = true;
                     default -> { System.err.println("Unrecognized argument: " + args[i]); System.exit(2); return; }
                 }
@@ -46,7 +49,14 @@ public final class ContentAuditCli {
             System.err.println("Allowlist not found: " + allowlist); System.exit(2); return;
         }
 
-        Result result = run(repoRoot, Allowlist.load(allowlist));
+        Result result;
+        try {
+            result = run(repoRoot, Allowlist.load(allowlist));
+        } catch (IOException e) {
+            System.err.println("Scan failed: " + e.getMessage());
+            System.exit(2);
+            return;
+        }
         if (result.entitiesScanned() < MIN_ENTITIES) {
             // Reading almost nothing must not read as "all content complete" — the
             // same defect class that made api-diff print PASS while scanning zero files.
