@@ -61,6 +61,10 @@ public class WndHero extends WndTabbed {
 
 	public static int lastIdx = 0;
 
+	//Prototype: true once the constructor finishes, so the construction-time select(lastIdx)
+	//never opens the Keybearer sphere-grid window before this window is on the scene.
+	private boolean built = false;
+
 	public WndHero() {
 		
 		super();
@@ -96,7 +100,14 @@ public class WndHero extends WndTabbed {
 				super.select( value );
 				if (selected) lastIdx = 1;
 				if (selected) StatusPane.talentBlink = 0;
-				talents.visible = talents.active = selected;
+				//Prototype: the Keybearer progresses on the sphere grid instead of talents.
+				if (selected && built && com.qsr.customspd.Dungeon.hero != null
+						&& com.qsr.customspd.Dungeon.hero.sphereGrid != null) {
+					talents.visible = talents.active = false;
+					com.qsr.customspd.scenes.GameScene.show(new WndSphereGrid(com.qsr.customspd.Dungeon.hero));
+				} else {
+					talents.visible = talents.active = selected;
+				}
 			}
 		} );
 		add( new IconTab( new Image(Asset.getAssetFilePath(GeneralAsset.ICON_BUFFS)) ) {
@@ -114,6 +125,8 @@ public class WndHero extends WndTabbed {
 		talents.layout();
 
 		select( lastIdx );
+
+		built = true;
 	}
 
 	@Override
