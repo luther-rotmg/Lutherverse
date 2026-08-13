@@ -1,10 +1,8 @@
 package com.qsr.customspd.actors.hero.spheregrid;
 
-import com.watabou.utils.Bundle;
+import com.qsr.customspd.test.SaveRoundtrip;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -93,13 +91,7 @@ class SphereGridTest {
 		assertTrue(g.activate(SphereNode.MIGHT_I));
 		// 2 spent, 3 left; mightLevel = ATTUNEMENT(1) + MIGHT_I(1) = 2
 
-		Bundle parent = new Bundle();
-		parent.put("grid", g);
-
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		assertTrue(Bundle.write(parent, out), "grid bundle must write");
-		Bundle restored = Bundle.read(new ByteArrayInputStream(out.toByteArray()));
-		SphereGrid g2 = (SphereGrid) restored.get("grid");
+		SphereGrid g2 = SaveRoundtrip.of(g);
 
 		assertNotNull(g2, "the grid must come back from the save");
 		assertEquals(3, g2.unspentPoints());
@@ -107,5 +99,27 @@ class SphereGridTest {
 		assertTrue(g2.isActivated(SphereNode.MIGHT_I));
 		assertEquals(2, g2.mightLevel());
 		assertFalse(g2.isActivated(SphereNode.EMBER_I), "un-activated nodes must stay off");
+	}
+
+	@Test
+	void fullyActivatedGridSurvivesRoundtrip() throws IOException {
+		// Every node activated: the stress case for serialization (all activations + 0 points).
+		SphereGrid g = new SphereGrid();
+		g.grantPoints(SphereNode.values().length);
+		for (SphereNode node : SphereNode.values()) {
+			assertTrue(g.activate(node), "every node should be reachable/affordable here: " + node);
+		}
+		int ember = g.emberLevel(), might = g.mightLevel(), vigor = g.vigorLevel();
+
+		SphereGrid g2 = SaveRoundtrip.of(g);
+
+		assertNotNull(g2);
+		for (SphereNode node : SphereNode.values()) {
+			assertTrue(g2.isActivated(node), "every activated node must survive the save: " + node);
+		}
+		assertEquals(0, g2.unspentPoints());
+		assertEquals(ember, g2.emberLevel());
+		assertEquals(might, g2.mightLevel());
+		assertEquals(vigor, g2.vigorLevel());
 	}
 }

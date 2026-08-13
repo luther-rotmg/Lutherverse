@@ -13,14 +13,13 @@ import com.qsr.customspd.items.weapon.melee.MeleeWeapon;
 import com.qsr.customspd.modding.HeroConfig;
 import com.qsr.customspd.modding.JsonConfigRetriever;
 import com.qsr.customspd.test.HeadlessGdx;
+import com.qsr.customspd.test.SaveRoundtrip;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -192,9 +191,7 @@ class KeybearerHeadlessTest {
 			// The real save path: storeInBundle -> Bundle.write -> read -> restoreFromBundle.
 			Bundle out = new Bundle();
 			hero.storeInBundle(out);
-			ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-			assertTrue(Bundle.write(out, bytes), "the hero bundle must write");
-			Bundle in = Bundle.read(new ByteArrayInputStream(bytes.toByteArray()));
+			Bundle in = SaveRoundtrip.writeRead(out);
 
 			Hero restored = new Hero();
 			restored.restoreFromBundle(in);
