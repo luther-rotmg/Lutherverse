@@ -36,6 +36,7 @@ public final class RegistryIndex {
     public boolean generatorReferences(String simpleName) { return wordPresent(generatorSource, simpleName); }
 
     private static boolean wordPresent(String haystack, String word) {
+        if (word == null) return false;
         return Pattern.compile("\\b" + Pattern.quote(word) + "\\b").matcher(haystack).find();
     }
 }

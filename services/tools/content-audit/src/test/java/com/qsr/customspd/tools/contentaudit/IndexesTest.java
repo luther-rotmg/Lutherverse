@@ -49,12 +49,13 @@ class IndexesTest {
     @Test
     void registryIndexDetectsWordTokenReferences(@TempDir Path root) throws Exception {
         write(root.resolve("core/src/main/java/com/qsr/customspd/actors/mobs/Bestiary.kt"),
-                "fun mobClass() { if (cl == Rat::class.java) {} }");
+                "fun mobClass() { if (cl == Rat::class.java) {} ; val x = RatKing }");
         write(root.resolve("core/src/main/java/com/qsr/customspd/items/Generator.java"),
                 "class Generator { Category c = new Category(Ration.class); }");
         RegistryIndex r = RegistryIndex.load(root.toFile());
         assertTrue(r.bestiaryReferences("Rat"));
         assertFalse(r.bestiaryReferences("Ration")); // substring of nothing; word-bounded
         assertTrue(r.generatorReferences("Ration"));
+        assertFalse(r.bestiaryReferences("King")); // 'King' only appears embedded in 'RatKing', not as a whole word
     }
 }
