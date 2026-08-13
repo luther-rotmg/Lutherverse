@@ -1,0 +1,26 @@
+# Reviewed permanent exceptions for content-audit.
+#
+# One "Type Name#Check" key per line (e.g. `Mob YogDzewa#M3`). Blank lines and
+# lines starting with `#` are ignored, so each entry can carry a rationale above it.
+#
+# An entry here means the finding is CORRECT FOREVER, not a gap -- e.g. a boss that
+# is placed by its boss level and legitimately never appears in Bestiary. The known
+# backlog of un-triaged findings is NOT listed here; it is parked behind the
+# `--max-findings` ceiling and stays visible in the tool's output as
+# "TRACKED, NOT ACCEPTED". Add an entry ONLY after individually verifying the finding.
+#
+# --- First run, 2026-08-12 ---
+# 314 entities scanned, 189 findings: I3=119, M3=48, M2=13, M1=5, I2=4.
+#
+# The registration checks (M3 "not in Bestiary.kt" / I3 "not in Generator.java")
+# OVER-REPORT against CPDU's actual registration mechanism: standard Bestiary mobs
+# (Bat, Crab, Gnoll, Skeleton, ...) are flagged M3 despite being real spawns, which
+# means CPDU registers most content somewhere the loose word-token check does not see.
+# So the bulk of the 189 are heuristic false-positives, NOT true permanent exceptions
+# and NOT real gaps. They are deliberately parked under the ceiling rather than
+# allowlisted, because allowlisting a false-positive would falsely assert it is
+# correct-forever. Tuning the registration heuristic + triaging the real remainder is
+# tracked as a follow-up bead. Only genuine, individually-verified permanent
+# exceptions belong below this line.
+#
+# (none yet -- see the follow-up bead)
