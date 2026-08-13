@@ -1,9 +1,15 @@
 package com.qsr.customspd;
 
+import com.qsr.customspd.Dungeon;
+import com.qsr.customspd.actors.hero.Hero;
+import com.qsr.customspd.actors.hero.spheregrid.SphereGrid;
+import com.qsr.customspd.actors.hero.spheregrid.SphereNode;
+import com.qsr.customspd.items.weapon.melee.Keyblade;
 import com.qsr.customspd.items.weapon.melee.MeleeWeapon;
 import com.qsr.customspd.modding.HeroConfig;
 import com.qsr.customspd.modding.JsonConfigRetriever;
 import com.qsr.customspd.test.HeadlessGdx;
+import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -44,5 +50,43 @@ class KeybearerHeadlessTest {
 				Reflection.forName("com.qsr.customspd.items." + "weapon.melee.Keyblade"));
 		assertNotNull(weapon, "the Keyblade class must exist and be constructible");
 		assertTrue(weapon instanceof MeleeWeapon, "the Keyblade must be a MeleeWeapon");
+	}
+
+	@Test
+	void mightNodesAddFlatKeybladeDamage() {
+		// Two fresh, identical heroes; one specs 2 points of Might on its grid.
+		Hero base = new Hero();
+		base.sphereGrid = new SphereGrid();
+
+		Hero might = new Hero();
+		might.sphereGrid = new SphereGrid();
+		might.sphereGrid.grantPoints(2);
+		might.sphereGrid.activate(SphereNode.ATTUNEMENT); // MIGHT +1
+		might.sphereGrid.activate(SphereNode.MIGHT_I);    // MIGHT +1  -> mightLevel 2
+		assertEquals(2, might.sphereGrid.mightLevel());
+
+		Keyblade kb = new Keyblade();
+
+		// KindOfWeapon.isEquipped() consults the global Dungeon.hero; combat always has one set.
+		Hero prevHero = Dungeon.hero;
+		try {
+			// Seed the RNG identically for both rolls so the only difference is the grid bonus.
+			long seed = 20260813L;
+
+			Dungeon.hero = base;
+			Random.pushGenerator(seed);
+			int baseDmg = kb.damageRoll(base);
+			Random.popGenerator();
+
+			Dungeon.hero = might;
+			Random.pushGenerator(seed);
+			int mightDmg = kb.damageRoll(might);
+			Random.popGenerator();
+
+			assertEquals(baseDmg + 2, mightDmg,
+					"Might nodes must add exactly mightLevel flat damage to the keyblade");
+		} finally {
+			Dungeon.hero = prevHero;
+		}
 	}
 }
