@@ -308,6 +308,8 @@ public enum HeroClass {
 				return Asset.getAssetFilePath(GeneralAsset.HUNTRESS);
 			case DUELIST:
 				return Asset.getAssetFilePath(GeneralAsset.DUELIST);
+			case KEYBEARER:
+				return Asset.getAssetFilePath(GeneralAsset.KEYBEARER);
 		}
 	}
 
@@ -315,6 +317,8 @@ public enum HeroClass {
 		switch (this) {
 			case WARRIOR: default:
 				return GeneralAsset.WARRIOR;
+			case KEYBEARER:
+				return GeneralAsset.KEYBEARER;
 			case MAGE:
 				return GeneralAsset.MAGE;
 			case ROGUE:
@@ -338,6 +342,8 @@ public enum HeroClass {
 				return Asset.getAssetFilePath(GeneralAsset.HUNTRESS_SPLASH);
 			case DUELIST:
 				return Asset.getAssetFilePath(GeneralAsset.DUELIST_SPLASH);
+			case KEYBEARER:
+				return Asset.getAssetFilePath(GeneralAsset.KEYBEARER_SPLASH);
 		}
 	}
 	

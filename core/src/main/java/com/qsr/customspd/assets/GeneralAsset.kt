@@ -655,6 +655,7 @@ enum class GeneralAsset(override val path: String) : Asset {
     ROGUE_SPLASH("splashes/rogue.jpg"),
     HUNTRESS_SPLASH("splashes/huntress.jpg"),
     DUELIST_SPLASH("splashes/duelist.jpg"),
+    KEYBEARER_SPLASH("splashes/keybearer.jpg"),
 
     SOMETHING("sprites/items/something.png"),
     WEAPON_HOLDER("sprites/items/weapon_holder.png"),
@@ -1050,6 +1051,7 @@ enum class GeneralAsset(override val path: String) : Asset {
     ROGUE("sprites/chars/rogue.png"),
     HUNTRESS("sprites/chars/huntress.png"),
     DUELIST("sprites/chars/duelist.png"),
+    KEYBEARER("sprites/chars/keybearer.png"),
     PET("sprites/chars/pet.png"),
     RAT("sprites/chars/rat.png"),
     BRUTE("sprites/chars/brute.png"),
