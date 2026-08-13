@@ -23,4 +23,12 @@
 # tracked as a follow-up bead. Only genuine, individually-verified permanent
 # exceptions belong below this line.
 #
-# (none yet -- see the follow-up bead)
+# --- Keybearer class weapons, 2026-08-13 ---
+# The Keyblade and FrostKeyblade are the Keybearer's signature class weapons,
+# granted exclusively through the hero starting kit (assets/heroes/keybearer.json).
+# They are deliberately NOT in the random loot Generator -- like a class-exclusive
+# starting weapon, they are never meant to drop from the dungeon's item pool. The
+# I3 "not referenced in Generator.java" finding is therefore correct-forever, not a
+# wiring gap. (Full sprite + localization + hero-kit wiring is verified present.)
+Item Keyblade#I3
+Item FrostKeyblade#I3
