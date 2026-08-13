@@ -62,6 +62,7 @@ import com.qsr.customspd.items.weapon.missiles.darts.TippedDart;
 import com.qsr.customspd.messages.Messages;
 import com.qsr.customspd.modding.HeroConfig;
 import com.qsr.customspd.modding.ItemDescription;
+import com.qsr.customspd.actors.hero.spheregrid.SphereGrid;
 import com.qsr.customspd.modding.JsonConfigRetriever;
 import com.watabou.utils.DeviceCompat;
 import com.watabou.utils.Reflection;
@@ -118,6 +119,7 @@ public enum HeroClass {
 				break;
 
 			case KEYBEARER:
+				hero.sphereGrid = new SphereGrid();
 				setUp(JsonConfigRetriever.INSTANCE.retrieveHeroConfig("keybearer"), hero);
 				break;
 		}

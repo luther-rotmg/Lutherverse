@@ -272,6 +272,9 @@ public class Hero extends Char {
 		return STR + strBonus;
 	}
 
+	//Prototype: Keybearer build-craft progression (sphere grid). null for every other class.
+	public com.qsr.customspd.actors.hero.spheregrid.SphereGrid sphereGrid = null;
+
 	private static final String CLASS       = "class";
 	private static final String SUBCLASS    = "subClass";
 	private static final String ABILITY     = "armorAbility";
@@ -304,8 +307,10 @@ public class Hero extends Char {
 		bundle.put( HTBOOST, HTBoost );
 
 		belongings.storeInBundle( bundle );
+
+		if (sphereGrid != null) bundle.put( "sphere_grid", sphereGrid );
 	}
-	
+
 	@Override
 	public void restoreFromBundle( Bundle bundle ) {
 
@@ -327,8 +332,15 @@ public class Hero extends Char {
 		STR = bundle.getInt( STRENGTH );
 
 		belongings.restoreFromBundle( bundle );
+
+		if (heroClass == HeroClass.KEYBEARER) {
+			sphereGrid = new com.qsr.customspd.actors.hero.spheregrid.SphereGrid();
+			if (bundle.contains( "sphere_grid" )) {
+				sphereGrid.restoreFromBundle( bundle.getBundle( "sphere_grid" ) );
+			}
+		}
 	}
-	
+
 	public static void preview( GamesInProgress.Info info, Bundle bundle ) {
 		info.level = bundle.getInt( LEVEL );
 		info.str = bundle.getInt( STRENGTH );
@@ -1784,7 +1796,9 @@ public class Hero extends Char {
 			if (lvl < MAX_LEVEL) {
 				lvl++;
 				levelUp = true;
-				
+
+				if (sphereGrid != null) sphereGrid.grantPoints(1); //prototype: 1 sphere-grid point per level
+
 				if (buff(ElixirOfMight.HTBoost.class) != null){
 					buff(ElixirOfMight.HTBoost.class).onLevelUp();
 				}
