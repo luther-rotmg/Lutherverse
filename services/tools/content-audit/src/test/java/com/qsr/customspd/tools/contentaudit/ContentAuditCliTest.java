@@ -54,4 +54,19 @@ class ContentAuditCliTest {
         ContentAuditCli.Result r = ContentAuditCli.run(repo, Allowlist.load(al));
         assertTrue(r.findings().isEmpty());
     }
+
+    @Test
+    void relativeAllowlistResolvesAgainstRepoRootAndAbsolutePassesThrough(@TempDir Path root) {
+        java.io.File repo = root.toFile();
+        // relative path resolves against the repo root, NOT the subproject CWD
+        java.nio.file.Path rel = java.nio.file.Path.of("services/tools/content-audit/reviewed-exceptions.txt");
+        org.junit.jupiter.api.Assertions.assertEquals(
+                root.resolve("services/tools/content-audit/reviewed-exceptions.txt"),
+                ContentAuditCli.resolve(repo, rel));
+        // an absolute path passes through unchanged
+        java.nio.file.Path abs = root.resolve("abs.txt").toAbsolutePath();
+        org.junit.jupiter.api.Assertions.assertEquals(abs, ContentAuditCli.resolve(repo, abs));
+        // null passes through
+        org.junit.jupiter.api.Assertions.assertNull(ContentAuditCli.resolve(repo, null));
+    }
 }

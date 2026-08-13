@@ -21,14 +21,22 @@ public final class ContentAuditCli {
         Path allowlistPath = null;
         int maxFindings = 0;
         boolean canary = false;
-        for (int i = 0; i < args.length; i++) {
-            switch (args[i]) {
-                case "--allowlist" -> allowlistPath = Path.of(args[++i]);
-                case "--max-findings" -> maxFindings = Integer.parseInt(args[++i]);
-                case "-Canary" -> canary = true;
-                default -> { System.err.println("Unrecognized argument: " + args[i]); System.exit(2); return; }
+        try {
+            for (int i = 0; i < args.length; i++) {
+                switch (args[i]) {
+                    case "--allowlist" -> allowlistPath = Path.of(args[++i]);
+                    case "--max-findings" -> maxFindings = Integer.parseInt(args[++i]);
+                    case "-Canary" -> canary = true;
+                    default -> { System.err.println("Unrecognized argument: " + args[i]); System.exit(2); return; }
+                }
             }
+        } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
+            System.err.println("Usage: content-audit [--allowlist <path>] [--max-findings <n>] [-Canary]");
+            System.exit(2);
+            return;
         }
+
+        if (canary) { System.exit(runCanary()); return; }
 
         File repoRoot = RepoRoot.find();
         if (repoRoot == null) { System.err.println("Not in a git repository"); System.exit(2); return; }
@@ -37,8 +45,6 @@ public final class ContentAuditCli {
         if (allowlist != null && !Files.exists(allowlist)) {
             System.err.println("Allowlist not found: " + allowlist); System.exit(2); return;
         }
-
-        if (canary) { System.exit(runCanary()); return; }
 
         Result result = run(repoRoot, Allowlist.load(allowlist));
         if (result.entitiesScanned() < MIN_ENTITIES) {
@@ -53,7 +59,7 @@ public final class ContentAuditCli {
         System.exit(result.findings().size() > maxFindings ? 1 : 0);
     }
 
-    private static Path resolve(File repoRoot, Path p) {
+    static Path resolve(File repoRoot, Path p) {
         if (p == null || p.isAbsolute()) return p;
         return repoRoot.toPath().resolve(p);
     }
