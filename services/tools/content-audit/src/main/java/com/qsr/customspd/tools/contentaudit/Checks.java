@@ -46,7 +46,7 @@ public final class Checks {
     static String itemKeyBase(ContentClass c) {
         String pkg = c.packageName();
         String marker = "com.qsr.customspd.items";
-        String tail = pkg.length() > marker.length() ? pkg.substring(marker.length() + 1) : "";
+        String tail = pkg.startsWith(marker + ".") ? pkg.substring(marker.length() + 1) : "";
         String sub = tail.isEmpty() ? "" : tail + ".";
         return "items." + sub + c.simpleName().toLowerCase();
     }
