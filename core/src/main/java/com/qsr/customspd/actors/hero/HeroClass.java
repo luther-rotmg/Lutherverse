@@ -118,10 +118,20 @@ public enum HeroClass {
 				setUp(JsonConfigRetriever.INSTANCE.retrieveHeroConfig("duelist"), hero);
 				break;
 
-			case KEYBEARER:
+			case KEYBEARER: {
 				hero.sphereGrid = new SphereGrid();
 				setUp(JsonConfigRetriever.INSTANCE.retrieveHeroConfig("keybearer"), hero);
+				// Start dual-wielding: move the second keyblade from the pack into the off-hand
+				// slot directly (mirroring how setUp assigns the primary, avoiding equip UI hooks).
+				com.qsr.customspd.items.weapon.melee.FrostKeyblade offhand =
+						(com.qsr.customspd.items.weapon.melee.FrostKeyblade) hero.belongings.getItem(com.qsr.customspd.items.weapon.melee.FrostKeyblade.class);
+				if (offhand != null) {
+					offhand.detachAll(hero.belongings.backpack);
+					hero.belongings.secondWep = offhand;
+					offhand.activate(hero);
+				}
 				break;
+			}
 		}
 
 	}

@@ -26,6 +26,7 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -267,6 +268,41 @@ class KeybearerHeadlessTest {
 	}
 
 	@Test
+	void trueDualWieldOffHandAlsoStrikes() {
+		Hero prevHero = Dungeon.hero;
+		try {
+			// Keybearer wielding a fire keyblade with a frost keyblade in the off-hand.
+			Hero hero = new Hero();
+			hero.heroClass = HeroClass.KEYBEARER;
+			hero.sphereGrid = new SphereGrid();
+			Dungeon.hero = hero;
+			hero.belongings.weapon = new Keyblade();
+			hero.belongings.secondWep = new FrostKeyblade();
+
+			Mob enemy = new Rat();
+			enemy.HP = enemy.HT = 100;
+			int returned = hero.attackProc(enemy, 10);
+
+			// The off-hand frost keyblade struck: its chill landed and its damage was added.
+			assertNotNull(enemy.buff(Chill.class), "off-hand frost keyblade applied its own chill");
+			assertTrue(returned > 10, "off-hand strike added damage on top of the primary");
+
+			// Control: identical loadout but NOT a Keybearer -> the gate skips the off-hand strike.
+			Hero other = new Hero();
+			other.heroClass = HeroClass.WARRIOR;
+			Dungeon.hero = other;
+			other.belongings.weapon = new Keyblade();
+			other.belongings.secondWep = new FrostKeyblade();
+			Mob e2 = new Rat();
+			e2.HP = e2.HT = 100;
+			other.attackProc(e2, 10);
+			assertNull(e2.buff(Chill.class), "non-Keybearer: the off-hand does not strike");
+		} finally {
+			Dungeon.hero = prevHero;
+		}
+	}
+
+	@Test
 	void keybearerClassInitialisesEndToEnd() {
 		Hero prevHero = Dungeon.hero;
 		try {
@@ -279,6 +315,8 @@ class KeybearerHeadlessTest {
 			assertNotNull(hero.sphereGrid, "initHero must create the sphere grid for the Keybearer");
 			assertTrue(hero.belongings.weapon instanceof Keyblade,
 					"the Keybearer must start the run wielding a Keyblade");
+			assertTrue(hero.belongings.secondWep instanceof FrostKeyblade,
+					"the Keybearer starts dual-wielding the frost keyblade in the off-hand");
 		} finally {
 			Dungeon.hero = prevHero;
 		}

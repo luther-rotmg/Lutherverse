@@ -1358,7 +1358,19 @@ public class Hero extends Char {
 		damage = Talent.onAttackProc( this, enemy, damage );
 
 		if (wep != null) damage = wep.proc( this, enemy, damage );
-		
+
+		// Keybearer true dual-wield: the off-hand keyblade also strikes — its own proc (element +
+		// signature) fires and it adds reduced damage. Gated to KEYBEARER so no other class's
+		// attack path is touched (the Champion's second-weapon machinery stays swap-only).
+		if (heroClass == HeroClass.KEYBEARER
+				&& belongings.secondWep instanceof com.qsr.customspd.items.weapon.melee.MeleeWeapon
+				&& belongings.secondWep != wep) {
+			com.qsr.customspd.items.weapon.melee.MeleeWeapon offhand =
+					(com.qsr.customspd.items.weapon.melee.MeleeWeapon) belongings.secondWep;
+			int offDmg = Math.round(offhand.damageRoll(this) * 0.5f);
+			damage += offhand.proc(this, enemy, offDmg);
+		}
+
 		switch (subClass) {
 		case SNIPER:
 			if (wep instanceof MissileWeapon && !(wep instanceof SpiritBow.SpiritArrow) && enemy != this) {

@@ -83,6 +83,7 @@ public class FrostKeyblade extends MeleeWeapon {
 			// elements for a Thermal Shock burst — bonus damage, not a stacked burn (applying the
 			// opposite status would just cancel this keyblade's own chill; see Keyblade).
 			if (defender.isAlive() && attacker instanceof Hero
+					&& ((Hero) attacker).belongings.secondWep == null // not dual-wielding (else the off-hand strike replaces this)
 					&& ((Hero) attacker).belongings.getItem(Keyblade.class) != null) {
 				defender.damage(2, this);
 			}

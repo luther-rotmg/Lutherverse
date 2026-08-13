@@ -86,6 +86,7 @@ public class Keyblade extends MeleeWeapon {
 			// DAMAGE, not a stacked chill: the game extinguishes burning when a target is chilled,
 			// so applying the opposite status would only douse this keyblade's own element.
 			if (defender.isAlive() && attacker instanceof Hero
+					&& ((Hero) attacker).belongings.secondWep == null // not dual-wielding (else the off-hand strike replaces this)
 					&& ((Hero) attacker).belongings.getItem(FrostKeyblade.class) != null) {
 				defender.damage(2, this);
 			}
