@@ -106,6 +106,17 @@ jobs:
           grep -q 'RESULT: PASS' /tmp/da.log \
             || { echo "::error::deletion-audit found unreviewed removals"; exit 1; }
 
+      - name: content-audit (content completeness)
+        # entities scanned must be non-vacuous, the same failure class as api-diff
+        # scanning zero files for weeks while printing PASS.
+        run: |
+          ./gradlew :services:tools:content-audit:run \
+            --args="--allowlist services/tools/content-audit/reviewed-exceptions.txt --max-findings 189" \
+            | tee /tmp/ca.log
+          grep -qE "entities scanned" /tmp/ca.log || (echo "content-audit scanned nothing" && exit 1)
+          scanned=$(grep -oE "[0-9]+ entities scanned" /tmp/ca.log | grep -oE "[0-9]+")
+          test "$scanned" -gt 50 || (echo "content-audit non-vacuity failed: $scanned entities" && exit 1)
+
       - name: Manifest audit
         run: pwsh -NoProfile -File services/tools/manifest-audit/manifest-audit.ps1
 

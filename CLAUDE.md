@@ -33,6 +33,7 @@ Then, for anything touching `core/`:
 
 ```bash
 ./gradlew.bat :services:tools:deletion-audit:run --quiet --args="--base 7d9c139c8 --head HEAD --min-shrink 3 --allowlist services/tools/deletion-audit/reviewed-removals.txt"
+./gradlew.bat :services:tools:content-audit:run --quiet --args="--allowlist services/tools/content-audit/reviewed-exceptions.txt --max-findings 189"
 ```
 
 deletion-audit reads **git refs, not the working tree** — commit first or it audits stale
@@ -43,6 +44,7 @@ Other tools, all under `services/tools/`, each with a README:
 | Tool | Answers |
 |---|---|
 | `deletion-audit` | did anything quietly disappear between two refs |
+| `content-audit` | is every core Mob/Item fully wired (sprite, localization, registration) |
 | `port-verify` | did an upstream commit's content actually land |
 | `manifest-audit` | can the Slice 1 scope manifests be trusted |
 | `asset-audit` | do assets ship that nothing can reference |
