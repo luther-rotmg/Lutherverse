@@ -1,6 +1,6 @@
 {
   "weapon": {
-    "type": "weapon.melee.Dagger",
+    "type": "weapon.melee.Keyblade",
     "identified": true,
     "quickslot": true
   },
