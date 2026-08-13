@@ -32,11 +32,19 @@ sourceCompatibility = targetCompatibility = appJavaCompatibility
 //classes and pure functions are fair game today.
 test {
     useJUnitPlatform()
+    //F1 headless bootstrap: game-runtime tests read base assets via Gdx.files.internal(...),
+    //which HeadlessFiles resolves relative to the process working directory. Point it at the
+    //asset root so ModManager/JsonConfigRetriever find heroes/*.json, messages/*, etc.
+    //Pure-logic tests (no file access) are unaffected by the CWD change.
+    workingDir = file('src/main/assets')
 }
 
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    //F1 headless bootstrap: run real game code (asset loading, later hero/combat) with no display.
+    testImplementation "com.badlogicgames.gdx:gdx-backend-headless:$gdxVersion"
+    testRuntimeOnly "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
 
     api project(':SPD-classes')
     implementation project(':services')
