@@ -1,0 +1,11 @@
+{
+  "weapon": {
+    "type": "weapon.melee.Dagger",
+    "identified": true,
+    "quickslot": true
+  },
+  "identified": [
+    "potions.PotionOfStrength",
+    "scrolls.ScrollOfMirrorImage"
+  ]
+}

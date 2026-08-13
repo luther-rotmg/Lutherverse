@@ -72,7 +72,11 @@ public enum HeroClass {
 	MAGE( HeroSubClass.BATTLEMAGE, HeroSubClass.WARLOCK ),
 	ROGUE( HeroSubClass.ASSASSIN, HeroSubClass.FREERUNNER ),
 	HUNTRESS( HeroSubClass.SNIPER, HeroSubClass.WARDEN ),
-	DUELIST( HeroSubClass.CHAMPION, HeroSubClass.MONK );
+	DUELIST( HeroSubClass.CHAMPION, HeroSubClass.MONK ),
+
+	//Prototype: build-craft ARPG spine (keyblade + sphere-grid class).
+	//NONE subclass keeps the subclass UI inert (its consumers loop by length) until real subclasses land.
+	KEYBEARER( HeroSubClass.NONE );
 
 	private HeroSubClass[] subClasses;
 
@@ -112,6 +116,10 @@ public enum HeroClass {
 			case DUELIST:
 				setUp(JsonConfigRetriever.INSTANCE.retrieveHeroConfig("duelist"), hero);
 				break;
+
+			case KEYBEARER:
+				setUp(JsonConfigRetriever.INSTANCE.retrieveHeroConfig("keybearer"), hero);
+				break;
 		}
 
 	}
@@ -128,6 +136,8 @@ public enum HeroClass {
 				return Badges.Badge.MASTERY_HUNTRESS;
 			case DUELIST:
 				return Badges.Badge.MASTERY_DUELIST;
+			case KEYBEARER:
+				return Badges.Badge.MASTERY_DUELIST; //prototype: reuse duelist mastery badge until Keybearer has its own
 		}
 		return null;
 	}
