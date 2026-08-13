@@ -940,6 +940,7 @@ enum class GeneralAsset(override val path: String) : Asset {
     OVERPRICED("sprites/items/overpriced.png"),
     CARPACCIO("sprites/items/carpaccio.png"),
     PHANTOM_MEAT("sprites/items/phantom_meat.png"),
+    SUPPLY_RATION("sprites/items/supply_ration.png"),
     RATION("sprites/items/ration.png"),
     PASTY("sprites/items/pasty.png"),
     PUMPKIN_PIE("sprites/items/pumpkin_pie.png"),

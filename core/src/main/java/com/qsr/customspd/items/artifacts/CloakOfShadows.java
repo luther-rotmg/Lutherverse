@@ -196,7 +196,13 @@ public class CloakOfShadows extends Artifact {
 		charge = Math.min(charge+amount, chargeCap+amount);
 		updateQuickslot();
 	}
-	
+
+	//unlike overCharge, this cannot push charge past chargeCap
+	public void directCharge(int amount){
+		charge = Math.min(charge+amount, chargeCap);
+		updateQuickslot();
+	}
+
 	@Override
 	public Item upgrade() {
 		chargeCap = Math.min(chargeCap + 1, 10);

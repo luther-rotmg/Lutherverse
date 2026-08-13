@@ -50,7 +50,7 @@ import com.qsr.customspd.items.Torch;
 import com.qsr.customspd.items.armor.Armor;
 import com.qsr.customspd.items.artifacts.Artifact;
 import com.qsr.customspd.items.artifacts.DriedRose;
-import com.qsr.customspd.items.food.SmallRation;
+import com.qsr.customspd.items.food.SupplyRation;
 import com.qsr.customspd.items.journal.DocumentPage;
 import com.qsr.customspd.items.journal.GuidePage;
 import com.qsr.customspd.items.journal.RegionLorePage;
@@ -625,11 +625,14 @@ public abstract class RegularLevel extends Level {
 			}
 		Random.popGenerator();
 
-		//cached rations try to drop in a special room on floors 2/3/4/6/7/8, to a max of 4/6
+		//cached rations try to drop in a special room on floors 2/4/7, to a max of 2/3
+		//we incremented dropped by 2 for compatibility with pre-v2.4 saves (when the talent dropped 4/6 items)
 		Random.pushGenerator( Random.Long() );
 			if (Dungeon.hero.hasTalent(Talent.CACHED_RATIONS)){
 				Talent.CachedRationsDropped dropped = Buff.affect(Dungeon.hero, Talent.CachedRationsDropped.class);
-				if (dropped.count() < 2 + 2*Dungeon.hero.pointsInTalent(Talent.CACHED_RATIONS)){
+				int targetFloor = (int)(2 + dropped.count());
+				if (dropped.count() > 4) targetFloor++;
+				if (Dungeon.depth >= targetFloor && dropped.count() < 2 + 2*Dungeon.hero.pointsInTalent(Talent.CACHED_RATIONS)){
 					int cell;
 					int tries = 100;
 					boolean valid;
@@ -646,8 +649,8 @@ public abstract class RegularLevel extends Level {
 							map[cell] = Terrain.GRASS;
 							losBlocking[cell] = false;
 						}
-						drop(new SmallRation(), cell).type = Heap.Type.CHEST;
-						dropped.countUp(1);
+						drop(new SupplyRation(), cell).type = Heap.Type.CHEST;
+						dropped.countUp(2);
 					}
 				}
 			}
