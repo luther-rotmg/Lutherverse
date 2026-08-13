@@ -13,10 +13,15 @@ import com.qsr.customspd.items.weapon.melee.MeleeWeapon;
 import com.qsr.customspd.modding.HeroConfig;
 import com.qsr.customspd.modding.JsonConfigRetriever;
 import com.qsr.customspd.test.HeadlessGdx;
+import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -167,6 +172,39 @@ class KeybearerHeadlessTest {
 			assertNotNull(hero.sphereGrid, "initHero must create the sphere grid for the Keybearer");
 			assertTrue(hero.belongings.weapon instanceof Keyblade,
 					"the Keybearer must start the run wielding a Keyblade");
+		} finally {
+			Dungeon.hero = prevHero;
+		}
+	}
+
+	@Test
+	void keybearerGridSurvivesAFullHeroSaveRoundtrip() throws IOException {
+		Hero prevHero = Dungeon.hero;
+		try {
+			// A realistic, fully-initialised Keybearer, then a specced grid.
+			Hero hero = new Hero();
+			Dungeon.hero = hero;
+			HeroClass.KEYBEARER.initHero(hero);
+			hero.sphereGrid.grantPoints(3);
+			hero.sphereGrid.activate(SphereNode.ATTUNEMENT);
+			hero.sphereGrid.activate(SphereNode.MIGHT_I);
+
+			// The real save path: storeInBundle -> Bundle.write -> read -> restoreFromBundle.
+			Bundle out = new Bundle();
+			hero.storeInBundle(out);
+			ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+			assertTrue(Bundle.write(out, bytes), "the hero bundle must write");
+			Bundle in = Bundle.read(new ByteArrayInputStream(bytes.toByteArray()));
+
+			Hero restored = new Hero();
+			restored.restoreFromBundle(in);
+
+			assertEquals(HeroClass.KEYBEARER, restored.heroClass);
+			assertNotNull(restored.sphereGrid, "the Keybearer grid must survive a full save");
+			assertTrue(restored.sphereGrid.isActivated(SphereNode.MIGHT_I),
+					"activated nodes must survive the save");
+			assertEquals(1, restored.sphereGrid.unspentPoints(), "unspent points must survive (3 granted - 2 spent)");
+			assertEquals(2, restored.sphereGrid.mightLevel());
 		} finally {
 			Dungeon.hero = prevHero;
 		}
