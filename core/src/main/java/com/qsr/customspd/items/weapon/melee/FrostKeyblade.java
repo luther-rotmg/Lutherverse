@@ -73,6 +73,12 @@ public class FrostKeyblade extends MeleeWeapon {
 				turns += grid.frostLevel(); // Frost nodes: a longer chill
 			}
 			Buff.affect(defender, Chill.class, turns);
+			// Rime Shatter (signature ability): burst = frostLevel * abilityLevel — the hybrid
+			// frost+ability payoff.
+			if (grid != null && defender.isAlive()) {
+				int burst = grid.frostLevel() * grid.abilityLevel();
+				if (burst > 0) defender.damage(burst, this);
+			}
 		}
 		return damage;
 	}

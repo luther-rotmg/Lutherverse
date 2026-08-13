@@ -49,9 +49,14 @@ public enum SphereNode {
 
 	// Frost branch — the second element (chill/slow); amplifies the frost keyblade
 	FROST_I(Effect.FROST, 1, 1, "ATTUNEMENT"),
-	FROST_II(Effect.FROST, 2, 1, "FROST_I");
+	FROST_II(Effect.FROST, 2, 1, "FROST_I"),
 
-	public enum Effect { EMBER, FROST, MIGHT, VIGOR }
+	// Ability branch — empowers each keyblade's signature ability (burst = elementLevel * abilityLevel),
+	// so it pays off only alongside an element: the design's hybrid element+ability quadrant.
+	ABILITY_I(Effect.ABILITY, 1, 1, "ATTUNEMENT"),
+	ABILITY_II(Effect.ABILITY, 2, 1, "ABILITY_I");
+
+	public enum Effect { EMBER, FROST, MIGHT, VIGOR, ABILITY }
 
 	public final Effect effect;
 	public final int magnitude;

@@ -196,6 +196,44 @@ class KeybearerHeadlessTest {
 	}
 
 	@Test
+	void signatureAbilityBurstScalesWithElementTimesAbility() {
+		Hero prevHero = Dungeon.hero;
+		try {
+			Keyblade kb = new Keyblade();
+
+			// Fire+ability build: emberLevel 1, abilityLevel 1 -> Flame Burst = 1*1 = 1,
+			// on top of the ember bonus (1). Two immediate damage total.
+			Hero hybrid = new Hero();
+			hybrid.sphereGrid = new SphereGrid();
+			hybrid.sphereGrid.grantPoints(3);
+			hybrid.sphereGrid.activate(SphereNode.ATTUNEMENT);
+			hybrid.sphereGrid.activate(SphereNode.EMBER_I);   // ember 1
+			hybrid.sphereGrid.activate(SphereNode.ABILITY_I); // ability 1
+			assertEquals(1, hybrid.sphereGrid.emberLevel());
+			assertEquals(1, hybrid.sphereGrid.abilityLevel());
+			Dungeon.hero = hybrid;
+			Mob t1 = new Rat();
+			t1.HP = t1.HT = 100;
+			kb.proc(hybrid, t1, 10);
+			assertEquals(100 - (1 + 1), t1.HP, "ember bonus (1) + Flame Burst (ember*ability = 1)");
+
+			// Ability WITHOUT an element: burst = 0 * ability = 0, and no ember bonus either.
+			Hero abilityOnly = new Hero();
+			abilityOnly.sphereGrid = new SphereGrid();
+			abilityOnly.sphereGrid.grantPoints(2);
+			abilityOnly.sphereGrid.activate(SphereNode.ATTUNEMENT);
+			abilityOnly.sphereGrid.activate(SphereNode.ABILITY_I); // ability 1, ember 0
+			Dungeon.hero = abilityOnly;
+			Mob t2 = new Rat();
+			t2.HP = t2.HT = 100;
+			kb.proc(abilityOnly, t2, 10);
+			assertEquals(100, t2.HP, "ability alone bursts for nothing without an element");
+		} finally {
+			Dungeon.hero = prevHero;
+		}
+	}
+
+	@Test
 	void keybearerClassInitialisesEndToEnd() {
 		Hero prevHero = Dungeon.hero;
 		try {

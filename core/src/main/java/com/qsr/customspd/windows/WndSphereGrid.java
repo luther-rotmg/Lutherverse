@@ -129,6 +129,7 @@ public class WndSphereGrid extends Window {
 			case FROST: return "Frost (chill)";
 			case MIGHT: return "Might (dmg)";
 			case VIGOR: return "Vigor (hp)";
+			case ABILITY: return "Ability (signature)";
 			default:    return e.name();
 		}
 	}
