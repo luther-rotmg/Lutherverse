@@ -71,6 +71,8 @@ public class WndSphereGrid extends Window {
 					@Override
 					protected void onClick() {
 						if (grid.activate(node)) {
+							//Apply HT-affecting nodes (Vigor) immediately; heals by the gain.
+							WndSphereGrid.this.hero.updateHT(true);
 							hide();
 							GameScene.show(new WndSphereGrid(WndSphereGrid.this.hero));
 						}

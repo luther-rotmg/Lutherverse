@@ -248,7 +248,11 @@ public class Hero extends Char {
 		if (buff(ElixirOfMight.HTBoost.class) != null){
 			HT += buff(ElixirOfMight.HTBoost.class).boost();
 		}
-		
+
+		if (sphereGrid != null){
+			HT += sphereGrid.vigorLevel(); //Prototype: Vigor nodes grant bonus max HP
+		}
+
 		if (boostHP){
 			HP += Math.max(HT - curHT, 0);
 		}
