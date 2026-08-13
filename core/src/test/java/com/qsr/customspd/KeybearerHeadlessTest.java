@@ -234,6 +234,39 @@ class KeybearerHeadlessTest {
 	}
 
 	@Test
+	void dualAttunementDealsThermalShockWhenCarryingBoth() {
+		Hero prevHero = Dungeon.hero;
+		try {
+			// Fire keyblade in hand, frost keyblade carried in the backpack.
+			Hero hero = new Hero();
+			hero.sphereGrid = new SphereGrid();
+			Dungeon.hero = hero;
+			Keyblade fire = new Keyblade();
+			hero.belongings.backpack.items.add(new FrostKeyblade());
+			assertNotNull(hero.belongings.getItem(FrostKeyblade.class), "hero carries the frost keyblade");
+
+			Mob target = new Rat();
+			target.HP = target.HT = 100;
+			fire.proc(hero, target, 10);
+			// The fire keyblade's own burn survives (not doused), plus 2 Thermal Shock damage.
+			assertNotNull(target.buff(Burning.class), "fire keyblade still ignites its own element");
+			assertEquals(100 - 2, target.HP, "Dual Attunement: Thermal Shock deals bonus damage");
+
+			// Control: not carrying the frost keyblade -> no Thermal Shock.
+			Hero solo = new Hero();
+			solo.sphereGrid = new SphereGrid();
+			Dungeon.hero = solo;
+			Mob t2 = new Rat();
+			t2.HP = t2.HT = 100;
+			new Keyblade().proc(solo, t2, 10);
+			assertNotNull(t2.buff(Burning.class));
+			assertEquals(100, t2.HP, "no frost keyblade carried -> no Thermal Shock");
+		} finally {
+			Dungeon.hero = prevHero;
+		}
+	}
+
+	@Test
 	void keybearerClassInitialisesEndToEnd() {
 		Hero prevHero = Dungeon.hero;
 		try {

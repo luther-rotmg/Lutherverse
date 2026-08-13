@@ -79,6 +79,13 @@ public class FrostKeyblade extends MeleeWeapon {
 				int burst = grid.frostLevel() * grid.abilityLevel();
 				if (burst > 0) defender.damage(burst, this);
 			}
+			// Dual Attunement (Keybearer): carrying the fire keyblade too clashes the opposing
+			// elements for a Thermal Shock burst — bonus damage, not a stacked burn (applying the
+			// opposite status would just cancel this keyblade's own chill; see Keyblade).
+			if (defender.isAlive() && attacker instanceof Hero
+					&& ((Hero) attacker).belongings.getItem(Keyblade.class) != null) {
+				defender.damage(2, this);
+			}
 		}
 		return damage;
 	}
