@@ -45,6 +45,11 @@ public class ShatteredPixelDungeon extends Game {
 		super( sceneClass == null ? WelcomeScene.class : sceneClass, platform );
 		tileMapCompiler = compiler;
 
+		registerBundleAliases();
+	}
+
+	/** Save-compat aliases for classes Slice 1 moved between packages. */
+	public static void registerBundleAliases() {
 		com.watabou.utils.Bundle.addAlias(
 				com.qsr.customspd.levels.rooms.standard.entrance.EntranceRoom.class,
 				"com.qsr.customspd.levels.rooms.standard.EntranceRoom" );
