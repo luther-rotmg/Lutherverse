@@ -55,87 +55,99 @@ public final class ContentScaffoldCli {
         usage();
     }
 
+    /**
+     * Generation is compute-then-flush: every touchpoint is planned (read from disk and
+     * validated in memory) before anything is written. addMob's depth check is one of
+     * those plans, so a bad --depth throws in the planning phase, before the class file,
+     * sprite, PNG, GeneralAsset entry, or localization entry ever reach disk.
+     */
     static GenResult generateMob(File repoRoot, String name, int depth) throws IOException {
         Names n = Names.of(name);
         Path base = repoRoot.toPath();
         List<String> created = new ArrayList<>(), modified = new ArrayList<>(), skipped = new ArrayList<>();
 
-        // 1. class + sprite files (created if absent; skipped if present)
-        writeIfAbsent(base.resolve("core/src/main/java/com/qsr/customspd/actors/mobs/" + n.className() + ".java"),
-                Templates.mobClass(n), created, skipped);
-        writeIfAbsent(base.resolve("core/src/main/java/com/qsr/customspd/sprites/" + n.className() + "Sprite.java"),
-                Templates.mobSprite(n), created, skipped);
+        // ---- Plan (no writes yet) ----
+        Path classFile = base.resolve("core/src/main/java/com/qsr/customspd/actors/mobs/" + n.className() + ".java");
+        NewFile classPlan = planNewFile(classFile, () -> Templates.mobClass(n));
 
-        // 2. placeholder PNG
+        Path spriteFile = base.resolve("core/src/main/java/com/qsr/customspd/sprites/" + n.className() + "Sprite.java");
+        NewFile spritePlan = planNewFile(spriteFile, () -> Templates.mobSprite(n));
+
         Path png = base.resolve("core/src/main/assets/" + n.mobAssetPath());
-        if (Files.exists(png)) { skipped.add(png.toString()); }
-        else {
-            Files.createDirectories(png.getParent());
-            try (InputStream in = ContentScaffoldCli.class.getResourceAsStream("/placeholder.png")) {
-                if (in == null) throw new IOException("placeholder.png resource missing");
-                Files.copy(in, png);
-            }
-            created.add(png.toString());
-        }
+        NewBinaryFile pngPlan = planPlaceholderPng(png);
 
-        // 3. GeneralAsset entry. Idempotency token is the FULL generated line, not just
+        // GeneralAsset entry. Idempotency token is the FULL generated line, not just
         // "<UPPER_SNAKE>(" -- a bare "WISP(" token would false-positive as a substring of
         // a longer existing entry like "GREATER_WISP(", silently skipping the insertion.
-        applyInsert(base.resolve("core/src/main/java/com/qsr/customspd/assets/GeneralAsset.kt"),
+        Insertion generalAsset = planInsert(base.resolve("core/src/main/java/com/qsr/customspd/assets/GeneralAsset.kt"),
+                "GeneralAsset:" + n.upperSnake(),
                 c -> AnchorInserter.insertAbove(c, "// @content-scaffold:mobs",
-                        Templates.generalAssetLine(n, true), Templates.generalAssetLine(n, true)),
-                "GeneralAsset:" + n.upperSnake(), modified, skipped);
+                        Templates.generalAssetLine(n, true), Templates.generalAssetLine(n, true)));
 
-        // 4. localization
-        applyInsert(base.resolve("core/src/main/assets/messages/actors/actors.properties"),
+        // localization
+        Insertion props = planInsert(base.resolve("core/src/main/assets/messages/actors/actors.properties"),
+                "actors.mobs." + n.lower(),
                 c -> AnchorInserter.insertAbove(c, "### @content-scaffold:mobs",
-                        Templates.messageLines(n, true).stripTrailing(), "actors.mobs." + n.lower() + ".name="),
-                "actors.mobs." + n.lower(), modified, skipped);
+                        Templates.messageLines(n, true).stripTrailing(), "actors.mobs." + n.lower() + ".name="));
 
-        // 5. dungeon.json registration
-        applyInsert(base.resolve("core/src/main/assets/dungeon/dungeon.json"),
-                c -> JsonBestiaryInserter.addMob(c, depth, n.className()),
-                "dungeon:" + n.className(), modified, skipped);
+        // dungeon.json registration -- this is where an unknown --depth throws.
+        Insertion dungeon = planInsert(base.resolve("core/src/main/assets/dungeon/dungeon.json"),
+                "dungeon:" + n.className(),
+                c -> JsonBestiaryInserter.addMob(c, depth, n.className()));
+
+        // ---- Flush (every plan above succeeded) ----
+        flushNewFile(classPlan, created, skipped);
+        flushNewFile(spritePlan, created, skipped);
+        flushNewBinaryFile(pngPlan, created, skipped);
+        flushInsertion(generalAsset, modified, skipped);
+        flushInsertion(props, modified, skipped);
+        flushInsertion(dungeon, modified, skipped);
 
         return new GenResult(created, modified, skipped);
     }
 
+    /**
+     * Same compute-then-flush structure as {@link #generateMob}: GeneratorCategoryInserter's
+     * category check runs during planning, so an unknown --category throws before any file
+     * (class, PNG, GeneralAsset entry, localization entry) is written.
+     */
     static GenResult generateItem(File repoRoot, String name, String category, String tier) throws IOException {
         Names n = Names.of(name);
         Path base = repoRoot.toPath();
         List<String> created = new ArrayList<>(), modified = new ArrayList<>(), skipped = new ArrayList<>();
 
-        writeIfAbsent(base.resolve("core/src/main/java/com/qsr/customspd/items/" + n.className() + ".java"),
-                Templates.itemClass(n), created, skipped);
+        // ---- Plan (no writes yet) ----
+        Path classFile = base.resolve("core/src/main/java/com/qsr/customspd/items/" + n.className() + ".java");
+        NewFile classPlan = planNewFile(classFile, () -> Templates.itemClass(n));
 
         Path png = base.resolve("core/src/main/assets/" + n.itemAssetPath());
-        if (Files.exists(png)) { skipped.add(png.toString()); }
-        else {
-            Files.createDirectories(png.getParent());
-            try (InputStream in = ContentScaffoldCli.class.getResourceAsStream("/placeholder.png")) {
-                if (in == null) throw new IOException("placeholder.png resource missing");
-                Files.copy(in, png);
-            }
-            created.add(png.toString());
-        }
+        NewBinaryFile pngPlan = planPlaceholderPng(png);
 
         // GeneralAsset entry. As with the mob path (see generateMob's comment), the
         // idempotency token must be the FULL generated line, not a bare "<UPPER_SNAKE>("
         // -- that would false-positive as a substring of a longer existing entry like
         // "SUPER_BERRY(" and silently skip the insertion.
-        applyInsert(base.resolve("core/src/main/java/com/qsr/customspd/assets/GeneralAsset.kt"),
+        Insertion generalAsset = planInsert(base.resolve("core/src/main/java/com/qsr/customspd/assets/GeneralAsset.kt"),
+                "GeneralAsset:" + n.upperSnake(),
                 c -> AnchorInserter.insertAbove(c, "// @content-scaffold:items",
-                        Templates.generalAssetLine(n, false), Templates.generalAssetLine(n, false)),
-                "GeneralAsset:" + n.upperSnake(), modified, skipped);
+                        Templates.generalAssetLine(n, false), Templates.generalAssetLine(n, false)));
 
-        applyInsert(base.resolve("core/src/main/assets/messages/items/items.properties"),
+        Insertion props = planInsert(base.resolve("core/src/main/assets/messages/items/items.properties"),
+                "items." + n.lower(),
                 c -> AnchorInserter.insertAbove(c, "### @content-scaffold:items",
-                        Templates.messageLines(n, false).stripTrailing(), "items." + n.lower() + ".name="),
-                "items." + n.lower(), modified, skipped);
+                        Templates.messageLines(n, false).stripTrailing(), "items." + n.lower() + ".name="));
 
-        applyInsert(base.resolve("core/src/main/java/com/qsr/customspd/items/Generator.java"),
-                c -> GeneratorCategoryInserter.addItem(c, category, n.className()),
-                "Generator:" + category + ":" + n.className(), modified, skipped);
+        // Generator.java registration -- this is where an unknown --category throws.
+        Insertion generator = planInsert(base.resolve("core/src/main/java/com/qsr/customspd/items/Generator.java"),
+                "Generator:" + category + ":" + n.className(),
+                c -> GeneratorCategoryInserter.addItem(c, category, n.className()));
+
+        // ---- Flush (every plan above succeeded) ----
+        flushNewFile(classPlan, created, skipped);
+        flushNewBinaryFile(pngPlan, created, skipped);
+        flushInsertion(generalAsset, modified, skipped);
+        flushInsertion(props, modified, skipped);
+        flushInsertion(generator, modified, skipped);
 
         return new GenResult(created, modified, skipped);
     }
@@ -165,21 +177,65 @@ public final class ContentScaffoldCli {
     }
 
     private interface Insert { AnchorInserter.Result apply(String content); }
+    private interface ContentSupplier { String get(); }
 
-    private static void applyInsert(Path file, Insert ins, String label,
-                                    List<String> modified, List<String> skipped) throws IOException {
-        String content = Files.readString(file);
-        AnchorInserter.Result r = ins.apply(content);
-        if (r.inserted()) { Files.writeString(file, r.newContent()); modified.add(label); }
-        else { skipped.add(label); }
+    /** A planned text-file write: either the file already exists (nothing to do) or
+     *  {@code content} is the fully-rendered new file, ready to flush. */
+    private record NewFile(Path path, boolean exists, String content) {}
+
+    /** Same as {@link NewFile} but for the placeholder PNG, which is binary. */
+    private record NewBinaryFile(Path path, boolean exists, byte[] content) {}
+
+    /** A planned anchor insertion: the {@link AnchorInserter.Result} is already computed
+     *  (and any {@code MissingAnchorException}/{@code IllegalArgumentException} already
+     *  thrown) -- flushing just writes it out if {@code result.inserted()}. */
+    private record Insertion(Path path, String label, AnchorInserter.Result result) {}
+
+    private static NewFile planNewFile(Path file, ContentSupplier content) {
+        if (Files.exists(file)) return new NewFile(file, true, null);
+        return new NewFile(file, false, content.get());
     }
 
-    private static void writeIfAbsent(Path file, String content, List<String> created, List<String> skipped)
+    private static void flushNewFile(NewFile plan, List<String> created, List<String> skipped) throws IOException {
+        if (plan.exists()) { skipped.add(plan.path().toString()); return; }
+        Files.createDirectories(plan.path().getParent());
+        Files.writeString(plan.path(), plan.content());
+        created.add(plan.path().toString());
+    }
+
+    private static NewBinaryFile planPlaceholderPng(Path png) throws IOException {
+        if (Files.exists(png)) return new NewBinaryFile(png, true, null);
+        return new NewBinaryFile(png, false, loadPlaceholderPngBytes());
+    }
+
+    private static byte[] loadPlaceholderPngBytes() throws IOException {
+        try (InputStream in = ContentScaffoldCli.class.getResourceAsStream("/placeholder.png")) {
+            if (in == null) throw new IOException("placeholder.png resource missing");
+            return in.readAllBytes();
+        }
+    }
+
+    private static void flushNewBinaryFile(NewBinaryFile plan, List<String> created, List<String> skipped)
             throws IOException {
-        if (Files.exists(file)) { skipped.add(file.toString()); return; }
-        Files.createDirectories(file.getParent());
-        Files.writeString(file, content);
-        created.add(file.toString());
+        if (plan.exists()) { skipped.add(plan.path().toString()); return; }
+        Files.createDirectories(plan.path().getParent());
+        Files.write(plan.path(), plan.content());
+        created.add(plan.path().toString());
+    }
+
+    private static Insertion planInsert(Path file, String label, Insert ins) throws IOException {
+        String content = Files.readString(file);
+        return new Insertion(file, label, ins.apply(content));
+    }
+
+    private static void flushInsertion(Insertion plan, List<String> modified, List<String> skipped)
+            throws IOException {
+        if (plan.result().inserted()) {
+            Files.writeString(plan.path(), plan.result().newContent());
+            modified.add(plan.label());
+        } else {
+            skipped.add(plan.label());
+        }
     }
 
     private static Integer intFlag(String[] args, String flag) {

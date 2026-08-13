@@ -1,5 +1,8 @@
 package com.qsr.customspd.tools.contentscaffold;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -75,5 +78,56 @@ class ContentScaffoldCliItemTest {
         String content = Files.readString(
                 root.resolve("core/src/main/java/com/qsr/customspd/assets/GeneralAsset.kt"));
         assertTrue(content.contains("    BERRY(\"sprites/items/berry.png\"),"), () -> content);
+    }
+
+    @Test
+    void longerSiblingKeyDoesNotFalsePositiveTheLocalizationToken(@TempDir Path root) throws Exception {
+        // CONFIRMED collision shape: the real items.properties has keys like
+        // "items.rings.ring.diamond=diamond ring", where "items.ring" is a literal substring
+        // of "items.rings..." because "ring" is a prefix of "rings". If the idempotency token
+        // AnchorInserter.insertAbove used for the localization touchpoint were the bare
+        // "items.ring" prefix, this would false-positive via plain String.contains against
+        // that longer key and silently skip inserting the real items.ring.name= entry --
+        // defeating the "fully-wired" guarantee on the FIRST run. The token the current code
+        // passes is already the delimited "items.ring.name=", so this must still insert.
+        write(root.resolve("core/src/main/java/com/qsr/customspd/assets/GeneralAsset.kt"),
+                "enum class GeneralAsset(val path: String) {\n    ANKH(\"sprites/items/ankh.png\"),\n"
+              + "    // @content-scaffold:items\n}\n");
+        write(root.resolve("core/src/main/assets/messages/items/items.properties"),
+                "items.rings.ring.diamond.name=Diamond Ring\n### @content-scaffold:items\n");
+        write(root.resolve("core/src/main/java/com/qsr/customspd/items/Generator.java"),
+                "class Generator {\n  static {\n    Category.FOOD.classes = new Class<?>[]{\n      Pasty.class\n    };\n  }\n}\n");
+        File r = root.toFile();
+        ContentScaffoldCli.GenResult result = ContentScaffoldCli.generateItem(r, "Ring", "FOOD", "1");
+        String content = Files.readString(root.resolve("core/src/main/assets/messages/items/items.properties"));
+        assertTrue(content.contains("items.ring.name="), () -> content);
+        assertTrue(result.modified().contains("items.ring"), () -> result.modified().toString());
+    }
+
+    @Test
+    void invalidCategoryLeavesNoPartialWrites(@TempDir Path root) throws Exception {
+        write(root.resolve("core/src/main/java/com/qsr/customspd/assets/GeneralAsset.kt"),
+                "enum class GeneralAsset(val path: String) {\n    ANKH(\"sprites/items/ankh.png\"),\n"
+              + "    // @content-scaffold:items\n}\n");
+        write(root.resolve("core/src/main/assets/messages/items/items.properties"),
+                "items.ankh.name=ankh\n### @content-scaffold:items\n");
+        write(root.resolve("core/src/main/java/com/qsr/customspd/items/Generator.java"),
+                "class Generator {\n  static {\n    Category.FOOD.classes = new Class<?>[]{\n      Pasty.class\n    };\n  }\n}\n");
+        File r = root.toFile();
+
+        Path generalAsset = root.resolve("core/src/main/java/com/qsr/customspd/assets/GeneralAsset.kt");
+        Path props = root.resolve("core/src/main/assets/messages/items/items.properties");
+        Path generator = root.resolve("core/src/main/java/com/qsr/customspd/items/Generator.java");
+        String generalAssetBefore = Files.readString(generalAsset);
+        String propsBefore = Files.readString(props);
+        String generatorBefore = Files.readString(generator);
+
+        assertThrows(IllegalArgumentException.class, () -> ContentScaffoldCli.generateItem(r, "Berry", "NOPE", "1"));
+
+        assertFalse(Files.exists(root.resolve("core/src/main/java/com/qsr/customspd/items/Berry.java")));
+        assertFalse(Files.exists(root.resolve("core/src/main/assets/sprites/items/berry.png")));
+        assertEquals(generalAssetBefore, Files.readString(generalAsset));
+        assertEquals(propsBefore, Files.readString(props));
+        assertEquals(generatorBefore, Files.readString(generator));
     }
 }
