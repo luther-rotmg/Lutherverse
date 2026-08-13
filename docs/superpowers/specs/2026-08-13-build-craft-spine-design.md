@@ -103,3 +103,30 @@ A walking skeleton of the spine, run-scoped grid only, built + committed + compi
   the deeper question of whether to finish upstream-sync to a stable checkpoint before
   diverging hard into custom content (divergence makes remaining upstream merges harder).
 - **`Dungeon.region()` 200-floor gameplay scaling** (Layer F4).
+
+## 6. Progress since writing (2026-08-13, later same day)
+
+Built out on `worktree-game-dev` after the initial walking skeleton (append-only per the
+historical-record convention):
+
+- **F1 — headless test bootstrap: DONE.** `HeadlessGdx` boots a libGDX HeadlessApplication once
+  per JVM (Gdx.files + temp storage + `Badges.loadGlobal()` + seeded item-appearance handlers),
+  so tests run real game code with no display. Contrary to §1's "multi-step spike" caution it
+  landed cleanly; the only static state runtime paths needed was `Dungeon.hero`. **This unblocks
+  F2–F4.**
+- **F2 — save-roundtrip harness: DONE (first bricks).** `SaveRoundtrip.of/writeRead` round-trips
+  state through the real `Bundle.write/read` path — the "no save-roundtrip harness exists" gap.
+- **F3 — run-determinism: already handled.** Investigated `Level.mobs`; it is a `LinkedHashSet`
+  at both construction sites and the store/restore preserves order, so the §1 note is stale.
+  Left untouched (no redundant core change).
+- **Vigor wired** to bonus max HP — all three original grid branches now have real effects.
+- **Second element added — frost keyblade + Frost grid branch.** The element axis is now real:
+  builds diverge across fire (burn-DoT) vs frost (chill/control) vs Might vs Vigor, and the
+  Keybearer carries both keyblades to swap between.
+- **Runtime coverage:** 35 core tests green, including headless integration tests that verify the
+  class boots (`initHero`), all four grid effects in real combat (Might/Ember/Frost/Vigor), and a
+  full `Hero` save roundtrip. Only `WndSphereGrid` **rendering** remains untestable headless
+  (needs a GL context / a playthrough).
+
+Still deferred: persistent Insight layer · dual-wield (invasive combat-core, wants supervision) ·
+signature-ability axis · real art · the branching-web grid visual · balance.
