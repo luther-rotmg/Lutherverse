@@ -1,9 +1,13 @@
 package com.qsr.customspd;
 
 import com.qsr.customspd.Dungeon;
+import com.qsr.customspd.actors.buffs.Burning;
 import com.qsr.customspd.actors.hero.Hero;
+import com.qsr.customspd.actors.hero.HeroClass;
 import com.qsr.customspd.actors.hero.spheregrid.SphereGrid;
 import com.qsr.customspd.actors.hero.spheregrid.SphereNode;
+import com.qsr.customspd.actors.mobs.Mob;
+import com.qsr.customspd.actors.mobs.Rat;
 import com.qsr.customspd.items.weapon.melee.Keyblade;
 import com.qsr.customspd.items.weapon.melee.MeleeWeapon;
 import com.qsr.customspd.modding.HeroConfig;
@@ -85,6 +89,84 @@ class KeybearerHeadlessTest {
 
 			assertEquals(baseDmg + 2, mightDmg,
 					"Might nodes must add exactly mightLevel flat damage to the keyblade");
+		} finally {
+			Dungeon.hero = prevHero;
+		}
+	}
+
+	@Test
+	void vigorNodesRaiseMaxHP() {
+		Hero prevHero = Dungeon.hero;
+		try {
+			Hero base = new Hero();
+			Dungeon.hero = base;
+			base.updateHT(false);
+			int baseHT = base.HT;
+
+			Hero tanky = new Hero();
+			tanky.sphereGrid = new SphereGrid();
+			tanky.sphereGrid.grantPoints(2);
+			tanky.sphereGrid.activate(SphereNode.ATTUNEMENT); // prerequisite for VIGOR_I
+			tanky.sphereGrid.activate(SphereNode.VIGOR_I);    // VIGOR magnitude 3
+			assertEquals(3, tanky.sphereGrid.vigorLevel());
+
+			Dungeon.hero = tanky;
+			tanky.updateHT(false);
+
+			assertEquals(baseHT + tanky.sphereGrid.vigorLevel(), tanky.HT,
+					"Vigor nodes must add vigorLevel to max HP");
+		} finally {
+			Dungeon.hero = prevHero;
+		}
+	}
+
+	@Test
+	void emberNodesIgniteAndAddFireDamage() {
+		Hero prevHero = Dungeon.hero;
+		try {
+			Keyblade kb = new Keyblade();
+
+			// Control: a Keybearer with no Ember. The hit ignites but deals no immediate bonus.
+			Hero plain = new Hero();
+			plain.sphereGrid = new SphereGrid();
+			Dungeon.hero = plain;
+			Mob control = new Rat();
+			control.HP = control.HT = 100;
+			kb.proc(plain, control, 10);
+			assertNotNull(control.buff(Burning.class), "a keyblade hit must ignite the target");
+			assertEquals(100, control.HP,
+					"without Ember, the hit ignites but deals no immediate bonus damage");
+
+			// Ember specced: same hit ignites AND deals emberLevel bonus fire damage now.
+			Hero fiery = new Hero();
+			fiery.sphereGrid = new SphereGrid();
+			fiery.sphereGrid.grantPoints(2);
+			fiery.sphereGrid.activate(SphereNode.ATTUNEMENT);
+			fiery.sphereGrid.activate(SphereNode.EMBER_I); // EMBER magnitude 1
+			Dungeon.hero = fiery;
+			Mob target = new Rat();
+			target.HP = target.HT = 100;
+			kb.proc(fiery, target, 10);
+			assertNotNull(target.buff(Burning.class), "a keyblade hit must ignite the target");
+			assertTrue(target.HP < 100, "Ember nodes must deal bonus fire damage on the hit");
+		} finally {
+			Dungeon.hero = prevHero;
+		}
+	}
+
+	@Test
+	void keybearerClassInitialisesEndToEnd() {
+		Hero prevHero = Dungeon.hero;
+		try {
+			Hero hero = new Hero();
+			Dungeon.hero = hero;
+
+			HeroClass.KEYBEARER.initHero(hero);
+
+			assertEquals(HeroClass.KEYBEARER, hero.heroClass);
+			assertNotNull(hero.sphereGrid, "initHero must create the sphere grid for the Keybearer");
+			assertTrue(hero.belongings.weapon instanceof Keyblade,
+					"the Keybearer must start the run wielding a Keyblade");
 		} finally {
 			Dungeon.hero = prevHero;
 		}

@@ -5,7 +5,12 @@ import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.headless.HeadlessApplication;
 import com.badlogic.gdx.backends.headless.HeadlessApplicationConfiguration;
+import com.qsr.customspd.Badges;
+import com.qsr.customspd.items.potions.Potion;
+import com.qsr.customspd.items.rings.Ring;
+import com.qsr.customspd.items.scrolls.Scroll;
 import com.watabou.utils.FileUtils;
+import com.watabou.utils.Random;
 
 import java.io.File;
 
@@ -41,6 +46,21 @@ public final class HeadlessGdx {
 			FileUtils.setDefaultFileProperties(Files.FileType.Absolute, tmp.getAbsolutePath() + File.separator);
 		} catch (Exception e) {
 			throw new RuntimeException("could not set up temp storage for the headless test harness", e);
+		}
+
+		// General game state many runtime paths touch (e.g. item.identify() -> Catalog -> Badges).
+		// With no save file in the temp dir, this initialises an empty global badge set.
+		Badges.loadGlobal();
+
+		// Item appearance handlers (Scroll/Potion/Ring) that item.identify() consults. The game
+		// initialises these at run start inside a seeded RNG block; do the same for determinism.
+		Random.pushGenerator(1L);
+		try {
+			Scroll.initLabels();
+			Potion.initColors();
+			Ring.initGems();
+		} finally {
+			Random.popGenerator();
 		}
 
 		booted = true;
