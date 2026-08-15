@@ -29,9 +29,10 @@ import java.util.Set;
  *
  * Run-scoped only: unspent points and node activations live and die with the run
  * (serialized in the hero bundle). The persistent "Insight" unlock backbone is a
- * later increment. Activating a node spends a point (if its prerequisite is met) and
- * contributes to the aggregate build modifiers combat and the hero read via the
- * {@code emberLevel()/mightLevel()/vigorLevel()} accessors.
+ * later increment. Activating a node spends a point (if ALL its prerequisites are met)
+ * and contributes to the aggregate build modifiers combat and the hero read via the
+ * {@code emberLevel()/frostLevel()/stormLevel()/mightLevel()/vigorLevel()/abilityLevel()}
+ * accessors (the ELEMENTAL_CONFLUX keystone adds +1 inside each element accessor).
  *
  * A LinkedHashSet keeps activation order deterministic (seeded-run discipline).
  */

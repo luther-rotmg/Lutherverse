@@ -21,12 +21,14 @@ package com.qsr.customspd.actors.hero.spheregrid;
 /**
  * Prototype fixed node set for the Keybearer sphere grid (build-craft spine).
  *
- * Three clusters expressed as effects — EMBER (fire, amplifies the keyblade burn),
- * MIGHT (raw melee damage), VIGOR (survivability) — connected in a tiny branching web
- * via {@link #requires} (a node's prerequisite by name, or null for a root). Magnitudes
- * are deliberately coarse; this exists to prove the loop, not to balance it.
+ * Six effect clusters — EMBER/FROST/STORM (the three element branches), MIGHT (raw
+ * melee damage), VIGOR (survivability), ABILITY (signature-ability scaling) — plus
+ * KEYSTONE nodes whose effects live in SphereGrid's accessors. Nodes connect in a
+ * branching web via {@link #requires} (comma-separated prerequisite names, or null
+ * for a root). Magnitudes are deliberately coarse; this exists to prove the loop,
+ * not to balance it.
  *
- * requires is stored as a String name (not a SphereNode reference) to avoid enum
+ * requires is stored as String names (not SphereNode references) to avoid enum
  * self-reference during initialization.
  */
 public enum SphereNode {
@@ -68,11 +70,11 @@ public enum SphereNode {
 	ABILITY_III(Effect.ABILITY, 2, 2, "ABILITY_II"),
 
 	// Keystone — requires deep investment in ALL THREE elements; grants +1 to every
-	// element level (implemented in SphereGrid's accessors, magnitude 0 here so the
-	// plain ABILITY sum does not double-count it).
-	ELEMENTAL_CONFLUX(Effect.ABILITY, 0, 2, "EMBER_II,FROST_II,STORM_II");
+	// element level (implemented in SphereGrid's accessors, so magnitude stays 0 and
+	// no per-effect sum counts it).
+	ELEMENTAL_CONFLUX(Effect.KEYSTONE, 0, 2, "EMBER_II,FROST_II,STORM_II");
 
-	public enum Effect { EMBER, FROST, STORM, MIGHT, VIGOR, ABILITY }
+	public enum Effect { EMBER, FROST, STORM, MIGHT, VIGOR, ABILITY, KEYSTONE }
 
 	public final Effect effect;
 	public final int magnitude;

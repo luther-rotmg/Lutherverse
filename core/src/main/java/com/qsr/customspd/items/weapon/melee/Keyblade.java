@@ -80,14 +80,15 @@ public class Keyblade extends MeleeWeapon {
 				int burst = grid.emberLevel() * grid.abilityLevel();
 				if (burst > 0) defender.damage(burst, this);
 			}
-			// Dual Attunement (Keybearer): carrying the frost keyblade too clashes the opposing
+			// Dual Attunement (Keybearer): carrying another elemental keyblade clashes the
 			// elements for a "Thermal Shock" burst — the combine-two-elements payoff without a
-			// second equipped weapon (true dual-wield stays a supervised follow-up). It is bonus
-			// DAMAGE, not a stacked chill: the game extinguishes burning when a target is chilled,
-			// so applying the opposite status would only douse this keyblade's own element.
+			// second equipped weapon. It is bonus DAMAGE, not a stacked status: the game
+			// extinguishes burning when a target is chilled, so applying the opposite status
+			// would only douse this keyblade's own element. Symmetric across all three blades.
 			if (defender.isAlive() && attacker instanceof Hero
 					&& ((Hero) attacker).belongings.secondWep == null // not dual-wielding (else the off-hand strike replaces this)
-					&& ((Hero) attacker).belongings.getItem(FrostKeyblade.class) != null) {
+					&& (((Hero) attacker).belongings.getItem(FrostKeyblade.class) != null
+						|| ((Hero) attacker).belongings.getItem(StormKeyblade.class) != null)) {
 				defender.damage(2, this);
 			}
 		}

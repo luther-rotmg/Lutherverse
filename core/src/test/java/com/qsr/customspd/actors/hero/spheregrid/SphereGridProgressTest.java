@@ -56,6 +56,29 @@ class SphereGridProgressTest {
 	}
 
 	@Test
+	void keystoneUnlockDemandsAllPrerequisitesNotJustTheFirst() {
+		// Regression: prerequisiteUnlocked once honoured only the FIRST prerequisite, which
+		// let ELEMENTAL_CONFLUX burn persistent Insight while the run-scoped layer would
+		// still refuse to activate it — a permanent currency loss.
+		SphereGridProgress.earnInsight(20);
+		SphereGridProgress.unlock(SphereNode.ATTUNEMENT);
+		SphereGridProgress.unlock(SphereNode.EMBER_I);
+		SphereGridProgress.unlock(SphereNode.EMBER_II); // first prereq satisfied...
+		assertFalse(SphereGridProgress.canUnlock(SphereNode.ELEMENTAL_CONFLUX),
+				"one of three element branches must NOT open the keystone");
+		int before = SphereGridProgress.insight();
+		assertFalse(SphereGridProgress.unlock(SphereNode.ELEMENTAL_CONFLUX));
+		assertEquals(before, SphereGridProgress.insight(), "no Insight burned on a gated keystone");
+
+		SphereGridProgress.unlock(SphereNode.FROST_I);
+		SphereGridProgress.unlock(SphereNode.FROST_II);
+		SphereGridProgress.unlock(SphereNode.STORM_I);
+		SphereGridProgress.unlock(SphereNode.STORM_II);
+		assertTrue(SphereGridProgress.canUnlock(SphereNode.ELEMENTAL_CONFLUX),
+				"all three element branches unlocked -> the keystone opens");
+	}
+
+	@Test
 	void unlocksAccumulateAndPersistInTheStore() {
 		SphereGridProgress.earnInsight(3);
 		assertTrue(SphereGridProgress.unlock(SphereNode.ATTUNEMENT));

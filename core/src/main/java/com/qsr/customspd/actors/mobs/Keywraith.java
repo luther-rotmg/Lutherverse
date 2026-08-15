@@ -29,10 +29,15 @@ public class Keywraith extends Mob {
 		defenseSkill = 6;
 
 		EXP = 4;
-		maxLvl = 11;
+		maxLvl = 9; // Crab's band — it is a Sewers mob, and the description promises no more
 
 		loot = Gold.class;
 		lootChance = 0.25f;
+
+		// It IS the ghost it claims to be: holy damage, transfusion, etc. must treat it
+		// as undead (matches Wraith).
+		properties.add(Property.UNDEAD);
+		properties.add(Property.INORGANIC);
 	}
 
 	@Override

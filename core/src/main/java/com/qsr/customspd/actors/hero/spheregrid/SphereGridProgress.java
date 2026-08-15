@@ -100,8 +100,13 @@ public final class SphereGridProgress {
 	}
 
 	public static boolean prerequisiteUnlocked(SphereNode node) {
-		SphereNode req = node.requiredNode();
-		return req == null || isUnlocked(req);
+		// ALL prerequisites, mirroring SphereGrid.prerequisiteMet — a single-prereq check
+		// here would let multi-prereq keystones burn persistent Insight on a node the
+		// run-scoped layer then refuses to activate.
+		for (SphereNode req : node.requiredNodes()) {
+			if (req == null || !isUnlocked(req)) return false;
+		}
+		return true;
 	}
 
 	public static int unlockCost(SphereNode node) {

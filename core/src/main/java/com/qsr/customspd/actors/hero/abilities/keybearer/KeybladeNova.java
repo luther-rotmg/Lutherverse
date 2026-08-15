@@ -67,7 +67,14 @@ public class KeybladeNova extends ArmorAbility {
 		return false; // self-centered burst, no aiming
 	}
 
-	/** Grid-scaled bonus damage — rewards total sphere-grid investment. Pure/testable. */
+	/**
+	 * Grid-scaled bonus damage — rewards total sphere-grid investment. Pure/testable.
+	 *
+	 * DELIBERATE: the Elemental Conflux keystone contributes +1 through EACH element
+	 * accessor, so it is worth +3 here — the Nova is the one effect that draws on all
+	 * three elements at once, which is exactly what the tri-element keystone celebrates.
+	 * (Single-element weapon procs only ever read their own element, so they see +1.)
+	 */
 	public static int gridBonus(SphereGrid grid) {
 		if (grid == null) return 0;
 		return grid.emberLevel() + grid.frostLevel() + grid.stormLevel()

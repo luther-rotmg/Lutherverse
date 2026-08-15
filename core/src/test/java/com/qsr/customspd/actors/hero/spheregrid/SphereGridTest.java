@@ -114,7 +114,8 @@ class SphereGridTest {
 		for (SphereNode node : SphereNode.values()) {
 			assertTrue(g.activate(node), "every node should be reachable/affordable here: " + node);
 		}
-		int ember = g.emberLevel(), storm = g.stormLevel(), might = g.mightLevel(), vigor = g.vigorLevel();
+		int ember = g.emberLevel(), frost = g.frostLevel(), storm = g.stormLevel();
+		int might = g.mightLevel(), vigor = g.vigorLevel(), ability = g.abilityLevel();
 
 		SphereGrid g2 = SaveRoundtrip.of(g);
 
@@ -124,9 +125,11 @@ class SphereGridTest {
 		}
 		assertEquals(0, g2.unspentPoints());
 		assertEquals(ember, g2.emberLevel());
+		assertEquals(frost, g2.frostLevel());
 		assertEquals(storm, g2.stormLevel());
 		assertEquals(might, g2.mightLevel());
 		assertEquals(vigor, g2.vigorLevel());
+		assertEquals(ability, g2.abilityLevel());
 	}
 
 	@Test

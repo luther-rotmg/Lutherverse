@@ -107,16 +107,21 @@ public class StormKeyblade extends MeleeWeapon {
 	}
 
 	/**
-	 * The arc's victim: the first enemy of the attacker standing adjacent to the defender,
-	 * scanning PathFinder.NEIGHBOURS8 in its fixed order (deterministic under seeded runs).
+	 * The arc's victim: the first ENEMY standing adjacent to the defender, scanning
+	 * PathFinder.NEIGHBOURS8 in its fixed order (deterministic under seeded runs).
+	 * Strictly Alignment.ENEMY — a passive on-hit proc must never auto-damage neutral
+	 * NPCs (shopkeeper, quest givers) the way an aimed AoE is allowed to. The
+	 * adjacent() check rejects row-wrap at level edges (pos±1 across a row boundary).
 	 * Null when there is no level (headless), no neighbour, or no valid enemy.
 	 */
 	public static Char arcTarget(Char attacker, Char defender) {
 		if (Dungeon.level == null) return null;
 		for (int offset : PathFinder.NEIGHBOURS8) {
-			Char ch = Actor.findChar(defender.pos + offset);
+			int cell = defender.pos + offset;
+			if (!Dungeon.level.adjacent(defender.pos, cell)) continue;
+			Char ch = Actor.findChar(cell);
 			if (ch != null && ch != attacker && ch != defender
-					&& ch.alignment != attacker.alignment && ch.isAlive()) {
+					&& ch.alignment == Char.Alignment.ENEMY && ch.isAlive()) {
 				return ch;
 			}
 		}

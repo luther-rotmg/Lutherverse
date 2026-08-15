@@ -451,6 +451,25 @@ class KeybearerHeadlessTest {
 	}
 
 	@Test
+	void keybladeNovaConfluxIsWorthPlusThreeByDesign() {
+		// The keystone adds +1 inside EACH element accessor, and the Nova sums all three,
+		// so activating the conflux is worth exactly +3 Nova damage. Pinned as DELIBERATE
+		// (see gridBonus javadoc) — if this fails, someone changed the interaction.
+		SphereGrid grid = new SphereGrid();
+		grid.grantPoints(20);
+		for (SphereNode n : new SphereNode[]{SphereNode.ATTUNEMENT,
+				SphereNode.EMBER_I, SphereNode.EMBER_II,
+				SphereNode.FROST_I, SphereNode.FROST_II,
+				SphereNode.STORM_I, SphereNode.STORM_II}) {
+			assertTrue(grid.activate(n));
+		}
+		int before = KeybladeNova.gridBonus(grid);
+		assertTrue(grid.activate(SphereNode.ELEMENTAL_CONFLUX));
+		assertEquals(before + 3, KeybladeNova.gridBonus(grid),
+				"conflux: +1 per element accessor x 3 elements summed by the Nova");
+	}
+
+	@Test
 	void keybearerKitCarriesTheStormKeyblade() {
 		Hero prevHero = Dungeon.hero;
 		try {
