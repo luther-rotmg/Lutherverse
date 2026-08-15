@@ -1109,5 +1109,6 @@ enum class GeneralAsset(override val path: String) : Asset {
     NINJA_LOG("sprites/chars/ninja_log.png"),
     SPIRIT_HAWK("sprites/chars/spirit_hawk.png"),
     RED_SENTRY("sprites/chars/red_sentry.png"),
+    KEYWRAITH("sprites/chars/keywraith.png"),
     // @content-scaffold:mobs
 }
