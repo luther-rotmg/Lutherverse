@@ -2,6 +2,7 @@ package com.qsr.customspd.tools.contentaudit;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,7 +21,16 @@ public final class EntityGraph {
 
     public static List<Entity> build(List<ContentClass> all) {
         Map<String, ContentClass> byName = new HashMap<>();
-        for (ContentClass c : all) byName.put(c.simpleName(), c);
+        Set<String> seen = new HashSet<>();
+        for (ContentClass c : all) {
+            if (!seen.add(c.simpleName())) {
+                // Duplicate simple name across packages: an unqualified `extends X`
+                // elsewhere can't tell which one it means, so don't silently guess.
+                byName.remove(c.simpleName());
+                continue;
+            }
+            byName.put(c.simpleName(), c);
+        }
 
         List<Entity> out = new ArrayList<>();
         for (ContentClass c : all) {

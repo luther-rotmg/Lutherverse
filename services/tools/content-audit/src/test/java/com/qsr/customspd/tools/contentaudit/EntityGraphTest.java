@@ -44,4 +44,24 @@ class EntityGraphTest {
                 cc("Helper", "com.qsr.customspd.utils", "Object", false, null, null));
         assertTrue(EntityGraph.build(all).isEmpty());
     }
+
+    @Test
+    void guardsAgainstDuplicateSimpleNamesInAncestryChain() {
+        // Two unrelated classes named "Helper" live in different packages, both
+        // extending Mob directly with different sprites.
+        List<ContentClass> all = List.of(
+                cc("Mob", "com.qsr.customspd.actors.mobs", "Char", true, null, null),
+                cc("Helper", "com.qsr.customspd.actors.mobs.variant1", "Mob", false, "VariantASprite", null),
+                cc("Helper", "com.qsr.customspd.actors.mobs.variant2", "Mob", false, "VariantBSprite", null),
+                cc("Elf", "com.qsr.customspd.actors.mobs", "Helper", false, null, null));
+        List<EntityGraph.Entity> es = EntityGraph.build(all);
+        // Elf's ancestry passes through the ambiguous "Helper" name, which could mean
+        // either variant; it must not be silently resolved to whichever one happened
+        // to win the name collision.
+        assertTrue(es.stream().noneMatch(e -> e.cls().simpleName().equals("Elf")),
+                () -> "Elf's ancestry is ambiguous and must be excluded, not guessed: " + es);
+        // Both Helper classes are still audited on their own terms (their own
+        // ancestry to Mob is unambiguous).
+        assertEquals(2, es.stream().filter(e -> e.cls().simpleName().equals("Helper")).count());
+    }
 }
