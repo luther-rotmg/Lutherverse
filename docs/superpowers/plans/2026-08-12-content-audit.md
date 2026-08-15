@@ -1,5 +1,7 @@
 # content-audit Implementation Plan
 
+> **Status (2026-08-14): DONE.** All 9 tasks' deliverables exist under `services/tools/content-audit/` (module registered in `settings.gradle`, depended on by `content-scaffold`). All 7 test classes (23 tests) pass with 0 failures/0 errors — see `build/test-results/test/*.xml`, timestamped 2026-08-13T02:18:37, including `CANARY OK`. `reviewed-exceptions.txt` is triaged with real entries (2026-08-12 first run: 314 entities/189 findings; 2026-08-13 Keybearer class-weapon exceptions). The gate is wired into `CLAUDE.md` (advisory, ceiling 189, over-reporting M3/I3 noted) and `.github/workflows/ci.yml` (content-audit step + canary step). Checkboxes below were backfilled to match reality — the work was already complete, just never marked (same situation as `2026-08-12-content-scaffold.md` before its backfill).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build a source-scanning gate that fails the build when any core `Mob`/`Item` is not fully wired (sprite, localization, registration), ratcheted like `deletion-audit` and proven-failable via `-Canary`.
@@ -31,7 +33,7 @@
 **Interfaces:**
 - Produces: a buildable Gradle module `:services:tools:content-audit` with JavaParser + JUnit 5 on the classpath and mainClass `com.qsr.customspd.tools.contentaudit.ContentAuditCli` (created in Task 7).
 
-- [ ] **Step 1: Write the build file**
+- [x] **Step 1: Write the build file**
 
 `services/tools/content-audit/build.gradle`:
 ```groovy
@@ -57,14 +59,14 @@ test {
 }
 ```
 
-- [ ] **Step 2: Register the module**
+- [x] **Step 2: Register the module**
 
 In `settings.gradle`, add after the `':services:tools:deletion-audit'` line:
 ```groovy
     include ':services:tools:content-audit'
 ```
 
-- [ ] **Step 3: Write a scaffold test**
+- [x] **Step 3: Write a scaffold test**
 
 `src/test/java/com/qsr/customspd/tools/contentaudit/ScaffoldTest.java`:
 ```java
@@ -84,12 +86,12 @@ class ScaffoldTest {
 }
 ```
 
-- [ ] **Step 4: Run the test**
+- [x] **Step 4: Run the test**
 
 Run: `./gradlew.bat :services:tools:content-audit:test`
 Expected: PASS (1 test).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add services/tools/content-audit/build.gradle settings.gradle services/tools/content-audit/src/test/java/com/qsr/customspd/tools/contentaudit/ScaffoldTest.java
@@ -108,7 +110,7 @@ git commit -m "feat(content-audit): scaffold the module"
 **Interfaces:**
 - Produces: `RepoRoot.find()` returns `java.io.File` (the repo top-level, or `null` if not in a repo). `Allowlist.load(Path)` returns an `Allowlist`; `allowlist.permits(String key)` returns boolean. Keys are the exact strings `Checks` will emit, e.g. `"Mob YogDzewa#M3"`.
 
-- [ ] **Step 1: Write the Allowlist test**
+- [x] **Step 1: Write the Allowlist test**
 
 `AllowlistTest.java`:
 ```java
@@ -142,12 +144,12 @@ class AllowlistTest {
 }
 ```
 
-- [ ] **Step 2: Run to verify it fails**
+- [x] **Step 2: Run to verify it fails**
 
 Run: `./gradlew.bat :services:tools:content-audit:test`
 Expected: FAIL (compile error, `Allowlist` not defined).
 
-- [ ] **Step 3: Implement RepoRoot and Allowlist**
+- [x] **Step 3: Implement RepoRoot and Allowlist**
 
 `RepoRoot.java`:
 ```java
@@ -216,12 +218,12 @@ public final class Allowlist {
 }
 ```
 
-- [ ] **Step 4: Run to verify it passes**
+- [x] **Step 4: Run to verify it passes**
 
 Run: `./gradlew.bat :services:tools:content-audit:test`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add services/tools/content-audit/src
@@ -240,7 +242,7 @@ git commit -m "feat(content-audit): repo-root resolver and allowlist"
 **Interfaces:**
 - Produces: `record ContentClass(String simpleName, String packageName, String superSimpleName, boolean isAbstract, String spriteClass, String imageAsset)` where `spriteClass`/`imageAsset` are nullable. `ContentClassParser.parse(String source)` returns `ContentClass` for the primary type (or `null` if the file has no top-level class).
 
-- [ ] **Step 1: Write the parser test**
+- [x] **Step 1: Write the parser test**
 
 `ContentClassParserTest.java`:
 ```java
@@ -296,12 +298,12 @@ class ContentClassParserTest {
 }
 ```
 
-- [ ] **Step 2: Run to verify it fails**
+- [x] **Step 2: Run to verify it fails**
 
 Run: `./gradlew.bat :services:tools:content-audit:test --tests '*ContentClassParserTest'`
 Expected: FAIL (compile error).
 
-- [ ] **Step 3: Implement ContentClass and ContentClassParser**
+- [x] **Step 3: Implement ContentClass and ContentClassParser**
 
 `ContentClass.java`:
 ```java
@@ -378,12 +380,12 @@ public final class ContentClassParser {
 }
 ```
 
-- [ ] **Step 4: Run to verify it passes**
+- [x] **Step 4: Run to verify it passes**
 
 Run: `./gradlew.bat :services:tools:content-audit:test --tests '*ContentClassParserTest'`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add services/tools/content-audit/src
@@ -406,7 +408,7 @@ git commit -m "feat(content-audit): parse content classes with JavaParser"
   - `MessageIndex.load(File repoRoot)` → `MessageIndex`; `hasKey(String key)` returns true iff that key is present in any `.properties` file under `core/src/main/assets/messages/`.
   - `RegistryIndex.load(File repoRoot)` → `RegistryIndex`; `bestiaryReferences(String simpleName)` and `generatorReferences(String simpleName)` return booleans (word-token presence in `Bestiary.kt` / `Generator.java`).
 
-- [ ] **Step 1: Write the indexes test**
+- [x] **Step 1: Write the indexes test**
 
 `IndexesTest.java` (fixture-based, so it does not depend on the live repo):
 ```java
@@ -472,12 +474,12 @@ class IndexesTest {
 }
 ```
 
-- [ ] **Step 2: Run to verify it fails**
+- [x] **Step 2: Run to verify it fails**
 
 Run: `./gradlew.bat :services:tools:content-audit:test --tests '*IndexesTest'`
 Expected: FAIL (compile error).
 
-- [ ] **Step 3: Implement the three indexes**
+- [x] **Step 3: Implement the three indexes**
 
 `SpriteIndex.java` (resolves sprites two ways — an item's `image = GeneralAsset.X`
 directly, and a mob's `spriteClass = XSprite` via the `GeneralAsset` that sprite class
@@ -646,12 +648,12 @@ public final class RegistryIndex {
 }
 ```
 
-- [ ] **Step 4: Run to verify it passes**
+- [x] **Step 4: Run to verify it passes**
 
 Run: `./gradlew.bat :services:tools:content-audit:test --tests '*IndexesTest'`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add services/tools/content-audit/src
@@ -670,7 +672,7 @@ git commit -m "feat(content-audit): sprite, message, and registry indexes"
 - Consumes: `ContentClass` (Task 3).
 - Produces: `record Entity(String kind, ContentClass cls, String resolvedSpriteClass, String resolvedImageAsset)` where `kind` is `"Mob"` or `"Item"`. `EntityGraph.build(List<ContentClass> all)` returns `List<Entity>` — every concrete class whose ancestry reaches `Mob` (in an `actors.mobs` package) or `Item` (in an `items` package), with `spriteClass`/`image` resolved from the nearest ancestor that assigns one. Abstract classes and the base-class allowlist (`Mob`, `Item`, `MeleeWeapon`, `MissileWeapon`, `Armor`, `Wand`, `Ring`, `Artifact`, `Potion`, `Scroll`, `Food`) are excluded from the output.
 
-- [ ] **Step 1: Write the EntityGraph test**
+- [x] **Step 1: Write the EntityGraph test**
 
 `EntityGraphTest.java`:
 ```java
@@ -723,12 +725,12 @@ class EntityGraphTest {
 }
 ```
 
-- [ ] **Step 2: Run to verify it fails**
+- [x] **Step 2: Run to verify it fails**
 
 Run: `./gradlew.bat :services:tools:content-audit:test --tests '*EntityGraphTest'`
 Expected: FAIL (compile error).
 
-- [ ] **Step 3: Implement EntityGraph**
+- [x] **Step 3: Implement EntityGraph**
 
 `EntityGraph.java`:
 ```java
@@ -794,12 +796,12 @@ public final class EntityGraph {
 }
 ```
 
-- [ ] **Step 4: Run to verify it passes**
+- [x] **Step 4: Run to verify it passes**
 
 Run: `./gradlew.bat :services:tools:content-audit:test --tests '*EntityGraphTest'`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add services/tools/content-audit/src
@@ -819,7 +821,7 @@ git commit -m "feat(content-audit): entity graph with inheritance resolution"
 - Consumes: `EntityGraph.Entity`, `SpriteIndex`, `MessageIndex`, `RegistryIndex`.
 - Produces: `record Finding(String key, String message)` where `key` is `"<kind> <simpleName>#<checkId>"` (e.g. `"Mob Ghost#M1"`). `Checks.run(Entity e, SpriteIndex sprites, MessageIndex msgs, RegistryIndex reg)` returns `List<Finding>` (empty if fully wired). Localization keys: mobs → `actors.mobs.<lowercase-simpleName>.{name,desc}`; items → `items.<package-after-"items.">.<lowercase-simpleName>.{name,desc}`.
 
-- [ ] **Step 1: Write the Checks test**
+- [x] **Step 1: Write the Checks test**
 
 `ChecksTest.java`:
 ```java
@@ -886,12 +888,12 @@ class ChecksTest {
 }
 ```
 
-- [ ] **Step 2: Run to verify it fails**
+- [x] **Step 2: Run to verify it fails**
 
 Run: `./gradlew.bat :services:tools:content-audit:test --tests '*ChecksTest'`
 Expected: FAIL (compile error).
 
-- [ ] **Step 3: Implement Finding and Checks**
+- [x] **Step 3: Implement Finding and Checks**
 
 Mob M1 uses `SpriteIndex.mobSpriteExists(resolvedSpriteClass)` (spriteClass → GeneralAsset
 → PNG, built in Task 4); item I1 uses `SpriteIndex.spriteExists(resolvedImageAsset)` (the
@@ -961,12 +963,12 @@ public final class Checks {
 }
 ```
 
-- [ ] **Step 4: Run to verify it passes**
+- [x] **Step 4: Run to verify it passes**
 
 Run: `./gradlew.bat :services:tools:content-audit:test --tests '*ChecksTest'`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add services/tools/content-audit/src
@@ -985,7 +987,7 @@ git commit -m "feat(content-audit): the six completeness checks"
 - Consumes: everything above.
 - Produces: `main(String[])` with args `--allowlist <path>`, `--max-findings <n>`, `-Canary`; exit codes `0` (within ceiling), `1` (over ceiling / canary failed), `2` (usage error or scan read too few files). `ContentAuditCli.run(File repoRoot, Allowlist allowlist)` returns `Result(int entitiesScanned, List<Finding> findings)` for testability.
 
-- [ ] **Step 1: Write the CLI test**
+- [x] **Step 1: Write the CLI test**
 
 `ContentAuditCliTest.java`:
 ```java
@@ -1047,12 +1049,12 @@ class ContentAuditCliTest {
 }
 ```
 
-- [ ] **Step 2: Run to verify it fails**
+- [x] **Step 2: Run to verify it fails**
 
 Run: `./gradlew.bat :services:tools:content-audit:test --tests '*ContentAuditCliTest'`
 Expected: FAIL (compile error).
 
-- [ ] **Step 3: Implement ContentAuditCli**
+- [x] **Step 3: Implement ContentAuditCli**
 
 `ContentAuditCli.java`:
 ```java
@@ -1189,12 +1191,12 @@ public final class ContentAuditCli {
 
 (The `empty()` factories the canary uses were added to each index in Task 4.)
 
-- [ ] **Step 4: Run to verify it passes**
+- [x] **Step 4: Run to verify it passes**
 
 Run: `./gradlew.bat :services:tools:content-audit:test`
 Expected: PASS (all tests).
 
-- [ ] **Step 5: Prove the canary red-then-green**
+- [x] **Step 5: Prove the canary red-then-green**
 
 Temporarily break `runCanary()` (change the required key to `"Mob CanaryMob#XX"` so `caught` is false). Run:
 ```bash
@@ -1202,7 +1204,7 @@ Temporarily break `runCanary()` (change the required key to `"Mob CanaryMob#XX"`
 ```
 Expected: prints `CANARY FAILED`, exits 1. Restore the correct keys, re-run, expect `CANARY OK`, exit 0. Note this in the commit.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add services/tools/content-audit/src
@@ -1220,14 +1222,14 @@ git commit -m "feat(content-audit): CLI, ratchet, and -Canary negative control (
 - Consumes: the working CLI.
 - Produces: a triaged allowlist and a documented ceiling number for the gate command (Task 9).
 
-- [ ] **Step 1: Run against the real repo, no ceiling suppression**
+- [x] **Step 1: Run against the real repo, no ceiling suppression**
 
 ```bash
 ./gradlew.bat :services:tools:content-audit:run --args="--max-findings 0" 2>&1 | tee /tmp/content-audit-first-run.txt
 ```
 Expected: a list of findings and `RESULT: FAIL`. Confirm `entities scanned` is well over `MIN_SOURCES` (non-vacuous).
 
-- [ ] **Step 2: Triage each finding into one of two buckets**
+- [x] **Step 2: Triage each finding into one of two buckets**
 
 For every finding, decide:
 - **Permanent correct exception** (boss not in Bestiary, quest/ability item not in Generator, an item whose localization key legitimately differs) → add to `reviewed-exceptions.txt` with a comment block explaining why.
@@ -1252,7 +1254,7 @@ Seed `reviewed-exceptions.txt`:
 ```
 Fill it in from the real first-run output (replace the commented examples with the actual classes).
 
-- [ ] **Step 3: Determine the ceiling**
+- [x] **Step 3: Determine the ceiling**
 
 Re-run with the allowlist applied:
 ```bash
@@ -1260,14 +1262,14 @@ Re-run with the allowlist applied:
 ```
 Note the remaining findings count `R` (genuine backlog). The gate ceiling is exactly `R` (parks today's backlog; anything new fails). Record `R` for Task 9.
 
-- [ ] **Step 4: Verify the ratchet holds**
+- [x] **Step 4: Verify the ratchet holds**
 
 ```bash
 ./gradlew.bat :services:tools:content-audit:run --args="--allowlist services/tools/content-audit/reviewed-exceptions.txt --max-findings R"
 ```
 Expected: `RESULT: PASS (R known findings ... TRACKED, NOT ACCEPTED)`, exit 0. Then run with `--max-findings (R-1)` and confirm it FAILs — proving the ceiling actually gates.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add services/tools/content-audit/reviewed-exceptions.txt
@@ -1286,7 +1288,7 @@ git commit -m "feat(content-audit): triage first run into reviewed-exceptions.tx
 **Interfaces:**
 - Consumes: the ceiling `R` from Task 8.
 
-- [ ] **Step 1: Write the README (this is the authoring guide)**
+- [x] **Step 1: Write the README (this is the authoring guide)**
 
 `services/tools/content-audit/README.md`:
 ```markdown
@@ -1330,7 +1332,7 @@ v1 audits core Mobs and Items. Bosses/biomes/talents and pack (JSON) content are
 scope; the scaffold/generator that speeds authoring builds on this next.
 ```
 
-- [ ] **Step 2: Add to the CPDU gate block in CLAUDE.md**
+- [x] **Step 2: Add to the CPDU gate block in CLAUDE.md**
 
 In `CLAUDE.md`, in the "Then, for anything touching `core/`" section, after the `deletion-audit` command, add:
 ```bash
@@ -1338,7 +1340,7 @@ In `CLAUDE.md`, in the "Then, for anything touching `core/`" section, after the 
 ```
 (replace `<R>` with the number from Task 8).
 
-- [ ] **Step 3: Add the CI step**
+- [x] **Step 3: Add the CI step**
 
 In `.github/workflows/ci.yml`, add a step after the deletion-audit step:
 ```yaml
@@ -1351,14 +1353,14 @@ In `.github/workflows/ci.yml`, add a step after the deletion-audit step:
 ```
 Match the exact indentation/style of the surrounding steps; replace `<R>`.
 
-- [ ] **Step 4: Verify the full gate still passes**
+- [x] **Step 4: Verify the full gate still passes**
 
 ```bash
 ./gradlew.bat :services:tools:content-audit:run --args="--allowlist services/tools/content-audit/reviewed-exceptions.txt --max-findings <R>"
 ```
 Expected: `RESULT: PASS`, exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add services/tools/content-audit/README.md CLAUDE.md .github/workflows/ci.yml

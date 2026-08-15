@@ -1,5 +1,7 @@
 # content-scaffold Implementation Plan
 
+> **Status (2026-08-14): DONE.** All 9 tasks' deliverables exist under `services/tools/content-scaffold/` (module registered in `settings.gradle`), and all 8 test classes pass with 0 failures/0 errors (see `build/test-results/test/*.xml`, timestamped 2026-08-13). Checkboxes below were backfilled to match reality — the work was already complete, just never marked. `build.gradle` diverges slightly from the Task 1 snippet (no `javaparser-core` dependency) per a later, deliberate removal.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** A generator that emits a compilable, fully-wired Mob/Item skeleton across all six content-audit touchpoints, so an author fills in the mechanic, not the wiring.
@@ -31,7 +33,7 @@
 **Interfaces:**
 - Produces: buildable module `:services:tools:content-scaffold` with JUnit 5 and a dependency on `:services:tools:content-audit`; mainClass `com.qsr.customspd.tools.contentscaffold.ContentScaffoldCli` (created in Task 8).
 
-- [ ] **Step 1: Write build.gradle**
+- [x] **Step 1: Write build.gradle**
 
 `services/tools/content-scaffold/build.gradle`:
 ```groovy
@@ -58,14 +60,14 @@ test {
 }
 ```
 
-- [ ] **Step 2: Register the module**
+- [x] **Step 2: Register the module**
 
 In `settings.gradle`, after the `':services:tools:content-audit'` line:
 ```groovy
     include ':services:tools:content-scaffold'
 ```
 
-- [ ] **Step 3: Create the placeholder PNG**
+- [x] **Step 3: Create the placeholder PNG**
 
 Create a 16×16 fully-magenta PNG at `services/tools/content-scaffold/src/main/resources/placeholder.png`. From the repo root run (Python is available):
 ```bash
@@ -73,7 +75,7 @@ python -c "from PIL import Image; Image.new('RGBA',(16,16),(255,0,255,255)).save
 ```
 Verify it exists and is 16×16.
 
-- [ ] **Step 4: Write the scaffold test**
+- [x] **Step 4: Write the scaffold test**
 
 `ScaffoldModuleTest.java`:
 ```java
@@ -97,12 +99,12 @@ class ScaffoldModuleTest {
 }
 ```
 
-- [ ] **Step 5: Run the test**
+- [x] **Step 5: Run the test**
 
 Run: `./gradlew.bat :services:tools:content-scaffold:test`
 Expected: PASS (2 tests).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add services/tools/content-scaffold/build.gradle settings.gradle services/tools/content-scaffold/src
@@ -120,7 +122,7 @@ git commit -m "feat(content-scaffold): scaffold the module + placeholder resourc
 **Interfaces:**
 - Produces: `record Names(String className, String snake, String upperSnake)` and `Names.of(String pascal)`. Derived accessors: `mobAssetPath()` = `"sprites/chars/<snake>.png"`; `itemAssetPath()` = `"sprites/items/<snake>.png"`; `mobMessageBase()` = `"actors.mobs.<snake-no-underscores? no: lowercase className>"`. IMPORTANT: content-audit derives the mob localization key as `actors.mobs.<lowercase className>` (no underscores — e.g. `SewerCrab` → `actors.mobs.sewercrab`), and the item key as `items.<pkgSubpath>.<lowercase className>`. So `Names` exposes `lower()` = `className.toLowerCase()` for message keys, and `snake` (underscored) only for asset filenames and the GeneralAsset member.
 
-- [ ] **Step 1: Write the test**
+- [x] **Step 1: Write the test**
 
 `NamesTest.java`:
 ```java
@@ -152,12 +154,12 @@ class NamesTest {
 }
 ```
 
-- [ ] **Step 2: Run to verify it fails**
+- [x] **Step 2: Run to verify it fails**
 
 Run: `./gradlew.bat :services:tools:content-scaffold:test --tests '*NamesTest'`
 Expected: FAIL (compile error).
 
-- [ ] **Step 3: Implement Names**
+- [x] **Step 3: Implement Names**
 
 `Names.java`:
 ```java
@@ -189,12 +191,12 @@ public record Names(String className, String snake, String upperSnake) {
 }
 ```
 
-- [ ] **Step 4: Run to verify it passes**
+- [x] **Step 4: Run to verify it passes**
 
 Run: `./gradlew.bat :services:tools:content-scaffold:test --tests '*NamesTest'`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add services/tools/content-scaffold/src
@@ -212,7 +214,7 @@ git commit -m "feat(content-scaffold): name derivations"
 **Interfaces:**
 - Produces: `AnchorInserter.insertAbove(String fileContent, String marker, String lineToInsert, String idempotencyToken)` returns a `Result(String newContent, boolean inserted)`. If `idempotencyToken` already occurs in `fileContent`, returns `(fileContent, false)`. If `marker` is absent, throws `MissingAnchorException(marker)`. Otherwise inserts `lineToInsert` (with a trailing newline) on its own line immediately before the first line containing `marker`, preserving that line's indentation of `lineToInsert` is the caller's responsibility (pass it pre-indented). `class MissingAnchorException extends RuntimeException`.
 
-- [ ] **Step 1: Write the test**
+- [x] **Step 1: Write the test**
 
 `AnchorInserterTest.java`:
 ```java
@@ -256,12 +258,12 @@ class AnchorInserterTest {
 }
 ```
 
-- [ ] **Step 2: Run to verify it fails**
+- [x] **Step 2: Run to verify it fails**
 
 Run: `./gradlew.bat :services:tools:content-scaffold:test --tests '*AnchorInserterTest'`
 Expected: FAIL (compile error).
 
-- [ ] **Step 3: Implement AnchorInserter**
+- [x] **Step 3: Implement AnchorInserter**
 
 `AnchorInserter.java`:
 ```java
@@ -296,12 +298,12 @@ public final class AnchorInserter {
 }
 ```
 
-- [ ] **Step 4: Run to verify it passes**
+- [x] **Step 4: Run to verify it passes**
 
 Run: `./gradlew.bat :services:tools:content-scaffold:test --tests '*AnchorInserterTest'`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add services/tools/content-scaffold/src
@@ -319,7 +321,7 @@ git commit -m "feat(content-scaffold): marker-anchored idempotent inserter"
 **Interfaces:**
 - Produces: `JsonBestiaryInserter.addMob(String dungeonJson, int depth, String className)` returns `AnchorInserter.Result`. Adds a `"className"` element to the `bestiary` array of the level object whose `"depth": <depth>` matches, inserting it as the last element (minimal diff, preserves formatting). Idempotent: if that level's bestiary already contains `"className"`, returns `(unchanged, false)`. Throws `IllegalArgumentException` if no level with that depth, or that level has no `bestiary` array.
 
-- [ ] **Step 1: Write the test**
+- [x] **Step 1: Write the test**
 
 `JsonBestiaryInserterTest.java`:
 ```java
@@ -361,12 +363,12 @@ class JsonBestiaryInserterTest {
 }
 ```
 
-- [ ] **Step 2: Run to verify it fails**
+- [x] **Step 2: Run to verify it fails**
 
 Run: `./gradlew.bat :services:tools:content-scaffold:test --tests '*JsonBestiaryInserterTest'`
 Expected: FAIL (compile error).
 
-- [ ] **Step 3: Implement JsonBestiaryInserter**
+- [x] **Step 3: Implement JsonBestiaryInserter**
 
 `JsonBestiaryInserter.java`:
 ```java
@@ -417,12 +419,12 @@ public final class JsonBestiaryInserter {
 }
 ```
 
-- [ ] **Step 4: Run to verify it passes**
+- [x] **Step 4: Run to verify it passes**
 
 Run: `./gradlew.bat :services:tools:content-scaffold:test --tests '*JsonBestiaryInserterTest'`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add services/tools/content-scaffold/src
@@ -440,7 +442,7 @@ git commit -m "feat(content-scaffold): dungeon.json bestiary inserter"
 **Interfaces:**
 - Produces: `GeneratorCategoryInserter.addItem(String generatorJava, String category, String className)` returns `AnchorInserter.Result`. Finds the assignment `Category.<category>.classes = new Class<?>[]{ ... };` and inserts `<className>.class` as the last element before `}`. Idempotent (if `<className>.class` already in that array). Throws `IllegalArgumentException` if the category's `classes` assignment is not found.
 
-- [ ] **Step 1: Write the test**
+- [x] **Step 1: Write the test**
 
 `GeneratorCategoryInserterTest.java`:
 ```java
@@ -477,12 +479,12 @@ class GeneratorCategoryInserterTest {
 }
 ```
 
-- [ ] **Step 2: Run to verify it fails**
+- [x] **Step 2: Run to verify it fails**
 
 Run: `./gradlew.bat :services:tools:content-scaffold:test --tests '*GeneratorCategoryInserterTest'`
 Expected: FAIL (compile error).
 
-- [ ] **Step 3: Implement GeneratorCategoryInserter**
+- [x] **Step 3: Implement GeneratorCategoryInserter**
 
 `GeneratorCategoryInserter.java`:
 ```java
@@ -526,12 +528,12 @@ public final class GeneratorCategoryInserter {
 }
 ```
 
-- [ ] **Step 4: Run to verify it passes**
+- [x] **Step 4: Run to verify it passes**
 
 Run: `./gradlew.bat :services:tools:content-scaffold:test --tests '*GeneratorCategoryInserterTest'`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add services/tools/content-scaffold/src
@@ -550,7 +552,7 @@ git commit -m "feat(content-scaffold): Generator category inserter"
 - Consumes: `Names`.
 - Produces: `Templates.mobClass(Names)`, `Templates.mobSprite(Names)`, `Templates.itemClass(Names)` — each returns the full Java source string. `Templates.generalAssetLine(Names, boolean mob)` returns the GeneralAsset enum line (pre-indented 4 spaces), e.g. `    WISP("sprites/chars/wisp.png"),`. `Templates.messageLines(Names, boolean mob)` returns the two `.properties` lines. All emit a `// TODO` marking the mechanic/art.
 
-- [ ] **Step 1: Write the test**
+- [x] **Step 1: Write the test**
 
 `TemplatesTest.java`:
 ```java
@@ -596,12 +598,12 @@ class TemplatesTest {
 }
 ```
 
-- [ ] **Step 2: Run to verify it fails**
+- [x] **Step 2: Run to verify it fails**
 
 Run: `./gradlew.bat :services:tools:content-scaffold:test --tests '*TemplatesTest'`
 Expected: FAIL (compile error).
 
-- [ ] **Step 3: Implement Templates**
+- [x] **Step 3: Implement Templates**
 
 `Templates.java`:
 ```java
@@ -707,12 +709,12 @@ public final class Templates {
 
 > Note for the implementer: the generated `drRoll()`/`isUpgradable()`/`isIdentified()` overrides are chosen to compile against CPDU's `Mob`/`Item` base classes without pulling in mechanic-specific APIs. If a base method signature differs, adjust the override to match the real base class — the goal is a compilable stub, and Task 8/9's post-generate compile is the check.
 
-- [ ] **Step 4: Run to verify it passes**
+- [x] **Step 4: Run to verify it passes**
 
 Run: `./gradlew.bat :services:tools:content-scaffold:test --tests '*TemplatesTest'`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add services/tools/content-scaffold/src
@@ -732,7 +734,7 @@ git commit -m "feat(content-scaffold): source templates for mob/item stubs"
 - Consumes: nothing.
 - Produces: the anchor markers the CLI (Tasks 8/9) inserts against. `dungeon.json` and `Generator.java` need NO marker (structural/named insertion).
 
-- [ ] **Step 1: Add the GeneralAsset markers**
+- [x] **Step 1: Add the GeneralAsset markers**
 
 In `GeneralAsset.kt`, add a marker comment line inside the enum. Place `// @content-scaffold:mobs` on its own line immediately AFTER the last existing `sprites/chars/*.png` entry (so scaffolded mob sprites group with the char sprites), and `// @content-scaffold:items` immediately after the last existing `sprites/items/*.png` entry. Find those regions:
 ```bash
@@ -740,7 +742,7 @@ grep -nE "sprites/chars/.*\.png|sprites/items/.*\.png" core/src/main/java/com/qs
 ```
 Add each marker as a line matching the enum's indentation (4 spaces). Do NOT remove or reorder any entry.
 
-- [ ] **Step 2: Add the properties markers**
+- [x] **Step 2: Add the properties markers**
 
 Append a scaffold section to each properties file (these are `key=value` files; a bare comment line starting with `#` is safe and ignored by the loader). At the END of `core/src/main/assets/messages/actors/actors.properties` add:
 ```
@@ -751,12 +753,12 @@ At the END of `core/src/main/assets/messages/items/items.properties` add:
 ### @content-scaffold:items
 ```
 
-- [ ] **Step 3: Verify the build still passes**
+- [x] **Step 3: Verify the build still passes**
 
 Run: `./gradlew.bat core:compileJava core:compileKotlin core:test --no-daemon`
 Expected: BUILD SUCCESSFUL (markers are comments; no behavior change).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add core/src/main/java/com/qsr/customspd/assets/GeneralAsset.kt core/src/main/assets/messages/actors/actors.properties core/src/main/assets/messages/items/items.properties
@@ -775,7 +777,7 @@ git commit -m "chore(content-scaffold): add insertion anchor markers to the regi
 - Consumes: `Names`, `Templates`, `AnchorInserter`, `JsonBestiaryInserter`, and `content-audit`'s `RepoRoot`.
 - Produces: `main(String[])` handling `mob <Name> --depth <n>`; exit 0 success, 2 usage/anchor error. `ContentScaffoldCli.generateMob(File repoRoot, String name, int depth)` returns `record GenResult(List<String> created, List<String> modified, List<String> skipped)` for testability. Writes: the mob class, the sprite class, the GeneralAsset line (marker `// @content-scaffold:mobs`), the placeholder PNG at `sprites/chars/<snake>.png`, the actors.properties lines (marker `### @content-scaffold:mobs`), and the dungeon.json bestiary entry.
 
-- [ ] **Step 1: Write the fixture test**
+- [x] **Step 1: Write the fixture test**
 
 `ContentScaffoldCliMobTest.java`:
 ```java
@@ -832,12 +834,12 @@ class ContentScaffoldCliMobTest {
 }
 ```
 
-- [ ] **Step 2: Run to verify it fails**
+- [x] **Step 2: Run to verify it fails**
 
 Run: `./gradlew.bat :services:tools:content-scaffold:test --tests '*ContentScaffoldCliMobTest'`
 Expected: FAIL (compile error).
 
-- [ ] **Step 3: Implement ContentScaffoldCli (mob path)**
+- [x] **Step 3: Implement ContentScaffoldCli (mob path)**
 
 `ContentScaffoldCli.java`:
 ```java
@@ -962,12 +964,12 @@ public final class ContentScaffoldCli {
 }
 ```
 
-- [ ] **Step 4: Run to verify it passes**
+- [x] **Step 4: Run to verify it passes**
 
 Run: `./gradlew.bat :services:tools:content-scaffold:test --tests '*ContentScaffoldCliMobTest'`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add services/tools/content-scaffold/src
@@ -987,7 +989,7 @@ git commit -m "feat(content-scaffold): CLI mob generation, idempotent + fail-saf
 - Consumes: `GeneratorCategoryInserter`, `Templates`, `content-audit`'s `ContentAuditCli.run` + `Allowlist`.
 - Produces: `generateItem(File repoRoot, String name, String category, String tier)` returning `GenResult`; `main` handling `item <Name> --category <cat> --tier <n>`; and a post-generate `content-audit` check (`ContentAuditCli.run(repoRoot, Allowlist.load(null))` filtered to findings whose key contains `<Name>`, printed as the wiring report with the M3/I3 caveat).
 
-- [ ] **Step 1: Write the item test**
+- [x] **Step 1: Write the item test**
 
 `ContentScaffoldCliItemTest.java`:
 ```java
@@ -1030,12 +1032,12 @@ class ContentScaffoldCliItemTest {
 }
 ```
 
-- [ ] **Step 2: Run to verify it fails**
+- [x] **Step 2: Run to verify it fails**
 
 Run: `./gradlew.bat :services:tools:content-scaffold:test --tests '*ContentScaffoldCliItemTest'`
 Expected: FAIL (compile error).
 
-- [ ] **Step 3: Implement generateItem + wire main + post-generate audit**
+- [x] **Step 3: Implement generateItem + wire main + post-generate audit**
 
 Add to `ContentScaffoldCli.java` (new method + extend `main`):
 ```java
@@ -1091,12 +1093,12 @@ Add to `ContentScaffoldCli.java` (new method + extend `main`):
 ```
 Extend `main` to handle the `item` verb (mirroring the `mob` branch: parse `item <Name> --category <cat> --tier <n>`, call `generateItem`, then `auditNewEntity`) and call `auditNewEntity` after a successful `generateMob` too. Update `usage()` to list both verbs.
 
-- [ ] **Step 4: Run to verify it passes**
+- [x] **Step 4: Run to verify it passes**
 
 Run: `./gradlew.bat :services:tools:content-scaffold:test`
 Expected: PASS (all tests).
 
-- [ ] **Step 5: Compile-smoke the templates against the REAL core (then revert)**
+- [x] **Step 5: Compile-smoke the templates against the REAL core (then revert)**
 
 The fixture tests prove the touchpoints land, but not that the generated Java compiles against CPDU's real `Mob`/`Item`/`MobSprite`. Verify once, on a throwaway name, and revert — leave NOTHING committed:
 ```bash
@@ -1116,7 +1118,7 @@ git status --porcelain core/   # MUST be empty before proceeding
 ```
 Confirm `git status` shows no residual `core/` changes. Any `Templates` fix is the only thing that stays (in `services/tools/content-scaffold/`).
 
-- [ ] **Step 6: Write the README**
+- [x] **Step 6: Write the README**
 
 `services/tools/content-scaffold/README.md`:
 ```markdown
@@ -1157,7 +1159,7 @@ registration-heuristic follow-up bead lands.
 v1 scaffolds core Mobs and Items. Art, the mechanic, and bosses/biomes/talents are out of scope.
 ```
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add services/tools/content-scaffold/src services/tools/content-scaffold/README.md
