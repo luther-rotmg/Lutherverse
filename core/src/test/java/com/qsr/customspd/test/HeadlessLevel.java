@@ -26,12 +26,16 @@ public class HeadlessLevel extends Level {
 	public static HeadlessLevel open(int w, int h) {
 		HeadlessLevel level = new HeadlessLevel();
 		// These collections are normally seeded by Level.create()/restore; buildFlagMaps
-		// iterates blobs, so the fixture seeds them itself.
+		// iterates blobs, and Fire.burn / trap-cell logic dereference plants/traps, so
+		// the fixture seeds the full set Level.create() would.
 		level.mobs = new java.util.LinkedHashSet<>();
 		level.heaps = new com.watabou.utils.SparseArray<>();
 		level.blobs = new java.util.HashMap<>();
+		level.plants = new com.watabou.utils.SparseArray<>();
+		level.traps = new com.watabou.utils.SparseArray<>();
 		level.customTiles = new java.util.HashSet<>();
 		level.customWalls = new java.util.HashSet<>();
+		level.transitions = new java.util.ArrayList<>();
 		level.setSize(w, h);
 		Arrays.fill(level.map, Terrain.EMPTY);
 		for (int x = 0; x < w; x++) {
