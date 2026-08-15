@@ -130,3 +130,25 @@ historical-record convention):
 
 Still deferred: persistent Insight layer · dual-wield (invasive combat-core, wants supervision) ·
 signature-ability axis · real art · the branching-web grid visual · balance.
+
+## Progress append — 2026-08-14 (aggressive build session)
+
+- **Third element: STORM.** StormKeyblade (original sprite) with shock-bonus, Static
+  Discharge signature (storm × ability, mirroring Flame Burst/Rime Shatter), a
+  deterministic ARC to one enemy adjacent to the target (NEIGHBOURS8 fixed-order scan;
+  storm = the anti-clustering element), and Conduction (Thermal Shock's shape for storm).
+- **Grid 2.0.** Deep tiers (PERMAFROST, TEMPEST, MIGHT_III, VIGOR_III, ABILITY_III at
+  cost 2) and the first keystone: ELEMENTAL_CONFLUX — multi-prerequisite support landed
+  (`requires` is now a comma-separated list; `prerequisiteMet` demands ALL) and the
+  keystone grants +1 to every element level.
+- **Keyblade Nova matured:** 3-way dominant element (pure `dominantElement`, ember-first
+  tie break), SPARK_CONE vfx + scaling Paralysis for storm builds, original hero icon
+  (`HeroIcon.KEYBLADE_NOVA`) replacing the ELEMENTAL_BLAST placeholder.
+- **Mod-platform dogfood: Keywraith.** First mob shipped end-to-end through the
+  content-scaffold pipeline (one command wired class/sprite/asset/strings/bestiary),
+  then the mechanic (Cripple "lock" touch) and original hooded-spectre art filled in.
+- **Runtime coverage: 57 core tests green** (storm combat, keystone gating, conflux
+  arithmetic, Keywraith mechanic + wiring through real Gdx.files).
+
+Still deferred: branching-web grid visual · balance · multi-frame mob animation ·
+storm-arc integration test on a real level (needs a loaded Level).

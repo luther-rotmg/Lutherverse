@@ -50,6 +50,7 @@ public class HeroIcon extends Image {
 	public static final Asset SHOCKWAVE       = GeneralAsset.HERO_ICON_SHOCKWAVE;
 	public static final Asset ENDURE          = GeneralAsset.HERO_ICON_ENDURE;
 	public static final Asset ELEMENTAL_BLAST = GeneralAsset.HERO_ICON_ELEMENTAL_BLAST;
+	public static final Asset KEYBLADE_NOVA   = GeneralAsset.HERO_ICON_KEYBLADE_NOVA;
 	public static final Asset WILD_MAGIC      = GeneralAsset.HERO_ICON_WILD_MAGIC;
 	public static final Asset WARP_BEACON     = GeneralAsset.HERO_ICON_WARP_BEACON;
 	public static final Asset SMOKE_BOMB      = GeneralAsset.HERO_ICON_SMOKE_BOMB;

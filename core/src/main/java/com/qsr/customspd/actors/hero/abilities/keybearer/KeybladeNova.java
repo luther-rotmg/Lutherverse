@@ -140,7 +140,7 @@ public class KeybladeNova extends ArmorAbility {
 
 	@Override
 	public Asset icon() {
-		return HeroIcon.ELEMENTAL_BLAST; // placeholder icon until a keyblade-nova icon exists
+		return HeroIcon.KEYBLADE_NOVA; // original keyblade-nova icon
 	}
 
 	@Override

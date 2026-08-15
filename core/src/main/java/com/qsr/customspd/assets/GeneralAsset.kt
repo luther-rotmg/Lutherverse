@@ -342,6 +342,7 @@ enum class GeneralAsset(override val path: String) : Asset {
     HERO_ICON_SHOCKWAVE("interfaces/hero_icons/shockwave.png"),
     HERO_ICON_ENDURE("interfaces/hero_icons/endure.png"),
     HERO_ICON_ELEMENTAL_BLAST("interfaces/hero_icons/elemental_blast.png"),
+    HERO_ICON_KEYBLADE_NOVA("interfaces/hero_icons/keyblade_nova.png"),
     HERO_ICON_WILD_MAGIC("interfaces/hero_icons/wild_magic.png"),
     HERO_ICON_WARP_BEACON("interfaces/hero_icons/warp_beacon.png"),
     HERO_ICON_SMOKE_BOMB("interfaces/hero_icons/smoke_bomb.png"),
