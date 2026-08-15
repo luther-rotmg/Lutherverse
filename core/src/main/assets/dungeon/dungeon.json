@@ -37,7 +37,8 @@
         "Rat",
         "Snake",
         "Gnoll",
-        "Gnoll"
+        "Gnoll",
+        "TumblerWisp"
       ]
     },
     "3": {
@@ -81,7 +82,8 @@
         "Crab",
         "Crab",
         "Slime",
-        "Slime"
+        "Slime",
+        "HexwardMoth"
       ],
       "rare_mob": "Thief"
     },
@@ -126,7 +128,8 @@
         "Skeleton",
         "Skeleton",
         "Thief",
-        "Swarm"
+        "Swarm",
+        "WardstoneSentinel"
       ]
     },
     "7": {
@@ -147,7 +150,8 @@
         "Skeleton",
         "Thief",
         "DM100",
-        "Guard"
+        "Guard",
+        "GaolShade"
       ]
     },
     "8": {

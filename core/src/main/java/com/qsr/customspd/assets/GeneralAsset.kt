@@ -983,6 +983,7 @@ enum class GeneralAsset(override val path: String) : Asset {
     CITY_PAGE("sprites/items/city_page.png"),
     HALLS_PAGE("sprites/items/halls_page.png"),
     INSIGHT_CRYSTAL("sprites/items/insight_crystal.png"),
+    WARDENS_SIGIL("sprites/items/wardens_sigil.png"),
     // @content-scaffold:items
 
     ITEM_ICON_RING_ACCURACY("sprites/item_icons/ring_accuracy.png"),
@@ -1112,5 +1113,9 @@ enum class GeneralAsset(override val path: String) : Asset {
     SPIRIT_HAWK("sprites/chars/spirit_hawk.png"),
     RED_SENTRY("sprites/chars/red_sentry.png"),
     KEYWRAITH("sprites/chars/keywraith.png"),
+    TUMBLER_WISP("sprites/chars/tumbler_wisp.png"),
+    HEXWARD_MOTH("sprites/chars/hexward_moth.png"),
+    WARDSTONE_SENTINEL("sprites/chars/wardstone_sentinel.png"),
+    GAOL_SHADE("sprites/chars/gaol_shade.png"),
     // @content-scaffold:mobs
 }

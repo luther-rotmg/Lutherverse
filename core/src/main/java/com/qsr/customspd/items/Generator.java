@@ -322,9 +322,10 @@ public class Generator {
 					StoneOfBlast.class,
 					StoneOfFear.class,
 					StoneOfAugmentation.class,  //1 is sold in each shop
-					InsightCrystal.class        //meta-progression faucet: shatters into Insight
+					InsightCrystal.class,       //meta-progression faucet: shatters into Insight
+					WardensSigil.class          //aimed lock-stone: cripples where it lands
 			};
-			STONE.defaultProbs = new float[]{ 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 2 };
+			STONE.defaultProbs = new float[]{ 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 2, 2 };
 			STONE.probs = STONE.defaultProbs.clone();
 
 			WAND.classes = new Class<?>[]{
