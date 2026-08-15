@@ -161,8 +161,9 @@ public final class ContentScaffoldCli {
      */
     static void auditNewEntity(File repoRoot, String name) {
         try {
+            Path allowlist = repoRoot.toPath().resolve("services/tools/content-audit/reviewed-exceptions.txt");
             var result = com.qsr.customspd.tools.contentaudit.ContentAuditCli.run(
-                    repoRoot, com.qsr.customspd.tools.contentaudit.Allowlist.load(null));
+                    repoRoot, com.qsr.customspd.tools.contentaudit.Allowlist.load(allowlist));
             var mine = result.findings().stream().filter(f -> f.key().contains(" " + name + "#")).toList();
             if (mine.isEmpty()) {
                 System.out.println("content-audit: " + name + " is fully wired.");
