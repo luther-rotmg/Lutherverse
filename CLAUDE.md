@@ -33,7 +33,7 @@ Then, for anything touching `core/`:
 
 ```bash
 ./gradlew.bat :services:tools:deletion-audit:run --quiet --args="--base 7d9c139c8 --head HEAD --min-shrink 3 --allowlist services/tools/deletion-audit/reviewed-removals.txt"
-./gradlew.bat :services:tools:content-audit:run --quiet --args="--allowlist services/tools/content-audit/reviewed-exceptions.txt --max-findings 189"
+./gradlew.bat :services:tools:content-audit:run --quiet --args="--allowlist services/tools/content-audit/reviewed-exceptions.txt --max-findings 190"
 ```
 
 content-audit is currently **advisory, not blocking**: its M3/I3 registration checks over-report

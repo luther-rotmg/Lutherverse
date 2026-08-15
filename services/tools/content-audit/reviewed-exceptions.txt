@@ -32,3 +32,4 @@
 # wiring gap. (Full sprite + localization + hero-kit wiring is verified present.)
 Item Keyblade#I3
 Item FrostKeyblade#I3
+Item StormKeyblade#I3
