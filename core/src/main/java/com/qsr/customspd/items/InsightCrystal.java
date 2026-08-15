@@ -33,7 +33,7 @@ public class InsightCrystal extends Runestone {
 	@Override
 	protected void activate(int cell) {
 		SphereGridProgress.earnInsight(INSIGHT_PER_CRYSTAL);
-		GLog.p("The crystal shatters — insight lingers. (+%d Insight)", INSIGHT_PER_CRYSTAL);
+		GLog.p(com.qsr.customspd.messages.Messages.get(InsightCrystal.class, "shatter", INSIGHT_PER_CRYSTAL));
 		if (Dungeon.hero != null && Dungeon.hero.sprite != null && Dungeon.hero.sprite.parent != null) {
 			com.qsr.customspd.effects.CellEmitter.center(cell).burst(Speck.factory(Speck.LIGHT), 6);
 		}

@@ -28,9 +28,8 @@ import com.qsr.customspd.ui.RedButton;
 import com.qsr.customspd.ui.RenderedTextBlock;
 import com.qsr.customspd.ui.ScrollPane;
 import com.qsr.customspd.ui.Window;
+import com.watabou.noosa.PointerArea;
 import com.watabou.noosa.ui.Component;
-
-import java.util.ArrayList;
 
 /**
  * Prototype sphere-grid screen for the Keybearer (build-craft spine) — the hybrid grid's UI.
@@ -69,24 +68,13 @@ public class WndSphereGrid extends Window {
 
 		// The node list lives in a ScrollPane clamped to the ui camera, so a growing grid
 		// (keystones, tier-IIIs, future branches) can never push nodes — or the close
-		// button — off-screen. Buttons inside a ScrollPane don't receive raw touches;
-		// the pane forwards clicks to them (the WndKeyBindings idiom).
-		final ArrayList<RedButton> nodeButtons = new ArrayList<>();
-		final ArrayList<SphereNode> nodeOrder = new ArrayList<>();
-
+		// button — off-screen. Buttons inside a scroll area keep their own onClick but
+		// must NOT block the pointer signal, or drag-to-scroll dies and (because the
+		// button's PointerArea is registered after the pane's and wins the stack-mode
+		// dispatch) the pane never sees the touch at all: the TalentButton/QuickRecipe
+		// idiom is hotArea.blockLevel = NEVER_BLOCK.
 		Component listContent = new Component();
-		ScrollPane list = new ScrollPane(listContent) {
-			@Override
-			public void onClick(float x, float y) {
-				for (int i = 0; i < nodeButtons.size(); i++) {
-					RedButton btn = nodeButtons.get(i);
-					if (btn.active && y >= btn.top() && y < btn.bottom()) {
-						nodeClicked(nodeOrder.get(i));
-						break;
-					}
-				}
-			}
-		};
+		ScrollPane list = new ScrollPane(listContent);
 		add(list);
 
 		float pos = 0;
@@ -97,13 +85,19 @@ public class WndSphereGrid extends Window {
 				final boolean canUnlock = SphereGridProgress.canUnlock(node);
 				final boolean canActivate = unlocked && grid.canActivate(node);
 
-				RedButton btn = new RedButton(nodeLabel(node, grid, activated, unlocked), 6);
+				RedButton btn = new RedButton(nodeLabel(node, grid, activated, unlocked), 6) {
+					{
+						hotArea.blockLevel = PointerArea.NEVER_BLOCK;
+					}
+					@Override
+					protected void onClick() {
+						nodeClicked(node);
+					}
+				};
 				btn.leftJustify = true;
 				btn.setRect(0, pos, WIDTH, BTN_H);
 				btn.enable(!activated && (canUnlock || canActivate));
 				listContent.add(btn);
-				nodeButtons.add(btn);
-				nodeOrder.add(node);
 
 				pos = btn.bottom() + GAP;
 			}
