@@ -6,7 +6,7 @@ commit as any substantive work.
 For the deeper "why" behind current state, see [PROJECT-STATUS.md](PROJECT-STATUS.md).
 For the release-facing change list, see [CHANGELOG.md](CHANGELOG.md).
 
-**Last updated:** 2026-08-11
+**Last updated:** 2026-08-14
 
 ---
 
@@ -14,10 +14,12 @@ For the release-facing change list, see [CHANGELOG.md](CHANGELOG.md).
 
 | Item | Status | Notes |
 |---|---|---|
-| **P0 — seeded runs** (`cpdu-yaa`) | 🟢 **fixed**, scope open | Both halves landed (right RNG + inside the pushed generator), with 8 tests and a negative control. *Same seed now reproduces the same dungeon layout.* Still open: `Level.mobs` is a `HashSet`, byte-identical to upstream, so *same seed reproduces the same run* does not yet hold — closing that means diverging from upstream and touching serialised state. |
-| Sub-B Slice 1 | 🟢 **resumed** | Deferred clusters worked with port-verify + deletion-audit in the loop. Landed: dark-gold log, foresight refresh, the regeneration-pause epic (15 call sites), the save-version precheck, the Barkskin multi-source rewrite (6 call sites), and — reviewed out of the 2026-08-11 AFK run — the T1 talent replacement, invalid-hero-position guards, seed-independent guaranteed generation, and deletion-audit rename detection. 22 batches (~230 commits) still parked. |
-| deletion-audit backlog | ✅ **zero** | 16 findings triaged against tag v2.5.4; 15 verified superseded, 1 was a real regression and is fixed. CI ceiling back to 0. |
-| CI | ✅ **green** | Run 31446047082. Found and fixed 3 real issues on the way: gradlew exec bit, a Windows-only test assumption, and a malformed step. |
+| **Build-craft spine (Keybearer)** | 🟢 **on `main`** | Three-element sphere grid (Ember/Frost/Storm, tier-IIIs, Elemental Conflux keystone with multi-prereqs), three original keyblades + signatures + true dual-wield, Keyblade Nova (own icon, 3-way dominant element), persistent Insight layer, distinct hero model. 68+ core tests, all gates green. An adversarial review round caught and fixed 2 blocking defects (grid-UI overflow, Insight burn on gated keystones) before ship. |
+| **Content via scaffold pipeline** | 🟢 **dogfooding** | Keywraith (mob) + Insight Crystal (meta-progression runestone) shipped end-to-end through `content-scaffold`; a 5-entity wave (TumblerWisp d2, HexwardMoth d4, WardstoneSentinel d6, GaolShade d7, WardensSigil stone) is scaffolded with mechanics/art in parallel implementation. Dogfooding exposed the Generator classes/probs desync in the tool (beaded); an every-category lockstep test now guards it. |
+| **Test foundations** | 🟢 **F3 landed** | `HeadlessLevel` real-Level fixture: storm-arc targeting semantics and full Keyblade Nova activation now run headless. F1 (boot) + F2 (save roundtrip) unchanged. |
+| **P0 — seeded runs** (`cpdu-yaa`) | 🟢 **fixed**, scope open | Layout reproduction holds; `Level.mobs` HashSet still leaves full-run determinism open. Content additions (bestiary/pools) legitimately shift seeded gen — noted per commit. |
+| Sub-B Slice 1 | 🟡 **parked behind vision work** | 22 batches (~230 commits) still parked; content-audit registration heuristic (`EntityGraph`) being tuned on the AFK track. |
+| CI | ✅ **green** | Gate set + audits verified locally on every `main` push through 2026-08-14. |
 
 ## Next
 

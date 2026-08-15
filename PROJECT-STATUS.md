@@ -5,8 +5,8 @@
 and dated design docs, plans and CHANGELOG entries deliberately keep the original name as a
 historical record. Updated in the same commit as any substantive work — treat as ground truth for near-term state.*
 
-**Last update:** 2026-08-11
-**Current tip:** working branch `afk/2026-08-09`, pushed to origin, CI green (run `git log -1` for the exact SHA).
+**Last update:** 2026-08-14
+**Current tip:** `main`, pushed to origin (run `git log -1 main` for the exact SHA).
 
 > The dated sections further down are a **historical log** and are deliberately not rewritten.
 > Where an older entry contradicts this header, the header wins.
@@ -14,6 +14,22 @@ historical record. Updated in the same commit as any substantive work — treat 
 ---
 
 ## Where we are
+
+**The build-craft vision has a running spine (2026-08-13/14).** The Keybearer prototype
+class shipped to `main` end-to-end: three-element sphere grid (Ember/Frost/Storm) with
+tier-III nodes and the Elemental Conflux keystone, three original keyblades with signature
+abilities and true dual-wield, the Keyblade Nova class ability (with its own icon), a
+persistent cross-run Insight layer, and a distinct hero model (recolored spritesheet +
+splash). The mod-platform pillar is being dogfooded: **Keywraith** (mob) and **Insight
+Crystal** (meta-progression item) are the first content shipped through the
+`content-scaffold` pipeline — the item path surfaced a real scaffold bug (Generator
+classes/probs desync, beaded) now guarded by an every-category lockstep test. Test
+foundations grew from F1/F2 to **F3 (`HeadlessLevel`)**: real-Level integration tests run
+headless, including full class-ability activation. Core test count 44 → 68+, every commit
+gate-verified (full gate set + deletion-audit + content-audit ratchet). A five-entity
+content wave (TumblerWisp, HexwardMoth, WardstoneSentinel, GaolShade, WardensSigil) is
+scaffolded on `main`'s lineage with mechanics in flight via parallel implementation.
+Design record: [2026-08-13-build-craft-spine-design.md](docs/superpowers/specs/2026-08-13-build-craft-spine-design.md).
 
 **Sub-A (Fork infrastructure)** is shipped. Seven commits landed on `main` and pushed to origin. Both build paths verified green (Android APK 22.8 MB, Desktop JAR 45.9 MB). Final whole-branch review completed with one blocker (a "Dark Souls Mode" leak in the public roadmap table) plus four documentation mediums plus a small tail of nits; all fixed in the same commit that added this line.
 
