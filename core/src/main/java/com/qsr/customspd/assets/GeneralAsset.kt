@@ -982,6 +982,7 @@ enum class GeneralAsset(override val path: String) : Asset {
     CAVES_PAGE("sprites/items/caves_page.png"),
     CITY_PAGE("sprites/items/city_page.png"),
     HALLS_PAGE("sprites/items/halls_page.png"),
+    INSIGHT_CRYSTAL("sprites/items/insight_crystal.png"),
     // @content-scaffold:items
 
     ITEM_ICON_RING_ACCURACY("sprites/item_icons/ring_accuracy.png"),
