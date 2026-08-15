@@ -49,8 +49,23 @@ class ContentScaffoldCliMobTest {
         File r = repo(root);
         ContentScaffoldCli.generateMob(r, "Wisp", 3);
         ContentScaffoldCli.GenResult second = ContentScaffoldCli.generateMob(r, "Wisp", 3);
-        // GeneralAsset/properties/dungeon insertions are all no-ops on the second run
-        assertTrue(second.skipped().size() >= 3, () -> "expected >=3 skipped, got " + second.skipped());
+        // Every mob touchpoint must be a no-op on the second run -- asserting a bare
+        // skipped().size() bound lets one touchpoint silently double-insert while another
+        // compensates on count, so check each touchpoint by name instead.
+        assertTrue(second.skipped().stream().anyMatch(s -> s.endsWith("Wisp.java")),
+                () -> "expected class file skipped, got " + second.skipped());
+        assertTrue(second.skipped().stream().anyMatch(s -> s.endsWith("WispSprite.java")),
+                () -> "expected sprite file skipped, got " + second.skipped());
+        assertTrue(second.skipped().stream().anyMatch(s -> s.endsWith("wisp.png")),
+                () -> "expected PNG skipped, got " + second.skipped());
+        assertTrue(second.skipped().contains("GeneralAsset:WISP"),
+                () -> "expected GeneralAsset entry skipped, got " + second.skipped());
+        assertTrue(second.skipped().contains("actors.mobs.wisp"),
+                () -> "expected localization entry skipped, got " + second.skipped());
+        assertTrue(second.skipped().contains("dungeon:Wisp"),
+                () -> "expected dungeon registration skipped, got " + second.skipped());
+        assertTrue(second.created().isEmpty(), () -> "expected nothing created, got " + second.created());
+        assertTrue(second.modified().isEmpty(), () -> "expected nothing modified, got " + second.modified());
     }
 
     @Test
