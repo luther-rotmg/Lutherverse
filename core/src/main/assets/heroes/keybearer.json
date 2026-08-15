@@ -9,6 +9,10 @@
       "type": "weapon.melee.FrostKeyblade",
       "identified": true,
       "quickslot": true
+    },
+    {
+      "type": "weapon.melee.StormKeyblade",
+      "identified": true
     }
   ],
   "identified": [

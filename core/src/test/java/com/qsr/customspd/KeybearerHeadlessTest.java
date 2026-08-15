@@ -14,6 +14,7 @@ import com.qsr.customspd.actors.mobs.Rat;
 import com.qsr.customspd.items.weapon.melee.FrostKeyblade;
 import com.qsr.customspd.items.weapon.melee.Keyblade;
 import com.qsr.customspd.items.weapon.melee.MeleeWeapon;
+import com.qsr.customspd.items.weapon.melee.StormKeyblade;
 import com.qsr.customspd.modding.HeroConfig;
 import com.qsr.customspd.modding.JsonConfigRetriever;
 import com.qsr.customspd.test.HeadlessGdx;
@@ -341,6 +342,123 @@ class KeybearerHeadlessTest {
 					"the Keybearer must start the run wielding a Keyblade");
 			assertTrue(hero.belongings.secondWep instanceof FrostKeyblade,
 					"the Keybearer starts dual-wielding the frost keyblade in the off-hand");
+		} finally {
+			Dungeon.hero = prevHero;
+		}
+	}
+
+	@Test
+	void stormKeybladeShocksAndStaticDischargeScales() {
+		Hero prevHero = Dungeon.hero;
+		try {
+			StormKeyblade skb = new StormKeyblade();
+
+			// Control: no Storm specced -> the hit deals no immediate bonus.
+			Hero plain = new Hero();
+			plain.sphereGrid = new SphereGrid();
+			Dungeon.hero = plain;
+			Mob control = new Rat();
+			control.HP = control.HT = 100;
+			skb.proc(plain, control, 10);
+			assertEquals(100, control.HP,
+					"without Storm, the storm keyblade hit deals no immediate bonus damage");
+
+			// Storm+ability build: stormLevel 1, abilityLevel 1 -> shock bonus (1) +
+			// Static Discharge (storm*ability = 1) = 2 immediate damage. No level is
+			// loaded headless, so the arc's Dungeon.level guard must keep this NPE-free.
+			Hero sparky = new Hero();
+			sparky.sphereGrid = new SphereGrid();
+			sparky.sphereGrid.grantPoints(3);
+			sparky.sphereGrid.activate(SphereNode.ATTUNEMENT);
+			sparky.sphereGrid.activate(SphereNode.STORM_I);   // storm 1
+			sparky.sphereGrid.activate(SphereNode.ABILITY_I); // ability 1
+			assertEquals(1, sparky.sphereGrid.stormLevel());
+			Dungeon.hero = sparky;
+			Mob target = new Rat();
+			target.HP = target.HT = 100;
+			skb.proc(sparky, target, 10);
+			assertEquals(100 - (1 + 1), target.HP,
+					"storm bonus (1) + Static Discharge (storm*ability = 1)");
+		} finally {
+			Dungeon.hero = prevHero;
+		}
+	}
+
+	@Test
+	void conductionDealsBonusWhenCarryingAnotherKeyblade() {
+		Hero prevHero = Dungeon.hero;
+		try {
+			// Storm keyblade in hand, fire keyblade carried: Conduction grounds the circuit.
+			Hero hero = new Hero();
+			hero.sphereGrid = new SphereGrid();
+			Dungeon.hero = hero;
+			hero.belongings.backpack.items.add(new Keyblade());
+
+			Mob target = new Rat();
+			target.HP = target.HT = 100;
+			new StormKeyblade().proc(hero, target, 10);
+			assertEquals(100 - 2, target.HP, "Conduction: bonus damage while carrying another keyblade");
+
+			// Control: no other keyblade carried -> no Conduction.
+			Hero solo = new Hero();
+			solo.sphereGrid = new SphereGrid();
+			Dungeon.hero = solo;
+			Mob t2 = new Rat();
+			t2.HP = t2.HT = 100;
+			new StormKeyblade().proc(solo, t2, 10);
+			assertEquals(100, t2.HP, "no other keyblade carried -> no Conduction");
+		} finally {
+			Dungeon.hero = prevHero;
+		}
+	}
+
+	@Test
+	void novaDominantElementPicksTheHeaviestBranch() {
+		assertEquals(KeybladeNova.Element.EMBER, KeybladeNova.dominantElement(null),
+				"no grid defaults to ember");
+
+		SphereGrid frosty = new SphereGrid();
+		frosty.grantPoints(4);
+		frosty.activate(SphereNode.ATTUNEMENT);
+		frosty.activate(SphereNode.FROST_I);
+		frosty.activate(SphereNode.FROST_II); // frost 3, others 0
+		assertEquals(KeybladeNova.Element.FROST, KeybladeNova.dominantElement(frosty));
+
+		SphereGrid stormy = new SphereGrid();
+		stormy.grantPoints(4);
+		stormy.activate(SphereNode.ATTUNEMENT);
+		stormy.activate(SphereNode.STORM_I);
+		stormy.activate(SphereNode.STORM_II); // storm 3, others 0
+		assertEquals(KeybladeNova.Element.STORM, KeybladeNova.dominantElement(stormy));
+
+		// A tie resolves toward the earlier element (ember) — deterministic, documented.
+		SphereGrid tied = new SphereGrid();
+		tied.grantPoints(3);
+		tied.activate(SphereNode.ATTUNEMENT);
+		tied.activate(SphereNode.EMBER_I);
+		tied.activate(SphereNode.FROST_I); // ember 1, frost 1
+		assertEquals(KeybladeNova.Element.EMBER, KeybladeNova.dominantElement(tied));
+	}
+
+	@Test
+	void keybladeNovaGridBonusCountsStorm() {
+		SphereGrid grid = new SphereGrid();
+		grid.grantPoints(3);
+		grid.activate(SphereNode.ATTUNEMENT); // might 1
+		grid.activate(SphereNode.STORM_I);    // storm 1
+		// bonus = ember(0) + frost(0) + storm(1) + might(1) + 2*ability(0) = 2
+		assertEquals(2, KeybladeNova.gridBonus(grid));
+	}
+
+	@Test
+	void keybearerKitCarriesTheStormKeyblade() {
+		Hero prevHero = Dungeon.hero;
+		try {
+			Hero hero = new Hero();
+			Dungeon.hero = hero;
+			HeroClass.KEYBEARER.initHero(hero);
+			assertNotNull(hero.belongings.getItem(StormKeyblade.class),
+					"the Keybearer kit must include the storm keyblade in the backpack");
 		} finally {
 			Dungeon.hero = prevHero;
 		}

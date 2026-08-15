@@ -127,6 +127,7 @@ public class WndSphereGrid extends Window {
 		switch (e) {
 			case EMBER: return "Ember (fire)";
 			case FROST: return "Frost (chill)";
+			case STORM: return "Storm (shock)";
 			case MIGHT: return "Might (dmg)";
 			case VIGOR: return "Vigor (hp)";
 			case ABILITY: return "Ability (signature)";

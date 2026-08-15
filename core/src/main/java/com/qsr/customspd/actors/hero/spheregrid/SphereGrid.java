@@ -53,8 +53,10 @@ public class SphereGrid implements Bundlable {
 	}
 
 	public boolean prerequisiteMet(SphereNode node) {
-		SphereNode req = node.requiredNode();
-		return req == null || activated.contains(req);
+		for (SphereNode req : node.requiredNodes()) {
+			if (req == null || !activated.contains(req)) return false;
+		}
+		return true;
 	}
 
 	public boolean canActivate(SphereNode node) {
@@ -74,15 +76,24 @@ public class SphereGrid implements Bundlable {
 	// --- aggregate build modifiers read by combat / the hero ---
 
 	public int emberLevel() {
-		return sum(SphereNode.Effect.EMBER);
+		return sum(SphereNode.Effect.EMBER) + confluxBonus();
 	}
 
 	public int frostLevel() {
-		return sum(SphereNode.Effect.FROST);
+		return sum(SphereNode.Effect.FROST) + confluxBonus();
+	}
+
+	public int stormLevel() {
+		return sum(SphereNode.Effect.STORM) + confluxBonus();
 	}
 
 	public int abilityLevel() {
 		return sum(SphereNode.Effect.ABILITY);
+	}
+
+	/** Elemental Conflux keystone: +1 to EVERY element level while active. */
+	private int confluxBonus() {
+		return isActivated(SphereNode.ELEMENTAL_CONFLUX) ? 1 : 0;
 	}
 
 	public int mightLevel() {

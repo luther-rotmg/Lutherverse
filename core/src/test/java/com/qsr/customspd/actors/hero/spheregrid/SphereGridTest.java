@@ -17,7 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * save path a real run would take, exercised here through Bundle.write/read.
  *
  * Magnitudes/costs asserted below track SphereNode: ATTUNEMENT(MIGHT,1), MIGHT_I(MIGHT,1),
- * EMBER_I(EMBER,1), EMBER_II(EMBER,1); every node costs 1 point.
+ * EMBER_I(EMBER,1), EMBER_II(EMBER,1); tier-I/II nodes cost 1 point, tier-III nodes and
+ * the ELEMENTAL_CONFLUX keystone cost 2.
  */
 class SphereGridTest {
 
@@ -105,11 +106,15 @@ class SphereGridTest {
 	void fullyActivatedGridSurvivesRoundtrip() throws IOException {
 		// Every node activated: the stress case for serialization (all activations + 0 points).
 		SphereGrid g = new SphereGrid();
-		g.grantPoints(SphereNode.values().length);
+		int totalCost = 0;
+		for (SphereNode node : SphereNode.values()) {
+			totalCost += node.cost;
+		}
+		g.grantPoints(totalCost);
 		for (SphereNode node : SphereNode.values()) {
 			assertTrue(g.activate(node), "every node should be reachable/affordable here: " + node);
 		}
-		int ember = g.emberLevel(), might = g.mightLevel(), vigor = g.vigorLevel();
+		int ember = g.emberLevel(), storm = g.stormLevel(), might = g.mightLevel(), vigor = g.vigorLevel();
 
 		SphereGrid g2 = SaveRoundtrip.of(g);
 
@@ -119,7 +124,60 @@ class SphereGridTest {
 		}
 		assertEquals(0, g2.unspentPoints());
 		assertEquals(ember, g2.emberLevel());
+		assertEquals(storm, g2.stormLevel());
 		assertEquals(might, g2.mightLevel());
 		assertEquals(vigor, g2.vigorLevel());
+	}
+
+	@Test
+	void stormBranchSumsThroughItsTierThree() {
+		SphereGrid g = new SphereGrid();
+		g.grantPoints(5); // ATTUNEMENT(1) + STORM_I(1) + STORM_II(1) + TEMPEST(2)
+		assertTrue(g.activate(SphereNode.ATTUNEMENT));
+		assertTrue(g.activate(SphereNode.STORM_I));
+		assertEquals(1, g.stormLevel());
+		assertTrue(g.activate(SphereNode.STORM_II));
+		assertEquals(3, g.stormLevel()); // STORM_I(1) + STORM_II(2)
+		assertTrue(g.activate(SphereNode.TEMPEST));
+		assertEquals(5, g.stormLevel()); // + TEMPEST(2)
+		assertEquals(0, g.unspentPoints());
+	}
+
+	@Test
+	void keystoneNeedsAllThreeElementBranches() {
+		SphereGrid g = new SphereGrid();
+		g.grantPoints(20);
+		assertTrue(g.activate(SphereNode.ATTUNEMENT));
+		assertTrue(g.activate(SphereNode.EMBER_I));
+		assertTrue(g.activate(SphereNode.EMBER_II));
+		assertTrue(g.activate(SphereNode.FROST_I));
+		assertTrue(g.activate(SphereNode.FROST_II));
+		// Two of three element branches deep — the keystone must stay locked.
+		assertFalse(g.prerequisiteMet(SphereNode.ELEMENTAL_CONFLUX));
+		assertFalse(g.activate(SphereNode.ELEMENTAL_CONFLUX));
+		assertTrue(g.activate(SphereNode.STORM_I));
+		assertTrue(g.activate(SphereNode.STORM_II));
+		// All three — now it opens.
+		assertTrue(g.prerequisiteMet(SphereNode.ELEMENTAL_CONFLUX));
+		assertTrue(g.activate(SphereNode.ELEMENTAL_CONFLUX));
+	}
+
+	@Test
+	void confluxKeystoneRaisesEveryElementByOne() {
+		SphereGrid g = new SphereGrid();
+		g.grantPoints(20);
+		for (SphereNode n : new SphereNode[]{SphereNode.ATTUNEMENT,
+				SphereNode.EMBER_I, SphereNode.EMBER_II,
+				SphereNode.FROST_I, SphereNode.FROST_II,
+				SphereNode.STORM_I, SphereNode.STORM_II}) {
+			assertTrue(g.activate(n));
+		}
+		int ember = g.emberLevel(), frost = g.frostLevel(), storm = g.stormLevel();
+		int ability = g.abilityLevel();
+		assertTrue(g.activate(SphereNode.ELEMENTAL_CONFLUX));
+		assertEquals(ember + 1, g.emberLevel(), "conflux: +1 ember");
+		assertEquals(frost + 1, g.frostLevel(), "conflux: +1 frost");
+		assertEquals(storm + 1, g.stormLevel(), "conflux: +1 storm");
+		assertEquals(ability, g.abilityLevel(), "conflux (magnitude 0) must not inflate ability");
 	}
 }

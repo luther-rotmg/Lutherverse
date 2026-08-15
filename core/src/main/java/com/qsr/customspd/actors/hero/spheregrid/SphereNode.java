@@ -50,13 +50,29 @@ public enum SphereNode {
 	// Frost branch — the second element (chill/slow); amplifies the frost keyblade
 	FROST_I(Effect.FROST, 1, 1, "ATTUNEMENT"),
 	FROST_II(Effect.FROST, 2, 1, "FROST_I"),
+	PERMAFROST(Effect.FROST, 2, 2, "FROST_II"),
+
+	// Storm branch — the third element (arcing shock); amplifies the storm keyblade
+	STORM_I(Effect.STORM, 1, 1, "ATTUNEMENT"),
+	STORM_II(Effect.STORM, 2, 1, "STORM_I"),
+	TEMPEST(Effect.STORM, 2, 2, "STORM_II"),
+
+	// Might/Vigor deep tiers — pricier capstones for the raw-stat branches
+	MIGHT_III(Effect.MIGHT, 2, 2, "MIGHT_II"),
+	VIGOR_III(Effect.VIGOR, 4, 2, "VIGOR_II"),
 
 	// Ability branch — empowers each keyblade's signature ability (burst = elementLevel * abilityLevel),
 	// so it pays off only alongside an element: the design's hybrid element+ability quadrant.
 	ABILITY_I(Effect.ABILITY, 1, 1, "ATTUNEMENT"),
-	ABILITY_II(Effect.ABILITY, 2, 1, "ABILITY_I");
+	ABILITY_II(Effect.ABILITY, 2, 1, "ABILITY_I"),
+	ABILITY_III(Effect.ABILITY, 2, 2, "ABILITY_II"),
 
-	public enum Effect { EMBER, FROST, MIGHT, VIGOR, ABILITY }
+	// Keystone — requires deep investment in ALL THREE elements; grants +1 to every
+	// element level (implemented in SphereGrid's accessors, magnitude 0 here so the
+	// plain ABILITY sum does not double-count it).
+	ELEMENTAL_CONFLUX(Effect.ABILITY, 0, 2, "EMBER_II,FROST_II,STORM_II");
+
+	public enum Effect { EMBER, FROST, STORM, MIGHT, VIGOR, ABILITY }
 
 	public final Effect effect;
 	public final int magnitude;
@@ -70,8 +86,24 @@ public enum SphereNode {
 		this.requires = requires;
 	}
 
+	/** The node's first (or only) prerequisite — kept for single-prereq callers/UI. */
 	public SphereNode requiredNode() {
-		return requires == null ? null : byName(requires);
+		SphereNode[] all = requiredNodes();
+		return all.length == 0 ? null : all[0];
+	}
+
+	/**
+	 * All prerequisites (comma-separated in {@link #requires}); empty for a root.
+	 * Keystones use this to demand several branches at once.
+	 */
+	public SphereNode[] requiredNodes() {
+		if (requires == null) return new SphereNode[0];
+		String[] names = requires.split(",");
+		SphereNode[] nodes = new SphereNode[names.length];
+		for (int i = 0; i < names.length; i++) {
+			nodes[i] = byName(names[i].trim());
+		}
+		return nodes;
 	}
 
 	public static SphereNode byName(String name) {
