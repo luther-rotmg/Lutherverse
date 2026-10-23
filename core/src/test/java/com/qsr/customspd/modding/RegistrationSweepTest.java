@@ -8,7 +8,6 @@ import com.qsr.customspd.actors.mobs.Shaman;
 import com.qsr.customspd.items.Item;
 import com.qsr.customspd.levels.Level;
 import com.qsr.customspd.test.HeadlessGdx;
-import com.watabou.noosa.Game;
 import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
 import org.junit.jupiter.api.BeforeAll;
@@ -55,15 +54,6 @@ class RegistrationSweepTest {
 	@BeforeAll
 	static void boot() {
 		HeadlessGdx.boot();
-		// Every real launcher (DesktopLauncher/AndroidLauncher) sets Game.version before any
-		// game class loads; headless it is null, and RegularLevel's static init transitively
-		// reaches Document -> DeviceCompat.isDebug() -> Game.version.contains(...), which NPEs.
-		// Mirror the launcher with a non-INDEV version (Document inits in release mode). Left
-		// set afterwards on purpose: class-init side effects are sticky JVM-wide anyway, and no
-		// existing test reads Game.version (it was null-crash territory before this).
-		if (Game.version == null) {
-			Game.version = "0.0.0-headless-test";
-		}
 	}
 
 	/**
