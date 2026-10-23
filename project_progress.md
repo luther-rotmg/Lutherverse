@@ -6,7 +6,7 @@ commit as any substantive work.
 For the deeper "why" behind current state, see [PROJECT-STATUS.md](PROJECT-STATUS.md).
 For the release-facing change list, see [CHANGELOG.md](CHANGELOG.md).
 
-**Last updated:** 2026-08-14
+**Last updated:** 2026-10-22
 
 ---
 
@@ -15,10 +15,12 @@ For the release-facing change list, see [CHANGELOG.md](CHANGELOG.md).
 | Item | Status | Notes |
 |---|---|---|
 | **Build-craft spine (Keybearer)** | 🟢 **on `main`** | Three-element sphere grid (Ember/Frost/Storm, tier-IIIs, Elemental Conflux keystone with multi-prereqs), three original keyblades + signatures + true dual-wield, Keyblade Nova (own icon, 3-way dominant element), persistent Insight layer, distinct hero model. 68+ core tests, all gates green. An adversarial review round caught and fixed 2 blocking defects (grid-UI overflow, Insight burn on gated keystones) before ship. |
-| **Content via scaffold pipeline** | 🟢 **dogfooding** | Keywraith (mob) + Insight Crystal (meta-progression runestone) shipped end-to-end through `content-scaffold`; a 5-entity wave (TumblerWisp d2, HexwardMoth d4, WardstoneSentinel d6, GaolShade d7, WardensSigil stone) is scaffolded with mechanics/art in parallel implementation. Dogfooding exposed the Generator classes/probs desync in the tool (beaded); an every-category lockstep test now guards it. |
-| **Test foundations** | 🟢 **F3 landed** | `HeadlessLevel` real-Level fixture: storm-arc targeting semantics and full Keyblade Nova activation now run headless. F1 (boot) + F2 (save roundtrip) unchanged. |
+| **Content via scaffold pipeline** | 🟢 **dogfooding** | Keywraith (mob) + Insight Crystal (meta-progression runestone) shipped end-to-end through `content-scaffold`; a 5-entity wave (TumblerWisp d2, HexwardMoth d4, WardstoneSentinel d6, GaolShade d7, WardensSigil stone) is scaffolded with mechanics/art in parallel implementation. Dogfooding exposed the Generator classes/probs desync in the tool. An every-category lockstep test guards Generator itself, and the tool's fix landed 2026-10-22 (`cpdu-a34`): it appends `--weight` to every prob literal and refuses layouts it cannot splice safely. |
+| **Ready queue** (2026-10-22) | ✅ **cleared** | 8 beads closed on `dev/2026-10-22`. Fixed save/load defects: `initialVersion` key (`cpdu-86k`) and ParalysisResist bundle plus decay (`cpdu-tvy` + upstream `f3f4ef40f`). Harness: `Game.version` in `HeadlessGdx` (`cpdu-5js`); alias registrations proven by a roundtrip test (`cpdu-6io`). Scaffold: Generator lockstep (`cpdu-a34`) and stricter idempotency test (`cpdu-xxv`). content-audit: G1 ambiguity finding (`cpdu-x0z`); registration triage 194 → 24 findings (`cpdu-zpc`). |
+| **Slice-2 WS-2 bugfix wave** | ✅ **closed** | 8 of 12 already in CPDU; 4 patch v3.x code CPDU lacks and ride along with those ports (`cpdu-313`). |
+| **Test foundations** | 🟢 **F3 landed** | `HeadlessLevel` real-Level fixture: storm-arc targeting semantics and full Keyblade Nova activation now run headless. F1 (boot) + F2 (save roundtrip) unchanged. Core tests 151 (2026-10-22). Next foundation per the Slice-2 roadmap: F4 HeadlessRun (real `Dungeon.init`/save/load). |
 | **P0 — seeded runs** (`cpdu-yaa`) | 🟢 **fixed**, scope open | Layout reproduction holds; `Level.mobs` HashSet still leaves full-run determinism open. Content additions (bestiary/pools) legitimately shift seeded gen — noted per commit. |
-| Sub-B Slice 1 | 🟡 **parked behind vision work** | 22 batches (~230 commits) still parked; content-audit registration heuristic (`EntityGraph`) being tuned on the AFK track. |
+| Sub-B Slice 1 | 🟡 **parked behind vision work** | 22 batches (~230 commits) still parked. The serialized-state roundtrip gate is now PASS (`cpdu-6io`). Generator v2.5.4 parity gaps are beaded (`cpdu-3vq`). |
 | CI | ✅ **green** | Gate set + audits verified locally on every `main` push through 2026-08-14. |
 
 ## Next
@@ -32,7 +34,11 @@ For the release-facing change list, see [CHANGELOG.md](CHANGELOG.md).
 
 | ID | Pri | Summary |
 |---|---|---|
-| — | — | none open |
+| `cpdu-lr8` | P3 | `Generator.WEP_T3.probs` clones WEP_T1's weights (5 against 6 classes); upstream fixed in `b1d82dee5`. Reset paths mask it today. |
+| `cpdu-66a` | P3 | SpectralNecromancer can finish a summon onto a newly impassable tile. Upstream has the same gap, so fixing it means a documented divergence: LO's call. |
+
+**Closed 2026-10-22:** `cpdu-86k`, `cpdu-tvy`, `cpdu-5js`, `cpdu-6io`, `cpdu-a34`, `cpdu-xxv`, `cpdu-x0z`,
+`cpdu-zpc` (see Now). Each new or tightened test was proven to fail before its fix.
 
 **Closed 2026-08-11:** `cpdu-6xp` (`depth/5` region math — fixed the 3 sites that actually threw/broke
 past the vanilla 25-floor range: `TrapsRoom.levelTraps[depth/5]`, `SecretRoom.regionSecretsThisRun[region]`,

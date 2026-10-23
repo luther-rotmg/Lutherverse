@@ -5,8 +5,8 @@
 and dated design docs, plans and CHANGELOG entries deliberately keep the original name as a
 historical record. Updated in the same commit as any substantive work — treat as ground truth for near-term state.*
 
-**Last update:** 2026-08-14
-**Current tip:** `main`, pushed to origin (run `git log -1 main` for the exact SHA).
+**Last update:** 2026-10-22
+**Current tip:** working branch `dev/2026-10-22` (off `main` at `34dfbdf17`), gate-verified locally; not yet merged to `main` or pushed.
 
 > The dated sections further down are a **historical log** and are deliberately not rewritten.
 > Where an older entry contradicts this header, the header wins.
@@ -14,6 +14,25 @@ historical record. Updated in the same commit as any substantive work — treat 
 ---
 
 ## Where we are
+
+**2026-10-22: the ready queue is cleared and the upstream bugfix wave is closed out.** Two real
+save/load defects are fixed. `Dungeon.initialVersion` was read back from the wrong bundle key; that
+bug entered through the CPD fork, and v2.5.4 reads `INIT_VER` with a fallback for old saves.
+ParalysisResist zeroed its counter on save, and it also detached on its first tick. Upstream fixed
+both of those in one commit, `f3f4ef40f`, now fully ported. Two gaps in the gates are also closed:
+the EntranceRoom/ExitRoom `Bundle.addAlias` registrations are now proven by a core roundtrip test,
+which closes the Slice 1 serialized-state gate that had stayed PARTIAL, and `HeadlessGdx` sets
+`Game.version` for every suite. content-scaffold keeps Generator `classes[]` and every prob literal
+in lockstep. It refuses layouts it cannot splice safely, and a recount after each splice blocks any
+desync from being written. content-audit now counts `dungeon.json` spawn lists as registration and
+reports ambiguous class names as a G1 finding instead of dropping them silently. Its 194-finding
+backlog is down to **24** (2 real port gaps plus 22 heuristic misses, all beaded), and the ceiling
+equals that real count. Slice-2 WS-2 (the upstream bugfix wave c1–c12) needs no further code: 8
+fixes were already in CPDU, and 4 patch v3.x code CPDU does not have yet (`cpdu-313` carries them
+forward). Core tests: 142 → 151. The six AFK commits on `afk/2026-08-15` were reviewed. The three
+code commits were cherry-picked and gate-verified (the AFK sandbox cannot run Gradle). The three
+doc commits were dropped: two duplicated `main`, and one rewrote a dated plan using a fabricated
+rationale.
 
 **The build-craft vision has a running spine (2026-08-13/14).** The Keybearer prototype
 class shipped to `main` end-to-end: three-element sphere grid (Ember/Frost/Storm) with
@@ -101,6 +120,12 @@ the gates catch regressions, not a faithfully implemented wrong spec.
 ---
 
 ## Recent activity
+
+**2026-10-22 (ready-queue burndown + WS-2 close-out, branch `dev/2026-10-22`):**
+- Closed `cpdu-86k`, `cpdu-tvy`, `cpdu-5js`, `cpdu-6io`, `cpdu-a34`, `cpdu-xxv`, `cpdu-x0z`, `cpdu-zpc`; `cpdu-r18` re-verified (the AFK run had closed it without compiling).
+- Every new or tightened test was shown to fail before its fix. Each track was adversarially reviewed. The scaffold track needed two review rounds: once for packed array layouts that would silently desync, and once for `--weight 2.5`, which would have emitted a `float[]` literal that does not compile.
+- WS-2 verified commit by commit. Already in CPDU: `94bd1370d`, `51168138c`, `68955901f`, `2d5b87292`, `f8bd2233b`, `26cac5c94`, `b692329a7`, `26d39b58f`. Not applicable until their features are ported: `77e648cf8`, `b030dc95d`, `434c467ac`, `176043785` (`cpdu-313`). `port-verify`'s 0–100% line scores were wrong in both directions: a 100% score can be coincidental text overlap, and a 0% score can mean the feature is absent.
+- New beads: `cpdu-313` (carry-forward), `cpdu-66a` (SpectralNecromancer lacks the guard upstream gave Necromancer, which commit `3385746c5` promised a bead for but none was filed), `cpdu-lr8` (`WEP_T3.probs` typo, upstream `b1d82dee5`), `cpdu-3vq` (Generator v2.5.4 parity gaps), `cpdu-e7i` (content-audit heuristic misses), `cpdu-wez` (make CI content-audit blocking: a decision).
 
 **2026-07-25 (Sub-B Slice 1 Phase 3 execution):**
 - **Task 15 (Level and generator)** — 6 beads run; boss-level fixes, Level v2.5 state/load fixes, and levelgen challenge RNG isolation integrated. Two beads were verified no-ops (CPDU had already superseded the behavior).
@@ -435,6 +460,9 @@ dispatcher at a time.
 
 - **Slice 1 scope decision.** The 541 triaged commits mean Slice 1 is roughly an order of magnitude larger than planned. Options: review and integrate them inside Slice 1, split them into a Slice 1b, or push the non-engine areas to a later slice. Task 25's re-estimation should not be the first time this is confronted.
 - **Conditional music as pack config** (`cpdu-15l`). Should amulet-obtained / quest-active track selection become a pack-config surface rather than hardcoded level code? Landing upstream's form would hardcode what CPDU deliberately made configurable, and would not apply to configured dungeons at all. Touches the frozen DSL.
+- **Make CI content-audit blocking?** (`cpdu-wez`). The over-report that justified `|| true` is fixed, and the ceiling (24) equals the real count. Advisory mode is how the ceiling drifted to 189 while the real count was 194.
+- **SpectralNecromancer divergence** (`cpdu-66a`). Upstream left it without the impassable-tile guard. Fix it as a documented CPDU divergence, or leave it faithful?
+- **Balance pass from the 2026-08-14 review.** The recommendations in [2026-08-14-quality-balance-review.md](docs/superpowers/specs/2026-08-14-quality-balance-review.md) cover the keyblade burst, Nova `gridBonus` and its paralysis lock, Insight pricing, and depth-6/7 mob stat bands. They have no beads because each is a design call. Note that ParalysisResist now works (upstream `f3f4ef40f`), which already softens the Nova paralysis lock on repeat casts.
 - Otherwise Slice 1 remains authorized for autonomous execution under the repository's beads-pipeline and review rules.
 - **Ultimate vision re-brainstorm** — LO explicitly deferred to "after Sub-B ships". Vision wave 1+2 already captured in frontier memory.
 
