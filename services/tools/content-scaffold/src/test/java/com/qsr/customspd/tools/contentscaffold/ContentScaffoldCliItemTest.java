@@ -25,7 +25,7 @@ class ContentScaffoldCliItemTest {
         write(root.resolve("core/src/main/assets/messages/items/items.properties"),
                 "items.ankh.name=ankh\n### @content-scaffold:items\n");
         write(root.resolve("core/src/main/java/com/qsr/customspd/items/Generator.java"),
-                "class Generator {\n  static {\n    Category.FOOD.classes = new Class<?>[]{\n      Pasty.class\n    };\n  }\n}\n");
+                "class Generator {\n  static {\n    Category.FOOD.classes = new Class<?>[]{\n      Pasty.class\n    };\n    Category.FOOD.defaultProbs = new float[]{ 1 };\n  }\n}\n");
         File r = root.toFile();
         ContentScaffoldCli.generateItem(r, "Berry", "FOOD", "1");
         assertTrue(Files.exists(root.resolve("core/src/main/java/com/qsr/customspd/items/Berry.java")));
@@ -34,8 +34,24 @@ class ContentScaffoldCliItemTest {
                 .contains("BERRY(\"sprites/items/berry.png\"),"));
         assertTrue(Files.readString(root.resolve("core/src/main/assets/messages/items/items.properties"))
                 .contains("items.berry.name="));
-        assertTrue(Files.readString(root.resolve("core/src/main/java/com/qsr/customspd/items/Generator.java"))
-                .contains("Berry.class"));
+        String generator = Files.readString(root.resolve("core/src/main/java/com/qsr/customspd/items/Generator.java"));
+        assertTrue(generator.contains("Berry.class"), () -> generator);
+        // the new class must carry a weight, or Random.chances can never pick it
+        assertTrue(generator.contains("Category.FOOD.defaultProbs = new float[]{ 1, 1 };"), () -> generator);
+    }
+
+    @Test
+    void weightFlagSetsTheNewItemsProb(@TempDir Path root) throws Exception {
+        write(root.resolve("core/src/main/java/com/qsr/customspd/assets/GeneralAsset.kt"),
+                "enum class GeneralAsset(val path: String) {\n    ANKH(\"sprites/items/ankh.png\"),\n"
+              + "    // @content-scaffold:items\n}\n");
+        write(root.resolve("core/src/main/assets/messages/items/items.properties"),
+                "items.ankh.name=ankh\n### @content-scaffold:items\n");
+        write(root.resolve("core/src/main/java/com/qsr/customspd/items/Generator.java"),
+                "class Generator {\n  static {\n    Category.FOOD.classes = new Class<?>[]{\n      Pasty.class\n    };\n    Category.FOOD.defaultProbs = new float[]{ 1 };\n  }\n}\n");
+        ContentScaffoldCli.generateItem(root.toFile(), "Berry", "FOOD", "1", "3");
+        String generator = Files.readString(root.resolve("core/src/main/java/com/qsr/customspd/items/Generator.java"));
+        assertTrue(generator.contains("Category.FOOD.defaultProbs = new float[]{ 1, 3 };"), () -> generator);
     }
 
     @Test
@@ -46,7 +62,7 @@ class ContentScaffoldCliItemTest {
         write(root.resolve("core/src/main/assets/messages/items/items.properties"),
                 "items.ankh.name=ankh\n### @content-scaffold:items\n");
         write(root.resolve("core/src/main/java/com/qsr/customspd/items/Generator.java"),
-                "class Generator {\n  static {\n    Category.FOOD.classes = new Class<?>[]{\n      Pasty.class\n    };\n  }\n}\n");
+                "class Generator {\n  static {\n    Category.FOOD.classes = new Class<?>[]{\n      Pasty.class\n    };\n    Category.FOOD.defaultProbs = new float[]{ 1 };\n  }\n}\n");
         File r = root.toFile();
         ContentScaffoldCli.generateItem(r, "Berry", "FOOD", "1");
         ContentScaffoldCli.GenResult second = ContentScaffoldCli.generateItem(r, "Berry", "FOOD", "1");
@@ -72,7 +88,7 @@ class ContentScaffoldCliItemTest {
         write(root.resolve("core/src/main/assets/messages/items/items.properties"),
                 "items.ankh.name=ankh\n### @content-scaffold:items\n");
         write(root.resolve("core/src/main/java/com/qsr/customspd/items/Generator.java"),
-                "class Generator {\n  static {\n    Category.FOOD.classes = new Class<?>[]{\n      Pasty.class\n    };\n  }\n}\n");
+                "class Generator {\n  static {\n    Category.FOOD.classes = new Class<?>[]{\n      Pasty.class\n    };\n    Category.FOOD.defaultProbs = new float[]{ 1 };\n  }\n}\n");
         File r = root.toFile();
         ContentScaffoldCli.generateItem(r, "Berry", "FOOD", "1");
         String content = Files.readString(
@@ -96,7 +112,7 @@ class ContentScaffoldCliItemTest {
         write(root.resolve("core/src/main/assets/messages/items/items.properties"),
                 "items.rings.ring.diamond.name=Diamond Ring\n### @content-scaffold:items\n");
         write(root.resolve("core/src/main/java/com/qsr/customspd/items/Generator.java"),
-                "class Generator {\n  static {\n    Category.FOOD.classes = new Class<?>[]{\n      Pasty.class\n    };\n  }\n}\n");
+                "class Generator {\n  static {\n    Category.FOOD.classes = new Class<?>[]{\n      Pasty.class\n    };\n    Category.FOOD.defaultProbs = new float[]{ 1 };\n  }\n}\n");
         File r = root.toFile();
         ContentScaffoldCli.GenResult result = ContentScaffoldCli.generateItem(r, "Ring", "FOOD", "1");
         String content = Files.readString(root.resolve("core/src/main/assets/messages/items/items.properties"));
@@ -112,7 +128,7 @@ class ContentScaffoldCliItemTest {
         write(root.resolve("core/src/main/assets/messages/items/items.properties"),
                 "items.ankh.name=ankh\n### @content-scaffold:items\n");
         write(root.resolve("core/src/main/java/com/qsr/customspd/items/Generator.java"),
-                "class Generator {\n  static {\n    Category.FOOD.classes = new Class<?>[]{\n      Pasty.class\n    };\n  }\n}\n");
+                "class Generator {\n  static {\n    Category.FOOD.classes = new Class<?>[]{\n      Pasty.class\n    };\n    Category.FOOD.defaultProbs = new float[]{ 1 };\n  }\n}\n");
         File r = root.toFile();
 
         Path generalAsset = root.resolve("core/src/main/java/com/qsr/customspd/assets/GeneralAsset.kt");
