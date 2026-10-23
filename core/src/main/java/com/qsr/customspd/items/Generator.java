@@ -257,11 +257,12 @@ public class Generator {
 		//some generator categories can have ordering within that category as well
 		// note that sub category ordering doesn't need to always include items that belong
 		// to that categories superclass, e.g. bombs are ordered within thrown weapons
-		//(upstream also orders Trinket/TrinketCatalyst here; CPDU has no trinket subsystem yet)
+		//(upstream also orders Trinket/TrinketCatalyst here, and since 213f7a2f6 lists Waterskin first among
+		// potions; CPDU has no trinket subsystem and does not port the Waterskin/bandolier change yet)
 		private static HashMap<Class, ArrayList<Class>> subOrderings = new HashMap<>();
 		static {
 			subOrderings.put(MissileWeapon.class, new ArrayList<>(Arrays.asList(MissileWeapon.class, Bomb.class)));
-			subOrderings.put(Potion.class, new ArrayList<>(Arrays.asList(Waterskin.class, Potion.class, ExoticPotion.class, Brew.class, Elixir.class, LiquidMetal.class)));
+			subOrderings.put(Potion.class, new ArrayList<>(Arrays.asList(Potion.class, ExoticPotion.class, Brew.class, Elixir.class, LiquidMetal.class)));
 			subOrderings.put(Scroll.class, new ArrayList<>(Arrays.asList(Scroll.class, ExoticScroll.class, Spell.class, ArcaneResin.class)));
 		}
 
