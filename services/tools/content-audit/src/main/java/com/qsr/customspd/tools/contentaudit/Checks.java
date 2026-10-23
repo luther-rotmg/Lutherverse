@@ -19,7 +19,7 @@ public final class Checks {
                 findings.add(new Finding(prefix + "M1",
                         "M1 sprite: spriteClass " + e.resolvedSpriteClass() + " -> asset PNG NOT FOUND"));
             }
-            String base = "actors.mobs." + name.toLowerCase();
+            String base = mobKeyBase(e.cls());
             if (!msgs.hasKey(base + ".name") || !msgs.hasKey(base + ".desc")) {
                 findings.add(new Finding(prefix + "M2", "M2 localization: " + base + ".{name,desc} missing"));
             }
@@ -40,6 +40,17 @@ public final class Checks {
             }
         }
         return findings;
+    }
+
+    /** actors.mobs.<subpackage-after-"com.qsr.customspd.actors.mobs">.<lowercase name>. Messages keys
+     *  a class by its full name minus "com.qsr.customspd.", so an NPC under actors.mobs.npcs lives at
+     *  actors.mobs.npcs.<name> -- the same derivation itemKeyBase does for items. */
+    static String mobKeyBase(ContentClass c) {
+        String pkg = c.packageName();
+        String marker = "com.qsr.customspd.actors.mobs";
+        String tail = pkg.startsWith(marker + ".") ? pkg.substring(marker.length() + 1) : "";
+        String sub = tail.isEmpty() ? "" : tail + ".";
+        return "actors.mobs." + sub + c.simpleName().toLowerCase();
     }
 
     /** items.<package-after-"com.qsr.customspd.items">.<lowercase name> */

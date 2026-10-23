@@ -101,4 +101,67 @@ class ChecksTest {
         assertTrue(ids.contains("Item MysteryBox#I3"));
         assertEquals(3, f.size());
     }
+
+    /** An NPC fixture: sprite chain wired, localization under the given key prefix. */
+    private static File npcRepo(Path root, String keyPrefix) throws Exception {
+        File repo = wiredMobRepo(root);
+        write(root.resolve("core/src/main/assets/messages/actors/actors.properties"),
+                keyPrefix + ".name=sheep\n" + keyPrefix + ".desc=baa\n");
+        return repo;
+    }
+
+    private static EntityGraph.Entity npc(String name) {
+        return new EntityGraph.Entity("Mob",
+                new ContentClass(name, "com.qsr.customspd.actors.mobs.npcs", "NPC", false, "RatSprite", null),
+                "RatSprite", null);
+    }
+
+    private static List<String> keys(List<Finding> f) {
+        return f.stream().map(Finding::key).collect(Collectors.toList());
+    }
+
+    @Test
+    void mobLocalizationKeysFollowThePackageLikeMessagesDoes(@TempDir Path root) throws Exception {
+        // Messages.get(Class,...) keys on the class's full name minus "com.qsr.customspd.", so an
+        // NPC in actors.mobs.npcs lives under actors.mobs.npcs.<name>, not actors.mobs.<name>.
+        File repo = npcRepo(root, "actors.mobs.npcs.sheep");
+        List<Finding> f = Checks.run(npc("Sheep"),
+                SpriteIndex.load(repo), MessageIndex.load(repo), RegistryIndex.load(repo));
+        assertTrue(!keys(f).contains("Mob Sheep#M2"), () -> "package-derived keys must satisfy M2: " + f);
+    }
+
+    @Test
+    void npcWithKeysOnlyAtTheFlatPathIsStillFlagged(@TempDir Path root) throws Exception {
+        // the keys exist, but where the runtime will never look for an npcs.* class
+        File repo = npcRepo(root, "actors.mobs.sheep");
+        List<Finding> f = Checks.run(npc("Sheep"),
+                SpriteIndex.load(repo), MessageIndex.load(repo), RegistryIndex.load(repo));
+        assertTrue(keys(f).contains("Mob Sheep#M2"), () -> "flat-path keys must not satisfy an npcs mob: " + f);
+        assertTrue(f.stream().anyMatch(x -> x.message().contains("actors.mobs.npcs.sheep.{name,desc}")),
+                () -> "the finding must name the package-derived key: " + f);
+    }
+
+    @Test
+    void npcMissingItsKeysIsFlagged(@TempDir Path root) throws Exception {
+        File repo = npcRepo(root, "actors.mobs.npcs.sheep");
+        // same repo, but ask about a different NPC that has no keys at all
+        List<Finding> f = Checks.run(npc("Goat"),
+                SpriteIndex.load(repo), MessageIndex.load(repo), RegistryIndex.load(repo));
+        assertTrue(keys(f).contains("Mob Goat#M2"), () -> "missing npcs keys must be flagged: " + f);
+    }
+
+    @Test
+    void nestedSpriteClassResolvesThroughItsOuterClassAsset(@TempDir Path root) throws Exception {
+        File repo = wiredMobRepo(root);
+        write(root.resolve("core/src/main/java/com/qsr/customspd/sprites/BoxSprite.java"),
+                "class BoxSprite { { texture(GeneralAsset.RAT); }\n"
+                        + "  public static class Golden extends BoxSprite {}\n"
+                        + "  public static class Missing extends NoSuchSprite {} }");
+        List<Finding> ok = Checks.run(mob("Box", "BoxSprite.Golden", null),
+                SpriteIndex.load(repo), MessageIndex.load(repo), RegistryIndex.load(repo));
+        assertTrue(!keys(ok).contains("Mob Box#M1"), () -> "nested sprite must resolve: " + ok);
+        List<Finding> bad = Checks.run(mob("Box", "BoxSprite.Missing", null),
+                SpriteIndex.load(repo), MessageIndex.load(repo), RegistryIndex.load(repo));
+        assertTrue(keys(bad).contains("Mob Box#M1"), () -> "unresolvable nested sprite must be flagged: " + bad);
+    }
 }

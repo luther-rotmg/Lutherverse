@@ -46,6 +46,7 @@ import com.qsr.customspd.items.artifacts.SandalsOfNature;
 import com.qsr.customspd.items.artifacts.TalismanOfForesight;
 import com.qsr.customspd.items.artifacts.TimekeepersHourglass;
 import com.qsr.customspd.items.artifacts.UnstableSpellbook;
+import com.qsr.customspd.items.bombs.Bomb;
 import com.qsr.customspd.items.food.Food;
 import com.qsr.customspd.items.food.MysteryMeat;
 import com.qsr.customspd.items.food.Pasty;
@@ -62,6 +63,9 @@ import com.qsr.customspd.items.potions.PotionOfParalyticGas;
 import com.qsr.customspd.items.potions.PotionOfPurity;
 import com.qsr.customspd.items.potions.PotionOfStrength;
 import com.qsr.customspd.items.potions.PotionOfToxicGas;
+import com.qsr.customspd.items.potions.brews.Brew;
+import com.qsr.customspd.items.potions.elixirs.Elixir;
+import com.qsr.customspd.items.potions.exotic.ExoticPotion;
 import com.qsr.customspd.items.rings.Ring;
 import com.qsr.customspd.items.rings.RingOfAccuracy;
 import com.qsr.customspd.items.rings.RingOfArcana;
@@ -88,6 +92,8 @@ import com.qsr.customspd.items.scrolls.ScrollOfTeleportation;
 import com.qsr.customspd.items.scrolls.ScrollOfTerror;
 import com.qsr.customspd.items.scrolls.ScrollOfTransmutation;
 import com.qsr.customspd.items.scrolls.ScrollOfUpgrade;
+import com.qsr.customspd.items.scrolls.exotic.ExoticScroll;
+import com.qsr.customspd.items.spells.Spell;
 import com.qsr.customspd.items.stones.Runestone;
 import com.qsr.customspd.items.stones.StoneOfFear;
 import com.qsr.customspd.items.stones.StoneOfAggression;
@@ -163,6 +169,7 @@ import com.qsr.customspd.items.weapon.missiles.ThrowingSpike;
 import com.qsr.customspd.items.weapon.missiles.ThrowingStone;
 import com.qsr.customspd.items.weapon.missiles.Tomahawk;
 import com.qsr.customspd.items.weapon.missiles.Trident;
+import com.qsr.customspd.items.weapon.missiles.darts.Dart;
 import com.qsr.customspd.plants.Blindweed;
 import com.qsr.customspd.plants.Mageroyal;
 import com.qsr.customspd.plants.Earthroot;
@@ -181,6 +188,8 @@ import com.watabou.utils.GameMath;
 import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -244,12 +253,38 @@ public class Generator {
 			this.superClass = superClass;
 		}
 		
+		//some generator categories can have ordering within that category as well
+		// note that sub category ordering doesn't need to always include items that belong
+		// to that categories superclass, e.g. bombs are ordered within thrown weapons
+		//(upstream also orders Trinket/TrinketCatalyst here, and since 213f7a2f6 lists Waterskin first among
+		// potions; CPDU has no trinket subsystem and does not port the Waterskin/bandolier change yet)
+		private static HashMap<Class, ArrayList<Class>> subOrderings = new HashMap<>();
+		static {
+			subOrderings.put(MissileWeapon.class, new ArrayList<>(Arrays.asList(MissileWeapon.class, Bomb.class)));
+			subOrderings.put(Potion.class, new ArrayList<>(Arrays.asList(Potion.class, ExoticPotion.class, Brew.class, Elixir.class, LiquidMetal.class)));
+			subOrderings.put(Scroll.class, new ArrayList<>(Arrays.asList(Scroll.class, ExoticScroll.class, Spell.class, ArcaneResin.class)));
+		}
+
+		//in case there are multiple matches, this will return the latest match
 		public static int order( Item item ) {
+			int catResult = -1, subResult = 0;
 			for (int i=0; i < values().length; i++) {
-				if (values()[i].superClass.isInstance( item )) {
-					return i;
+				ArrayList<Class> subOrdering = subOrderings.get(values()[i].superClass);
+				if (subOrdering != null){
+					for (int j=0; j < subOrdering.size(); j++){
+						if (subOrdering.get(j).isInstance(item)){
+							catResult = i;
+							subResult = j;
+						}
+					}
+				} else {
+					if (values()[i].superClass.isInstance(item)) {
+						catResult = i;
+						subResult = 0;
+					}
 				}
 			}
+			if (catResult != -1) return catResult*100 + subResult;
 
 			//items without a category-defined order are sorted based on the spritesheet
 			return Short.MAX_VALUE + ((GeneralAsset)item.image()).ordinal();
@@ -359,6 +394,10 @@ public class Generator {
 			WEP_T1.defaultProbs = new float[]{ 2, 0, 2, 2, 2 };
 			WEP_T1.probs = WEP_T1.defaultProbs.clone();
 			
+			//upstream 6a313b135 also lists Pickaxe here at weight 0, for its new journal catalog. Not ported
+			// yet: CPDU's old Catalog.WEAPONS is built from WEP_T*.classes, so the entry alone would make
+			// ALL_WEAPONS_IDENTIFIED require a Pickaxe, a state upstream never shipped (b003d1129 redesigned
+			// those badges for the new catalog). Port it together with the catalog rewrite.
 			WEP_T2.classes = new Class<?>[]{
 					Shortsword.class,
 					HandAxe.class,
@@ -379,7 +418,7 @@ public class Generator {
 					Whip.class
 			};
 			WEP_T3.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2 };
-			WEP_T3.probs = WEP_T1.defaultProbs.clone();
+			WEP_T3.probs = WEP_T3.defaultProbs.clone();
 			
 			WEP_T4.classes = new Class<?>[]{
 					Longsword.class,
@@ -427,9 +466,10 @@ public class Generator {
 			MIS_T1.classes = new Class<?>[]{
 					ThrowingStone.class,
 					ThrowingKnife.class,
-					ThrowingSpike.class
+					ThrowingSpike.class,
+					Dart.class
 			};
-			MIS_T1.defaultProbs = new float[]{ 3, 3, 3 };
+			MIS_T1.defaultProbs = new float[]{ 3, 3, 3, 0 };
 			MIS_T1.probs = MIS_T1.defaultProbs.clone();
 			
 			MIS_T2.classes = new Class<?>[]{

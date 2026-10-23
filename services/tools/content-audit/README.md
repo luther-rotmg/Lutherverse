@@ -5,7 +5,7 @@ IS the "how to add content" checklist — satisfy every row and the gate passes.
 
 ```
 ./gradlew.bat :services:tools:content-audit:run \
-  --args="--allowlist services/tools/content-audit/reviewed-exceptions.txt --max-findings 24"
+  --args="--allowlist services/tools/content-audit/reviewed-exceptions.txt --max-findings 0"
 ```
 
 Exit 0 within the ceiling, 1 over it or canary failed, 2 if the scan itself broke.
@@ -14,8 +14,12 @@ Exit 0 within the ceiling, 1 over it or canary failed, 2 if the scan itself brok
 
 Adding a **mob** (`core/.../actors/mobs/YourMob.java`):
 - **M1 Sprite** — set `spriteClass = YourMobSprite.class`; the sprite textures with a
-  `GeneralAsset.YOUR_MOB`; the PNG exists at that asset's path.
-- **M2 Localization** — `actors.mobs.yourmob.name` and `.desc` in `actors.properties`.
+  `GeneralAsset.YOUR_MOB`; the PNG exists at that asset's path. A nested sprite class
+  (`spriteClass = MimicSprite.Golden.class`) uses its own `GeneralAsset` ref, else the asset
+  of the sprite class it extends.
+- **M2 Localization** — `actors.mobs.yourmob.name` and `.desc` in `actors.properties`; keyed by
+  package like `Messages` does, so a mob in `actors.mobs.npcs` is `actors.mobs.npcs.yourmob.*`.
+  Only the default (English) `*.properties` count: a translation cannot satisfy a missing key.
 - **M3 Registration** — named in a level's `bestiary`, `rare_mob` or `extra_mobs` in
   `core/src/main/assets/dungeon/dungeon.json` (or referenced in `Bestiary.kt`), or
   allowlisted (bosses, quest NPCs, room-placed mobs, summons).

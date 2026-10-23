@@ -40,9 +40,11 @@ Item StormKeyblade#I3
 # cleared 19 false M3s (Bat, Crab, Gnoll, Skeleton, ...). Every entry below was
 # checked against its spawn/acquisition site in core and against upstream v2.5.4,
 # where none of them is in MobSpawner/Generator either. The line above each key
-# is its reason. NOT allowlisted (still parked under the ceiling): Dart and
-# Pickaxe, which upstream v2.5.0+ lists in Generator at probability 0 (catalogs);
-# and every M1/M2/I2, which are gaps or check-heuristic issues, not exceptions.
+# is its reason. Dart and Pickaxe were NOT allowlisted: upstream v2.5.0+ lists them
+# in Generator at probability 0 (catalogs), so cpdu-3vq ported that and cleared
+# their I3s. The M1/M2/I2 findings were check-heuristic misses; cpdu-e7i fixed the
+# generic ones (package-derived mob keys, nested sprite classes) and reviewed the
+# remainder one by one in the section at the end of this file.
 #
 # Bosses: placed by their boss level, never by a bestiary
 # Goo: sewer boss, placed by the sewerboss Goo rooms
@@ -373,3 +375,39 @@ Item LostBackpack#I3
 Item CapeOfThorns#I3
 # MerchantsBeacon: removed from drops, kept for pre-1.1.0 saves
 Item MerchantsBeacon#I3
+
+# --- M1/M2/I2 review, 2026-10-23 (cpdu-e7i) ---
+# M2 now derives a mob's key from its package (actors.mobs.npcs.<name>, like itemKeyBase does
+# for items) and M1 resolves nested sprite classes (MimicSprite.Golden / .Crystal), which cleared
+# 12 of the 22 findings. These 10 are not assets or strings missing from a shipped entity:
+# each is a base class, or reads its text/texture through a path the audit does not model.
+# They are allowlisted individually, not by pattern, so any NEW mob or item with the same
+# defect still fails. Each was checked against its source (and upstream v2.5.4 where noted).
+#
+# Texture is the hero's sheet, chosen at runtime: MirrorSprite calls
+# texture(Dungeon.hero.heroClass.spritesheet()), so there is no GeneralAsset to find
+# MirrorImage: MirrorSprite textures with the hero sheet at runtime
+Mob MirrorImage#M1
+# PrismaticImage: PrismaticSprite extends MirrorSprite, hero sheet at runtime
+Mob PrismaticImage#M1
+#
+# Concrete in the Java sense, but base classes never spawned or dropped themselves
+# DirectableAlly: base class of HawkAlly, ShadowAlly and GhostHero; no spriteClass, no keys
+Mob DirectableAlly#M1
+Mob DirectableAlly#M2
+# Bag: base class of the carry bags (no `new Bag(` anywhere in core); has a name key, no desc
+Item Bag#I2
+# ExoticPotion: base class of the exotic potions (instantiated only through regToExo subclasses)
+Item ExoticPotion#I2
+#
+# Text lives under variant keys the audit does not follow
+# Bandit: extends Thief and sets only its own name; desc resolves through Messages' superclass
+# fallback to actors.mobs.thief.desc (upstream v2.5.4 also defines bandit.name only)
+Mob Bandit#M2
+# Pylon: description() reads desc_inactive / desc_active, never a plain desc (as upstream v2.5.4)
+Mob Pylon#M2
+# Pasty: name() reads pasty / pie / cane and info() reads pasty_desc / pie_desc / cane_desc
+# by holiday, never a plain name or desc
+Item Pasty#I2
+# SandalsOfNature: name() reads name_<level> and desc() reads desc_<level+1> (as upstream v2.5.4)
+Item SandalsOfNature#I2
