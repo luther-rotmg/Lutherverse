@@ -16,8 +16,11 @@ public final class GeneratorCategoryInserter {
 
     public static final String DEFAULT_WEIGHT = "1";
 
-    /** No leading zero: "08" is not a valid Java int literal. */
-    private static final Pattern WEIGHT = Pattern.compile("(0|[1-9]\\d*)(\\.\\d+)?");
+    /**
+     * Integers only, no leading zero: "08" is not a valid Java int literal, and an unsuffixed
+     * decimal is a double literal that does not compile inside a float[] initializer.
+     */
+    private static final Pattern WEIGHT = Pattern.compile("0|[1-9]\\d*");
 
     /**
      * Generator.random(Category) special-cases these and never reads their classes/probs, so an
@@ -39,7 +42,7 @@ public final class GeneratorCategoryInserter {
     public static AnchorInserter.Result addItem(String generatorJava, String category, String className,
                                                 String weight) {
         if (!WEIGHT.matcher(weight).matches()) {
-            throw new IllegalArgumentException("Invalid weight '" + weight + "' (expected a non-negative number)");
+            throw new IllegalArgumentException("Invalid weight '" + weight + "' (expected a non-negative integer)");
         }
         // Match: Category.<CAT>.classes = new Class<?>[]{  ...  };  The "Category."
         // qualifier is optional -- the real Generator.java assigns these fields from

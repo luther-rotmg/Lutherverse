@@ -20,7 +20,7 @@ art, not the wiring. The inverse of `content-audit`.
 
 - Marker-anchored insertion: it never reserializes a shared file, only inserts at
   `// @content-scaffold:*` markers (or the structural `dungeon.json` array / named category).
-- Generator lockstep: adding an item appends `--weight` (default 1) to every `defaultProbs`/`probs`
+- Generator lockstep: adding an item appends `--weight` (a non-negative integer, default 1) to every `defaultProbs`/`probs`
   array literal of the same category, so `classes` and the prob arrays never desync. It refuses
   (non-zero exit) categories with no prob literal, categories already out of step, and the dispatch
   categories `WEAPON`/`MISSILE`/`ARMOR`, where an item would look wired but never drop. After

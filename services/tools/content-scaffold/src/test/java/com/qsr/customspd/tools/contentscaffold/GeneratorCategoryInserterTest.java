@@ -164,8 +164,17 @@ class GeneratorCategoryInserterTest {
 
     @Test
     void customWeightIsAppendedToTheProbs() {
-        AnchorInserter.Result r = GeneratorCategoryInserter.addItem(STONE_GEN, "STONE", "InsightCrystal", "2.5");
-        assertTrue(r.newContent().contains("STONE.defaultProbs = new float[]{ 0, 5, 2.5 };"), () -> r.newContent());
+        AnchorInserter.Result r = GeneratorCategoryInserter.addItem(STONE_GEN, "STONE", "InsightCrystal", "3");
+        assertTrue(r.newContent().contains("STONE.defaultProbs = new float[]{ 0, 5, 3 };"), () -> r.newContent());
+    }
+
+    @Test
+    void decimalWeightThrows() {
+        // an unsuffixed 2.5 is a double literal: inside float[]{...} it does not compile
+        assertThrows(IllegalArgumentException.class,
+                () -> GeneratorCategoryInserter.addItem(STONE_GEN, "STONE", "InsightCrystal", "2.5"));
+        assertThrows(IllegalArgumentException.class,
+                () -> GeneratorCategoryInserter.addItem(STONE_GEN, "STONE", "InsightCrystal", "0.5"));
     }
 
     @Test
