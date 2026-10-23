@@ -311,7 +311,7 @@ record what is currently evidenced, not a closure claim.
       migration, 1 `ShadowCaster.castShadow`). **This gate only became real
       today** — the tool previously scanned 0 files and printed PASS. Its first
       working run caught the `CorpseDust.actions()` regression.
-- [ ] **PARTIAL — Serialized-state roundtrip is proven for the generic
+- [x] **PASS (was PARTIAL; closed by cpdu-6io) — Serialized-state roundtrip is proven for the generic
       mechanism, not yet for the specific registrations.** Slice 1 changed
       serialized state two ways: terrain id reuse (`CUSTOM_DECO` takes the old
       `SIGN` id 23) and `Bundle.addAlias` registrations for the moved
@@ -330,6 +330,9 @@ record what is currently evidenced, not a closure claim.
       source set that bundles a real `EntranceRoom`/`ExitRoom`, round-trips
       it, and separately confirms the legacy pre-move class names resolve via
       the actual registration call. Tracked as bead `cpdu-6io`.
+      Closed: `core/src/test/java/com/qsr/customspd/levels/rooms/standard/EntranceExitRoomAliasTest.java`
+      calls `ShatteredPixelDungeon.registerBundleAliases()` and proves both
+      fresh roundtrips and old-class-name resolution for both rooms.
 - [x] No DSL surface additions, iOS work, or original Lutherverse content.
       `core/.../modding/` untouched; no `ios/` paths; no original content.
 - [x] No unrelated edits and no worker commits/pushes.
