@@ -636,7 +636,12 @@ public class Dungeon {
 
 		Bundle bundle = FileUtils.bundleFromFile( GamesInProgress.gameFile( save ) );
 
-		initialVersion = bundle.getInt( VERSION );
+		//saves written before INIT_VER existed
+		if (bundle.contains( INIT_VER )) {
+			initialVersion = bundle.getInt( INIT_VER );
+		} else {
+			initialVersion = bundle.getInt( VERSION );
+		}
 
 		version = bundle.getInt( VERSION );
 
