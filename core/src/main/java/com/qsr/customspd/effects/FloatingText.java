@@ -201,8 +201,10 @@ public class FloatingText extends RenderedTextBlock {
 		text( text );
 		hardlight( color );
 
-		if (iconIdx != NO_ICON){
-			icon = new Image( Asset.getAssetFilePath(iconAsset(iconIdx)) );
+		//an index with no mapped asset draws no icon, as upstream's blank sheet cell would
+		GeneralAsset asset = iconIdx == NO_ICON ? null : iconAsset(iconIdx);
+		if (asset != null){
+			icon = new Image( Asset.getAssetFilePath(asset) );
 			add(icon);
 			iconLeft = left;
 			if (iconLeft){
