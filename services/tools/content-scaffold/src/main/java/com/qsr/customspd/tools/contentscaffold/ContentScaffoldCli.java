@@ -43,6 +43,9 @@ public final class ContentScaffoldCli {
             if (repoRoot == null) { System.err.println("Not in a git repository"); System.exit(2); return; }
             try {
                 String weight = strFlag(args, "--weight");
+                if (weight == null && java.util.Arrays.asList(args).contains("--weight")) {
+                    throw new IllegalArgumentException("--weight needs a value");
+                }
                 GenResult r = generateItem(repoRoot, name, category, tier,
                         weight != null ? weight : GeneratorCategoryInserter.DEFAULT_WEIGHT);
                 report(r);

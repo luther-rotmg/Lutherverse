@@ -242,4 +242,57 @@ class GeneratorCategoryInserterTest {
         assertTrue(r.newContent().contains("{\n    ScrollOfMagicMapping.class\n  };"),
                 () -> r.newContent());
     }
+
+    @Test
+    void packedMultiLineProbsLiteralStaysInLockstep() {
+        // Several numbers per line: the new line's indent must come from the line's whitespace,
+        // not from everything before the last number.
+        String gen = "static {\n  FOOD.classes = new Class<?>[]{\n    A.class,\n    B.class\n  };\n"
+                + "  FOOD.defaultProbs = new float[]{\n    4, 1\n  };\n}\n";
+        AnchorInserter.Result r = GeneratorCategoryInserter.addItem(gen, "FOOD", "Zzz");
+        assertTrue(r.inserted());
+        assertEquals(3, classCount(r.newContent(), "FOOD.classes"), () -> r.newContent());
+        assertEquals(3, probCount(r.newContent(), "FOOD.defaultProbs"), () -> r.newContent());
+        assertTrue(r.newContent().contains("{\n    4, 1,\n    1\n  };"), () -> r.newContent());
+    }
+
+    @Test
+    void packedMultiLineClassesLiteralStaysInLockstep() {
+        String gen = "static {\n  FOOD.classes = new Class<?>[]{\n    A.class, B.class,\n    C.class, D.class\n  };\n"
+                + "  FOOD.defaultProbs = new float[]{ 4, 1, 1, 1 };\n}\n";
+        AnchorInserter.Result r = GeneratorCategoryInserter.addItem(gen, "FOOD", "Zzz");
+        assertTrue(r.inserted());
+        assertEquals(5, classCount(r.newContent(), "FOOD.classes"), () -> r.newContent());
+        assertEquals(5, probCount(r.newContent(), "FOOD.defaultProbs"), () -> r.newContent());
+        assertTrue(r.newContent().contains("C.class, D.class,\n    Zzz.class\n  };"), () -> r.newContent());
+    }
+
+    @Test
+    void defaultProbs2SiblingExtendsWithDefaultProbs() {
+        // upstream v2.5.4 gives POTION/SCROLL a second weight array that must stay the same length
+        String gen = "static {\n  POTION.classes = new Class<?>[]{ A.class, B.class };\n"
+                + "  POTION.defaultProbs = new float[]{ 3, 3 };\n"
+                + "  POTION.defaultProbs2 = new float[]{ 0, 1 };\n}\n";
+        AnchorInserter.Result r = GeneratorCategoryInserter.addItem(gen, "POTION", "C");
+        assertTrue(r.inserted());
+        assertEquals(3, probCount(r.newContent(), "POTION.defaultProbs"), () -> r.newContent());
+        assertEquals(3, probCount(r.newContent(), "POTION.defaultProbs2"), () -> r.newContent());
+    }
+
+    @Test
+    void commentedOutProbLiteralIsNotTreatedAsLive() {
+        String gen = "static {\n  FOOD.classes = new Class<?>[]{ A.class };\n"
+                + "  //FOOD.defaultProbs = new float[]{ 9, 9, 9 };\n"
+                + "  FOOD.defaultProbs = new float[]{ 4 };\n}\n";
+        AnchorInserter.Result r = GeneratorCategoryInserter.addItem(gen, "FOOD", "B");
+        assertTrue(r.newContent().contains("//FOOD.defaultProbs = new float[]{ 9, 9, 9 };"), () -> r.newContent());
+        assertTrue(r.newContent().contains("FOOD.defaultProbs = new float[]{ 4, 1 };"), () -> r.newContent());
+    }
+
+    @Test
+    void weightWithALeadingZeroThrows() {
+        // 08 / 09 are invalid octal int literals in the generated Java
+        assertThrows(IllegalArgumentException.class,
+                () -> GeneratorCategoryInserter.addItem(STONE_GEN, "STONE", "InsightCrystal", "08"));
+    }
 }

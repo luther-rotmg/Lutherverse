@@ -16,7 +16,8 @@ public final class GeneratorCategoryInserter {
 
     public static final String DEFAULT_WEIGHT = "1";
 
-    private static final Pattern WEIGHT = Pattern.compile("\\d+(\\.\\d+)?");
+    /** No leading zero: "08" is not a valid Java int literal. */
+    private static final Pattern WEIGHT = Pattern.compile("(0|[1-9]\\d*)(\\.\\d+)?");
 
     /**
      * Generator.random(Category) special-cases these and never reads their classes/probs, so an
@@ -46,22 +47,24 @@ public final class GeneratorCategoryInserter {
         // in scope unqualified. Requiring "Category." unconditionally would never match
         // the real file, only test fixtures that happened to include it.
         String prefix = "(?<![A-Za-z0-9_$.])(?:Category\\.)?" + Pattern.quote(category);
+        // Everything is located in the comment-masked text (same offsets), so a commented-out
+        // literal is not live and a '}' inside a // comment does not end an array.
+        String maskedFile = maskComments(generatorJava);
         Matcher m = Pattern.compile(prefix + "\\.classes\\s*=\\s*new\\s+Class<\\?>\\[\\]\\{")
-                .matcher(generatorJava);
+                .matcher(maskedFile);
         if (!m.find()) {
             throw new IllegalArgumentException("No Category." + category + ".classes assignment found");
         }
         int open = m.end();                    // just after the '{'
-        int close = generatorJava.indexOf('}', open);
+        int close = maskedFile.indexOf('}', open);
         if (close < 0) throw new IllegalArgumentException("Unterminated classes array for " + category);
-        String body = generatorJava.substring(open, close);
         // A bare body.contains(className + ".class") check would false-positive when
         // className is a suffix of an existing class name (e.g. adding "Berry" while
         // "SuperBerry.class" is already present) since there is no delimiter protecting
         // the identifier boundary. Require a non-identifier character (or start-of-body)
         // immediately before the class name. Comments are blanked first so a
         // "// see Berry.class" remark is neither an entry nor an insertion point.
-        String masked = maskComments(body);
+        String masked = maskedFile.substring(open, close);
         Pattern present = Pattern.compile(
                 "(?<![A-Za-z0-9_$])" + Pattern.quote(className) + "\\.class\\b");
         if (present.matcher(masked).find()) {
@@ -77,16 +80,17 @@ public final class GeneratorCategoryInserter {
         // form (probs = defaultProbs.clone()) is not a literal and follows by itself.
         // Refuse -- rather than guess -- when none exists or one is already out of step.
         int classCount = count(masked, CLASS_ELEM);
-        Matcher pm = Pattern.compile(prefix + "\\.(defaultProbs|probs)\\s*=\\s*new\\s+float\\[\\]\\s*\\{")
-                .matcher(generatorJava);
+        Pattern probLiteral = Pattern.compile(
+                prefix + "\\.(defaultProbs2?|probs)\\s*=\\s*new\\s+float\\[\\]\\s*\\{");
+        Matcher pm = probLiteral.matcher(maskedFile);
         List<int[]> edits = new ArrayList<>();           // {open, close, 0=classes|1=probs}
         edits.add(new int[]{open, close, 0});
         int probLiterals = 0;
         while (pm.find()) {
             int pOpen = pm.end();
-            int pClose = generatorJava.indexOf('}', pOpen);
+            int pClose = maskedFile.indexOf('}', pOpen);
             if (pClose < 0) throw new IllegalArgumentException("Unterminated " + pm.group(1) + " array for " + category);
-            int probCount = count(maskComments(generatorJava.substring(pOpen, pClose)), PROB_ELEM);
+            int probCount = count(maskedFile.substring(pOpen, pClose), PROB_ELEM);
             if (probCount != classCount) {
                 throw new IllegalArgumentException(category + ".classes has " + classCount + " entries but "
                         + category + "." + pm.group(1) + " has " + probCount
@@ -110,7 +114,34 @@ public final class GeneratorCategoryInserter {
                     : appendElement(old, PROB_ELEM, weight, " " + weight + " ");
             out.replace(e[0], e[1], updated);
         }
+
+        // Post-condition: whatever the splice logic did, classes and every prob literal grew by
+        // exactly one. A layout it mishandles fails here instead of shipping a silent desync.
+        String maskedOut = maskComments(out.toString());
+        Matcher cm = Pattern.compile(prefix + "\\.classes\\s*=\\s*new\\s+Class<\\?>\\[\\]\\{").matcher(maskedOut);
+        if (!cm.find() || elementCount(maskedOut, cm.end(), CLASS_ELEM) != classCount + 1) {
+            throw new IllegalArgumentException("Internal error: " + category
+                    + ".classes did not grow by exactly one entry; Generator.java left untouched");
+        }
+        Matcher pm2 = probLiteral.matcher(maskedOut);
+        int seen = 0;
+        while (pm2.find()) {
+            seen++;
+            if (elementCount(maskedOut, pm2.end(), PROB_ELEM) != classCount + 1) {
+                throw new IllegalArgumentException("Internal error: " + category + "." + pm2.group(1)
+                        + " did not grow by exactly one entry; Generator.java left untouched");
+            }
+        }
+        if (seen != probLiterals) {
+            throw new IllegalArgumentException("Internal error: " + category + " prob literal count changed from "
+                    + probLiterals + " to " + seen + "; Generator.java left untouched");
+        }
         return new AnchorInserter.Result(out.toString(), true);
+    }
+
+    /** Elements matched by {@code elem} between {@code from} and the next '}' of {@code masked}. */
+    private static int elementCount(String masked, int from, Pattern elem) {
+        return count(masked.substring(from, masked.indexOf('}', from)), elem);
     }
 
     private static int count(String s, Pattern p) {
@@ -152,7 +183,10 @@ public final class GeneratorCategoryInserter {
         int lineStart = body.lastIndexOf('\n', lastStart);
         if (lineStart >= 0) {
             // multi-line: mimic the last element's indentation
-            String indent = body.substring(lineStart + 1, lastStart);
+            // only the line's leading whitespace: the last element may share its line with others
+            Matcher lead = Pattern.compile("^[ \\t]*").matcher(body.substring(lineStart + 1, lastStart));
+            lead.find();
+            String indent = lead.group();
             int eol = body.indexOf('\n', lastEnd);
             if (eol < 0) eol = body.length();
             Matcher comment = TRAILING_COMMENT.matcher(body.substring(lastEnd, eol));
