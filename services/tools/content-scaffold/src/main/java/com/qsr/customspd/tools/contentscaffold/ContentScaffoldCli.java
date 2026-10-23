@@ -42,7 +42,12 @@ public final class ContentScaffoldCli {
             File repoRoot = RepoRoot.find();
             if (repoRoot == null) { System.err.println("Not in a git repository"); System.exit(2); return; }
             try {
-                GenResult r = generateItem(repoRoot, name, category, tier);
+                String weight = strFlag(args, "--weight");
+                if (weight == null && java.util.Arrays.asList(args).contains("--weight")) {
+                    throw new IllegalArgumentException("--weight needs a value");
+                }
+                GenResult r = generateItem(repoRoot, name, category, tier,
+                        weight != null ? weight : GeneratorCategoryInserter.DEFAULT_WEIGHT);
                 report(r);
                 auditNewEntity(repoRoot, name);
                 System.exit(0);
@@ -112,6 +117,11 @@ public final class ContentScaffoldCli {
      * (class, PNG, GeneralAsset entry, localization entry) is written.
      */
     static GenResult generateItem(File repoRoot, String name, String category, String tier) throws IOException {
+        return generateItem(repoRoot, name, category, tier, GeneratorCategoryInserter.DEFAULT_WEIGHT);
+    }
+
+    static GenResult generateItem(File repoRoot, String name, String category, String tier, String weight)
+            throws IOException {
         Names n = Names.of(name);
         Path base = repoRoot.toPath();
         List<String> created = new ArrayList<>(), modified = new ArrayList<>(), skipped = new ArrayList<>();
@@ -140,7 +150,7 @@ public final class ContentScaffoldCli {
         // Generator.java registration -- this is where an unknown --category throws.
         Insertion generator = planInsert(base.resolve("core/src/main/java/com/qsr/customspd/items/Generator.java"),
                 "Generator:" + category + ":" + n.className(),
-                c -> GeneratorCategoryInserter.addItem(c, category, n.className()));
+                c -> GeneratorCategoryInserter.addItem(c, category, n.className(), weight));
 
         // ---- Flush (every plan above succeeded) ----
         flushNewFile(classPlan, created, skipped);
@@ -261,7 +271,7 @@ public final class ContentScaffoldCli {
 
     private static void usage() {
         System.err.println("Usage: content-scaffold mob <Name> --depth <n>");
-        System.err.println("       content-scaffold item <Name> --category <cat> --tier <n>");
+        System.err.println("       content-scaffold item <Name> --category <cat> --tier <n> [--weight <n>]");
         System.exit(2);
     }
 }

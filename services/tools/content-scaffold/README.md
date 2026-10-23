@@ -5,7 +5,7 @@ art, not the wiring. The inverse of `content-audit`.
 
 ```
 ./gradlew :services:tools:content-scaffold:run --args="mob Wisp --depth 3"
-./gradlew :services:tools:content-scaffold:run --args="item Berry --category FOOD --tier 1"
+./gradlew :services:tools:content-scaffold:run --args="item Berry --category FOOD --tier 1 [--weight 1]"
 ```
 
 ## What it wires
@@ -20,6 +20,12 @@ art, not the wiring. The inverse of `content-audit`.
 
 - Marker-anchored insertion: it never reserializes a shared file, only inserts at
   `// @content-scaffold:*` markers (or the structural `dungeon.json` array / named category).
+- Generator lockstep: adding an item appends `--weight` (a non-negative integer, default 1) to every `defaultProbs`/`probs`
+  array literal of the same category, so `classes` and the prob arrays never desync. It refuses
+  (non-zero exit) categories with no prob literal, categories already out of step, and the dispatch
+  categories `WEAPON`/`MISSILE`/`ARMOR`, where an item would look wired but never drop. After
+  splicing it recounts the output and refuses unless `classes` and every prob literal (including
+  `defaultProbs2`) grew by exactly one, so a layout it mishandles fails instead of desyncing.
 - Idempotent: re-running for an existing name is a warned no-op, not a duplicate.
 - Fail-safe: a missing anchor is a non-zero exit naming the marker.
 
