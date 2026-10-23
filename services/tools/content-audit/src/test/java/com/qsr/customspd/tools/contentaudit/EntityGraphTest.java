@@ -64,4 +64,30 @@ class EntityGraphTest {
         // ancestry to Mob is unambiguous).
         assertEquals(2, es.stream().filter(e -> e.cls().simpleName().equals("Helper")).count());
     }
+
+    @Test
+    void reportsTheAmbiguousNameAndWhatItExcludes() {
+        // Excluding Elf above is only safe if it is visible: the ambiguity must be
+        // reported with both declarations and the class it drops from the audit.
+        List<ContentClass> all = List.of(
+                cc("Mob", "com.qsr.customspd.actors.mobs", "Char", true, null, null),
+                cc("Helper", "com.qsr.customspd.actors.mobs.variant1", "Mob", false, "VariantASprite", null),
+                cc("Helper", "com.qsr.customspd.actors.mobs.variant2", "Mob", false, "VariantBSprite", null),
+                cc("Elf", "com.qsr.customspd.actors.mobs", "Helper", false, null, null),
+                cc("Rat", "com.qsr.customspd.actors.mobs", "Mob", false, "RatSprite", null));
+        List<EntityGraph.Ambiguity> amb = EntityGraph.ambiguities(all);
+        assertEquals(List.of(new EntityGraph.Ambiguity("Helper",
+                        List.of("com.qsr.customspd.actors.mobs.variant1.Helper",
+                                "com.qsr.customspd.actors.mobs.variant2.Helper"),
+                        List.of("com.qsr.customspd.actors.mobs.Elf"))),
+                amb);
+    }
+
+    @Test
+    void reportsNoAmbiguityWhenSimpleNamesAreUnique() {
+        List<ContentClass> all = List.of(
+                cc("Mob", "com.qsr.customspd.actors.mobs", "Char", true, null, null),
+                cc("Rat", "com.qsr.customspd.actors.mobs", "Mob", false, "RatSprite", null));
+        assertTrue(EntityGraph.ambiguities(all).isEmpty());
+    }
 }

@@ -91,6 +91,15 @@ public final class ContentAuditCli {
                 if (!allowlist.permits(f.key())) findings.add(f);
             }
         }
+        // build() drops anything whose ancestry runs through a duplicated simple name;
+        // a finding keeps that exclusion visible and counted against the ceiling.
+        for (EntityGraph.Ambiguity a : EntityGraph.ambiguities(classes)) {
+            Finding f = new Finding("Class " + a.simpleName() + "#G1",
+                    "G1 ambiguous name: " + a.simpleName() + " declared by "
+                            + String.join(", ", a.declarations()) + " -- excluded from the audit: "
+                            + (a.excluded().isEmpty() ? "none" : String.join(", ", a.excluded())));
+            if (!allowlist.permits(f.key())) findings.add(f);
+        }
         findings.sort((a, b) -> a.key().compareTo(b.key()));
         return new Result(entities.size(), findings);
     }
@@ -129,17 +138,25 @@ public final class ContentAuditCli {
         EntityGraph.Entity broken = new EntityGraph.Entity("Mob",
                 new ContentClass("CanaryMob", "com.qsr.customspd.actors.mobs", "Mob", false, "NoSuchSprite", null),
                 "NoSuchSprite", null);
-        // Empty indexes: nothing is wired, so every check must fire.
+        // Empty sprite/message indexes: nothing is wired, so those checks must fire. The
+        // registry does list other mobs, so M3 must fire on the name, not on an empty
+        // source -- and must stay quiet for a mob the dungeon.json bestiary does list.
         SpriteIndex sprites = SpriteIndex.empty();
         MessageIndex msgs = MessageIndex.empty();
-        RegistryIndex reg = RegistryIndex.empty();
+        RegistryIndex reg = RegistryIndex.of("if (cl == Rat::class.java) {}", "",
+                "{ \"dungeon\": { \"1\": { \"bestiary\": [ \"CanaryControl\" ], \"rare_mob\": \"Thief\" } } }");
         List<Finding> f = Checks.run(broken, sprites, msgs, reg);
+        EntityGraph.Entity control = new EntityGraph.Entity("Mob",
+                new ContentClass("CanaryControl", "com.qsr.customspd.actors.mobs", "Mob", false, null, null),
+                null, null);
         boolean caught = f.stream().anyMatch(x -> x.key().equals("Mob CanaryMob#M1"))
                 && f.stream().anyMatch(x -> x.key().equals("Mob CanaryMob#M2"))
-                && f.stream().anyMatch(x -> x.key().equals("Mob CanaryMob#M3"));
+                && f.stream().anyMatch(x -> x.key().equals("Mob CanaryMob#M3"))
+                && Checks.run(control, sprites, msgs, reg).stream()
+                        .noneMatch(x -> x.key().equals("Mob CanaryControl#M3"));
         System.out.println(caught
                 ? "CANARY OK (the checks flag a deliberately-broken entity)"
-                : "CANARY FAILED (broken entity not flagged -- the tool is not actually checking)");
+                : "CANARY FAILED (broken entity not flagged, or registered control flagged -- the tool is not actually checking)");
         return caught ? 0 : 1;
     }
 }

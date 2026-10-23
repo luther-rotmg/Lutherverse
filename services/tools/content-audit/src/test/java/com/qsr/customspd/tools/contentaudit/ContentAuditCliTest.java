@@ -56,6 +56,36 @@ class ContentAuditCliTest {
     }
 
     @Test
+    void dungeonJsonBestiaryRegistersAMobButUnlistedMobsStillFail(@TempDir Path root) throws Exception {
+        File repo = fixture(root);
+        write(root.resolve("core/src/main/java/com/qsr/customspd/actors/mobs/Bestiary.kt"),
+                "object Bestiary {}"); // no Rat token: registration must come from dungeon.json
+        write(root.resolve("core/src/main/assets/dungeon/dungeon.json"),
+                "{ \"dungeon\": { \"1\": { \"depth\": 1, \"bestiary\": [ \"Rat\" ] } } }");
+        ContentAuditCli.Result r = ContentAuditCli.run(repo, Allowlist.load(null));
+        assertFalse(r.findings().stream().anyMatch(f -> f.key().equals("Mob Rat#M3")),
+                () -> "Rat is in a dungeon.json bestiary and must count as registered: " + r.findings());
+        assertTrue(r.findings().stream().anyMatch(f -> f.key().equals("Mob Ghost#M3")));
+    }
+
+    @Test
+    void duplicateSimpleNameIsAFindingNotASilentExclusion(@TempDir Path root) throws Exception {
+        File repo = fixture(root);
+        write(root.resolve("core/src/main/java/com/qsr/customspd/actors/mobs/a/Helper.java"),
+                "package com.qsr.customspd.actors.mobs.a; public class Helper extends Mob {}");
+        write(root.resolve("core/src/main/java/com/qsr/customspd/actors/mobs/b/Helper.java"),
+                "package com.qsr.customspd.actors.mobs.b; public class Helper extends Mob {}");
+        write(root.resolve("core/src/main/java/com/qsr/customspd/actors/mobs/Elf.java"),
+                "package com.qsr.customspd.actors.mobs; public class Elf extends Helper {}");
+        ContentAuditCli.Result r = ContentAuditCli.run(repo, Allowlist.load(null));
+        Finding g1 = r.findings().stream().filter(f -> f.key().equals("Class Helper#G1"))
+                .findFirst().orElse(null);
+        org.junit.jupiter.api.Assertions.assertNotNull(g1,
+                () -> "ambiguous 'Helper' must surface as a finding: " + r.findings());
+        assertTrue(g1.message().contains("com.qsr.customspd.actors.mobs.Elf"), g1::message);
+    }
+
+    @Test
     void canaryCatchesTheDeliberatelyBrokenEntity() {
         // Standing negative control: if this ever returns non-zero, the checks have
         // stopped flagging a deliberately-broken entity and the whole audit is inert.
