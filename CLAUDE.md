@@ -33,13 +33,14 @@ Then, for anything touching `core/`:
 
 ```bash
 ./gradlew.bat :services:tools:deletion-audit:run --quiet --args="--base 7d9c139c8 --head HEAD --min-shrink 3 --allowlist services/tools/deletion-audit/reviewed-removals.txt"
-./gradlew.bat :services:tools:content-audit:run --quiet --args="--allowlist services/tools/content-audit/reviewed-exceptions.txt --max-findings 194"
+./gradlew.bat :services:tools:content-audit:run --quiet --args="--allowlist services/tools/content-audit/reviewed-exceptions.txt --max-findings 24"
 ```
 
-content-audit is currently **advisory, not blocking**: its M3/I3 registration checks over-report
-because CPDU registers mobs data-driven/reflectively by name rather than by source token (a
-follow-up bead tracks tuning the heuristic). Read its output, but do not treat a ceiling-exceed
-as a merge blocker yet.
+content-audit is currently **advisory, not blocking** in CI. Its M3 check now reads the
+`dungeon.json` spawn lists CPDU's Bestiary reflects by name, and the permanent M3/I3 exceptions
+are triaged into `reviewed-exceptions.txt`; the 24 parked findings are mostly M1/M2/I2 heuristic
+misses (subpackage keys, variant keys, nested sprites). Locally a ceiling-exceed means something
+new is unwired; fix, allowlist with a reason, or say why.
 
 deletion-audit reads **git refs, not the working tree** — commit first or it audits stale
 content. Same for `port-verify`.

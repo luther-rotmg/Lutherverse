@@ -56,6 +56,19 @@ class ContentAuditCliTest {
     }
 
     @Test
+    void dungeonJsonBestiaryRegistersAMobButUnlistedMobsStillFail(@TempDir Path root) throws Exception {
+        File repo = fixture(root);
+        write(root.resolve("core/src/main/java/com/qsr/customspd/actors/mobs/Bestiary.kt"),
+                "object Bestiary {}"); // no Rat token: registration must come from dungeon.json
+        write(root.resolve("core/src/main/assets/dungeon/dungeon.json"),
+                "{ \"dungeon\": { \"1\": { \"depth\": 1, \"bestiary\": [ \"Rat\" ] } } }");
+        ContentAuditCli.Result r = ContentAuditCli.run(repo, Allowlist.load(null));
+        assertFalse(r.findings().stream().anyMatch(f -> f.key().equals("Mob Rat#M3")),
+                () -> "Rat is in a dungeon.json bestiary and must count as registered: " + r.findings());
+        assertTrue(r.findings().stream().anyMatch(f -> f.key().equals("Mob Ghost#M3")));
+    }
+
+    @Test
     void duplicateSimpleNameIsAFindingNotASilentExclusion(@TempDir Path root) throws Exception {
         File repo = fixture(root);
         write(root.resolve("core/src/main/java/com/qsr/customspd/actors/mobs/a/Helper.java"),

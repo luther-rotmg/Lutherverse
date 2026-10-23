@@ -58,4 +58,31 @@ class IndexesTest {
         assertTrue(r.generatorReferences("Ration"));
         assertFalse(r.bestiaryReferences("King")); // 'King' only appears embedded in 'RatKing', not as a whole word
     }
+
+    @Test
+    void registryIndexCountsDungeonJsonSpawnListsAsRegistration(@TempDir Path root) throws Exception {
+        // CPDU's Bestiary.kt resolves each level's "bestiary"/"rare_mob" strings by
+        // reflection, and RegularLevel places "extra_mobs"/"extra_items" by "type";
+        // none of those names appear as tokens in Bestiary.kt or Generator.java.
+        write(root.resolve("core/src/main/assets/dungeon/dungeon.json"),
+                "{ \"dungeon\": {\n"
+                        + "  \"1\": { \"depth\": 1, \"type\": \"regular\", \"layout\": \"SewerBossLevel\",\n"
+                        + "    \"bestiary\": [ \"Rat\", \"Snake\" ], \"rare_mob\": \"Thief\",\n"
+                        + "    \"extra_mobs\": [ { \"type\": \"npcs.Sheep\", \"hp\": 5 } ],\n"
+                        + "    \"extra_items\": [ { \"type\": \"weapon.missiles.darts.TippedDart\", \"quantity\": 2 } ] }\n"
+                        + "}, \"rat_king_level\": \"1\" }");
+        RegistryIndex r = RegistryIndex.load(root.toFile());
+        assertTrue(r.bestiaryReferences("Snake"));
+        assertTrue(r.bestiaryReferences("Thief"));
+        assertTrue(r.bestiaryReferences("Sheep")); // package-relative type -> simple name
+        assertTrue(r.generatorReferences("TippedDart"));
+        // Names outside the spawn lists must not count: a level "type"/"layout" value,
+        // a top-level quest key, a mob absent from the file, or a mob name as an item.
+        assertFalse(r.bestiaryReferences("regular"));
+        assertFalse(r.bestiaryReferences("SewerBossLevel"));
+        assertFalse(r.bestiaryReferences("RatKing"));
+        assertFalse(r.bestiaryReferences("Crab"));
+        assertFalse(r.generatorReferences("Snake"));
+        assertFalse(r.bestiaryReferences("TippedDart"));
+    }
 }

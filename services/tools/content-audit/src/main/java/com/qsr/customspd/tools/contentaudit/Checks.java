@@ -24,7 +24,7 @@ public final class Checks {
                 findings.add(new Finding(prefix + "M2", "M2 localization: " + base + ".{name,desc} missing"));
             }
             if (!reg.bestiaryReferences(name)) {
-                findings.add(new Finding(prefix + "M3", "M3 registration: not referenced in Bestiary.kt"));
+                findings.add(new Finding(prefix + "M3", "M3 registration: not referenced in Bestiary.kt or a dungeon.json spawn list"));
             }
         } else { // Item
             if (!sprites.spriteExists(e.resolvedImageAsset())) {
@@ -36,7 +36,7 @@ public final class Checks {
                 findings.add(new Finding(prefix + "I2", "I2 localization: " + base + ".{name,desc} missing"));
             }
             if (!reg.generatorReferences(name)) {
-                findings.add(new Finding(prefix + "I3", "I3 registration: not referenced in Generator.java"));
+                findings.add(new Finding(prefix + "I3", "I3 registration: not referenced in Generator.java or dungeon.json extra_items"));
             }
         }
         return findings;

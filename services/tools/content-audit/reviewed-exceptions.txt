@@ -33,3 +33,343 @@
 Item Keyblade#I3
 Item FrostKeyblade#I3
 Item StormKeyblade#I3
+
+# --- Registration triage, 2026-10-22 (cpdu-zpc) ---
+# M3 now also counts the class names core dungeon.json spawns by reflection
+# ("bestiary", "rare_mob", "extra_mobs"; I3 also counts "extra_items"), which
+# cleared 19 false M3s (Bat, Crab, Gnoll, Skeleton, ...). Every entry below was
+# checked against its spawn/acquisition site in core and against upstream v2.5.4,
+# where none of them is in MobSpawner/Generator either. The line above each key
+# is its reason. NOT allowlisted (still parked under the ceiling): Dart and
+# Pickaxe, which upstream v2.5.0+ lists in Generator at probability 0 (catalogs);
+# and every M1/M2/I2, which are gaps or check-heuristic issues, not exceptions.
+#
+# Bosses: placed by their boss level, never by a bestiary
+# Goo: sewer boss, placed by the sewerboss Goo rooms
+Mob Goo#M3
+# Tengu: prison boss, placed by PrisonBossLevel
+Mob Tengu#M3
+# DM300: caves boss, placed by CavesBossLevel
+Mob DM300#M3
+# Pylon: DM-300 fight component, placed by CavesBossLevel
+Mob Pylon#M3
+# DwarfKing: city boss, placed by CityBossLevel
+Mob DwarfKing#M3
+# YogDzewa: halls boss, placed by HallsBossLevel
+Mob YogDzewa#M3
+#
+# Quest NPCs and quest targets: spawned by their quest, on the *_spawn_levels in dungeon.json
+# Ghost: Sad Ghost quest NPC, Ghost.Quest.spawn on ghost_spawn_levels
+Mob Ghost#M3
+# FetidRat: Sad Ghost quest target, spawned by Ghost.Quest
+Mob FetidRat#M3
+# GnollTrickster: Sad Ghost quest target, spawned by Ghost.Quest
+Mob GnollTrickster#M3
+# GreatCrab: Sad Ghost quest target, spawned by Ghost.Quest
+Mob GreatCrab#M3
+# Wandmaker: quest NPC, Wandmaker.Quest via PrisonPainter on wandmaker_spawn_levels
+Mob Wandmaker#M3
+# Blacksmith: quest NPC, placed by BlacksmithRoom on blacksmith_spawn_levels
+Mob Blacksmith#M3
+# Imp: quest NPC, Imp.Quest.spawn on imp_spawn_levels
+Mob Imp#M3
+# ImpShopkeeper: Imp quest reward shop, placed by ImpShopRoom
+Mob ImpShopkeeper#M3
+# Shopkeeper: shop NPC, placed by ShopRoom
+Mob Shopkeeper#M3
+# RatKing: NPC, placed by the secret RatKingRoom
+Mob RatKing#M3
+#
+# Room/feature-placed mobs: the level painter places them, not the bestiary
+# Statue: placed by StatueRoom
+Mob Statue#M3
+# ArmoredStatue: Statue.random() variant, placed by StatueRoom
+Mob ArmoredStatue#M3
+# Mimic: placed by chest rooms (SuspiciousChestRoom, TreasuryRoom) and RegularLevel
+Mob Mimic#M3
+# GoldenMimic: Mimic.spawnAt variant from RegularLevel and CursedWand
+Mob GoldenMimic#M3
+# CrystalMimic: Mimic variant, placed by CrystalVaultRoom
+Mob CrystalMimic#M3
+# Piranha: placed by PoolRoom and AquariumRoom
+Mob Piranha#M3
+# PhantomPiranha: Piranha.random() variant
+Mob PhantomPiranha#M3
+# RotHeart: placed by RotGardenRoom
+Mob RotHeart#M3
+# RotLasher: placed by RotGardenRoom
+Mob RotLasher#M3
+# DemonSpawner: placed by DemonSpawnerRoom
+Mob DemonSpawner#M3
+#
+# Summons, allies and spawned-by-another-entity mobs
+# RipperDemon: spawned by DemonSpawner and AscensionChallenge
+Mob RipperDemon#M3
+# Wraith: spawned from graves, remains and CorpseDust, not the bestiary
+Mob Wraith#M3
+# TormentedSpirit: spawned in place of a Wraith by Wraith.spawnAt
+Mob TormentedSpirit#M3
+# Bee: released by a shattered Honeypot
+Mob Bee#M3
+# Sheep: summoned by StoneOfFlock, FlockTrap, WoollyBomb and CursedWand
+Mob Sheep#M3
+# MirrorImage: summoned by ScrollOfMirrorImage and the Multiplicity curse
+Mob MirrorImage#M3
+# PrismaticImage: summoned by PrismaticGuard (ScrollOfPrismaticImage)
+Mob PrismaticImage#M3
+# DirectableAlly: base class of HawkAlly, ShadowAlly and GhostHero; never spawned itself
+Mob DirectableAlly#M3
+#
+# Tipped darts: made by tipping a Dart with a seed (TippedDart.types), never random loot
+# AdrenalineDart: tipped dart, TippedDart recipe/random tipping only
+Item AdrenalineDart#I3
+# BlindingDart: tipped dart, TippedDart recipe/random tipping only
+Item BlindingDart#I3
+# ChillingDart: tipped dart, TippedDart recipe/random tipping only
+Item ChillingDart#I3
+# CleansingDart: tipped dart, TippedDart recipe/random tipping only
+Item CleansingDart#I3
+# DisplacingDart: tipped dart, TippedDart recipe/random tipping only
+Item DisplacingDart#I3
+# HealingDart: tipped dart, TippedDart recipe/random tipping only
+Item HealingDart#I3
+# HolyDart: tipped dart, TippedDart recipe/random tipping only
+Item HolyDart#I3
+# IncendiaryDart: tipped dart, TippedDart recipe/random tipping only
+Item IncendiaryDart#I3
+# ParalyticDart: tipped dart, TippedDart recipe/random tipping only
+Item ParalyticDart#I3
+# PoisonDart: tipped dart, TippedDart recipe/random tipping only
+Item PoisonDart#I3
+# RotDart: tipped dart, TippedDart recipe/random tipping only
+Item RotDart#I3
+# ShockingDart: tipped dart, TippedDart recipe/random tipping only
+Item ShockingDart#I3
+#
+# Exotic potions: alchemy output via ExoticPotion.regToExo (also RingOfWealth/Transmutation)
+# PotionOfCleansing: exotic potion, ExoticPotion.regToExo only
+Item PotionOfCleansing#I3
+# PotionOfCorrosiveGas: exotic potion, ExoticPotion.regToExo only
+Item PotionOfCorrosiveGas#I3
+# PotionOfDivineInspiration: exotic potion, ExoticPotion.regToExo only
+Item PotionOfDivineInspiration#I3
+# PotionOfDragonsBreath: exotic potion, ExoticPotion.regToExo only
+Item PotionOfDragonsBreath#I3
+# PotionOfEarthenArmor: exotic potion, ExoticPotion.regToExo only
+Item PotionOfEarthenArmor#I3
+# PotionOfMagicalSight: exotic potion, ExoticPotion.regToExo only
+Item PotionOfMagicalSight#I3
+# PotionOfMastery: exotic potion, ExoticPotion.regToExo only
+Item PotionOfMastery#I3
+# PotionOfShielding: exotic potion, ExoticPotion.regToExo only
+Item PotionOfShielding#I3
+# PotionOfShroudingFog: exotic potion, ExoticPotion.regToExo only
+Item PotionOfShroudingFog#I3
+# PotionOfSnapFreeze: exotic potion, ExoticPotion.regToExo only
+Item PotionOfSnapFreeze#I3
+# PotionOfStamina: exotic potion, ExoticPotion.regToExo only
+Item PotionOfStamina#I3
+# PotionOfStormClouds: exotic potion, ExoticPotion.regToExo only
+Item PotionOfStormClouds#I3
+# ExoticPotion: base class of the exotic potions; never instantiated as loot
+Item ExoticPotion#I3
+#
+# Exotic scrolls: alchemy output via ExoticScroll.regToExo (also RingOfWealth/Transmutation)
+# ScrollOfAntiMagic: exotic scroll, ExoticScroll.regToExo only
+Item ScrollOfAntiMagic#I3
+# ScrollOfChallenge: exotic scroll, ExoticScroll.regToExo only
+Item ScrollOfChallenge#I3
+# ScrollOfDivination: exotic scroll, ExoticScroll.regToExo only
+Item ScrollOfDivination#I3
+# ScrollOfDread: exotic scroll, ExoticScroll.regToExo only
+Item ScrollOfDread#I3
+# ScrollOfEnchantment: exotic scroll, ExoticScroll.regToExo only
+Item ScrollOfEnchantment#I3
+# ScrollOfForesight: exotic scroll, ExoticScroll.regToExo only
+Item ScrollOfForesight#I3
+# ScrollOfMetamorphosis: exotic scroll, ExoticScroll.regToExo only
+Item ScrollOfMetamorphosis#I3
+# ScrollOfMysticalEnergy: exotic scroll, ExoticScroll.regToExo only
+Item ScrollOfMysticalEnergy#I3
+# ScrollOfPassage: exotic scroll, ExoticScroll.regToExo only
+Item ScrollOfPassage#I3
+# ScrollOfPrismaticImage: exotic scroll, ExoticScroll.regToExo only
+Item ScrollOfPrismaticImage#I3
+# ScrollOfPsionicBlast: exotic scroll, ExoticScroll.regToExo only
+Item ScrollOfPsionicBlast#I3
+# ScrollOfSirensSong: exotic scroll, ExoticScroll.regToExo only
+Item ScrollOfSirensSong#I3
+#
+# Alchemy products: each is the `output` of a Recipe in its own file
+# BlizzardBrew: brew, alchemy Recipe output
+Item BlizzardBrew#I3
+# CausticBrew: brew, alchemy Recipe output
+Item CausticBrew#I3
+# InfernalBrew: brew, alchemy Recipe output
+Item InfernalBrew#I3
+# ShockingBrew: brew, alchemy Recipe output
+Item ShockingBrew#I3
+# ElixirOfAquaticRejuvenation: elixir, alchemy Recipe output
+Item ElixirOfAquaticRejuvenation#I3
+# ElixirOfArcaneArmor: elixir, alchemy Recipe output
+Item ElixirOfArcaneArmor#I3
+# ElixirOfDragonsBlood: elixir, alchemy Recipe output
+Item ElixirOfDragonsBlood#I3
+# ElixirOfHoneyedHealing: elixir, alchemy Recipe output
+Item ElixirOfHoneyedHealing#I3
+# ElixirOfIcyTouch: elixir, alchemy Recipe output
+Item ElixirOfIcyTouch#I3
+# ElixirOfMight: elixir, alchemy Recipe output
+Item ElixirOfMight#I3
+# ElixirOfToxicEssence: elixir, alchemy Recipe output
+Item ElixirOfToxicEssence#I3
+# AquaBlast: spell, alchemy Recipe output
+Item AquaBlast#I3
+# BeaconOfReturning: spell, alchemy Recipe output
+Item BeaconOfReturning#I3
+# CurseInfusion: spell, alchemy Recipe output
+Item CurseInfusion#I3
+# FeatherFall: spell, alchemy Recipe output
+Item FeatherFall#I3
+# MagicalInfusion: spell, alchemy Recipe output
+Item MagicalInfusion#I3
+# PhaseShift: spell, alchemy Recipe output
+Item PhaseShift#I3
+# ReclaimTrap: spell, alchemy Recipe output
+Item ReclaimTrap#I3
+# Recycle: spell, alchemy Recipe output
+Item Recycle#I3
+# SummonElemental: spell, alchemy Recipe output
+Item SummonElemental#I3
+# TelekineticGrab: spell, alchemy Recipe output
+Item TelekineticGrab#I3
+# WildEnergy: spell, alchemy Recipe output
+Item WildEnergy#I3
+# Alchemize: spell, alchemy Recipe output (also ShopRoom stock)
+Item Alchemize#I3
+# ArcaneCatalyst: alchemy Recipe output; spell-recipe ingredient
+Item ArcaneCatalyst#I3
+# AlchemicalCatalyst: alchemy Recipe output; brew/elixir ingredient
+Item AlchemicalCatalyst#I3
+# ArcaneResin: alchemy Recipe output (wand-upgrade resin)
+Item ArcaneResin#I3
+# LiquidMetal: alchemy Recipe output (missile-repair metal)
+Item LiquidMetal#I3
+# StewedMeat: food, alchemy Recipe output
+Item StewedMeat#I3
+# MeatPie: food, alchemy Recipe output
+Item MeatPie#I3
+#
+# Bombs: Bomb is placed by rooms/shops; the variants are Bomb.EnhanceBomb outputs
+# Bomb: placed by ArmoryRoom, SecretHoneypotRoom and shops; dropped by Tengu
+Item Bomb#I3
+# Firebomb: Bomb.EnhanceBomb alchemy output
+Item Firebomb#I3
+# Flashbang: Bomb.EnhanceBomb alchemy output
+Item Flashbang#I3
+# FrostBomb: Bomb.EnhanceBomb alchemy output
+Item FrostBomb#I3
+# Noisemaker: Bomb.EnhanceBomb alchemy output
+Item Noisemaker#I3
+# RegrowthBomb: Bomb.EnhanceBomb alchemy output
+Item RegrowthBomb#I3
+# ShockBomb: Bomb.EnhanceBomb alchemy output
+Item ShockBomb#I3
+# ShrapnelBomb: Bomb.EnhanceBomb alchemy output
+Item ShrapnelBomb#I3
+# WoollyBomb: Bomb.EnhanceBomb alchemy output
+Item WoollyBomb#I3
+#
+# Food made by an effect rather than generated
+# ChargrilledMeat: made by Burning cooking MysteryMeat; SecretLarderRoom
+Item ChargrilledMeat#I3
+# FrozenCarpaccio: made by Frost freezing MysteryMeat
+Item FrozenCarpaccio#I3
+# PhantomMeat: dropped by PhantomPiranha
+Item PhantomMeat#I3
+# Berry: dropped from HighGrass by the Huntress nature talent
+Item Berry#I3
+# Blandfruit: dropped by BlandfruitBush
+Item Blandfruit#I3
+# SmallRation: ShopRoom stock
+Item SmallRation#I3
+# SupplyRation: dropped in a chest heap by RegularLevel
+Item SupplyRation#I3
+#
+# Quest items: given or dropped by their quest
+# CeremonialCandle: Wandmaker quest, placed by RitualSiteRoom
+Item CeremonialCandle#I3
+# CorpseDust: Wandmaker quest, placed by MassGraveRoom
+Item CorpseDust#I3
+# Embers: Wandmaker quest, dropped by the Elemental
+Item Embers#I3
+# DarkGold: Blacksmith quest ore, mined with the Pickaxe
+Item DarkGold#I3
+# DwarfToken: Imp quest, dropped by Monks/Golems
+Item DwarfToken#I3
+# GooBlob: dropped by Goo and CausticSlime; alchemy ingredient
+Item GooBlob#I3
+# MetalShard: dropped by DM-300 and DM-201; alchemy ingredient
+Item MetalShard#I3
+# RatSkull: legacy quest item kept for old saves; no drop site
+Item RatSkull#I3
+#
+# Keys: placed by the room or level that they unlock
+# IronKey: placed with locked rooms (ArmoryRoom, CryptRoom, ...)
+Item IronKey#I3
+# GoldenKey: placed with locked chests by RegularLevel/secret rooms
+Item GoldenKey#I3
+# CrystalKey: placed with crystal rooms (CrystalVaultRoom, CrystalPathRoom, ...)
+Item CrystalKey#I3
+# SkeletonKey: dropped by Goo to open the boss exit
+Item SkeletonKey#I3
+#
+# Bags and starting-kit gear
+# Bag: base class of the bags; never instantiated as loot
+Item Bag#I3
+# VelvetPouch: starting kit (heroes/any.json) and ShopRoom stock
+Item VelvetPouch#I3
+# PotionBandolier: ShopRoom stock
+Item PotionBandolier#I3
+# ScrollHolder: ShopRoom stock
+Item ScrollHolder#I3
+# MagicalHolster: ShopRoom stock
+Item MagicalHolster#I3
+# Waterskin: starting kit (heroes/any.json)
+Item Waterskin#I3
+# SpiritBow: Huntress class weapon, starting kit (heroes/huntress.json)
+Item SpiritBow#I3
+# BrokenSeal: Warrior starting kit (heroes/warrior.json seal)
+Item BrokenSeal#I3
+#
+# Boss drops, shop stock, level features and unique items
+# Amulet: the win item, placed by LastLevel
+Item Amulet#I3
+# TengusMask: dropped by Tengu
+Item TengusMask#I3
+# KingsCrown: dropped by DwarfKing
+Item KingsCrown#I3
+# Ankh: ShopRoom stock
+Item Ankh#I3
+# Honeypot: ShopRoom stock and honeypot/storage rooms
+Item Honeypot#I3
+# Torch: ShopRoom stock and dark-level spawns
+Item Torch#I3
+# Stylus: ShopRoom stock and Level.addItemToSpawn
+Item Stylus#I3
+# Dewdrop: dropped from HighGrass and by Eye/WandOfRegrowth
+Item Dewdrop#I3
+# EnergyCrystal: placed by LaboratoryRoom; alchemy energy
+Item EnergyCrystal#I3
+# AlchemyPage: journal page placed by LaboratoryRoom
+Item AlchemyPage#I3
+# GuidePage: journal page placed by RegularLevel
+Item GuidePage#I3
+# Guidebook: journal, placed by the entrance room
+Item Guidebook#I3
+# LostBackpack: dropped by InterlevelScene when an unblessed Ankh resurrects the hero
+Item LostBackpack#I3
+# CapeOfThorns: no acquisition path in CPDU or upstream v2.5.4; legacy artifact
+Item CapeOfThorns#I3
+# MerchantsBeacon: removed from drops, kept for pre-1.1.0 saves
+Item MerchantsBeacon#I3

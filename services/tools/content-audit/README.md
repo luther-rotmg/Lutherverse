@@ -5,7 +5,7 @@ IS the "how to add content" checklist — satisfy every row and the gate passes.
 
 ```
 ./gradlew.bat :services:tools:content-audit:run \
-  --args="--allowlist services/tools/content-audit/reviewed-exceptions.txt --max-findings 189"
+  --args="--allowlist services/tools/content-audit/reviewed-exceptions.txt --max-findings 24"
 ```
 
 Exit 0 within the ceiling, 1 over it or canary failed, 2 if the scan itself broke.
@@ -16,12 +16,15 @@ Adding a **mob** (`core/.../actors/mobs/YourMob.java`):
 - **M1 Sprite** — set `spriteClass = YourMobSprite.class`; the sprite textures with a
   `GeneralAsset.YOUR_MOB`; the PNG exists at that asset's path.
 - **M2 Localization** — `actors.mobs.yourmob.name` and `.desc` in `actors.properties`.
-- **M3 Registration** — referenced in `Bestiary.kt`, or allowlisted (bosses, summons).
+- **M3 Registration** — named in a level's `bestiary`, `rare_mob` or `extra_mobs` in
+  `core/src/main/assets/dungeon/dungeon.json` (or referenced in `Bestiary.kt`), or
+  allowlisted (bosses, quest NPCs, room-placed mobs, summons).
 
 Adding an **item** (`core/.../items/<category>/YourItem.java`):
 - **I1 Sprite** — set `image = GeneralAsset.YOUR_ITEM`; the PNG exists.
 - **I2 Localization** — `items.<category>.youritem.name`/`.desc`.
-- **I3 Registration** — referenced in a `Generator` `Category`, or allowlisted.
+- **I3 Registration** — referenced in a `Generator` `Category` (or a `dungeon.json`
+  `extra_items` type), or allowlisted.
 
 Either kind:
 - **G1 Unique simple name** — no two scanned classes share a simple name. Ancestry is

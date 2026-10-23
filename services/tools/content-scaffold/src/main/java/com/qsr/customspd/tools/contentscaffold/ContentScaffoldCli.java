@@ -168,8 +168,7 @@ public final class ContentScaffoldCli {
             if (mine.isEmpty()) {
                 System.out.println("content-audit: " + name + " is fully wired.");
             } else {
-                System.out.println("content-audit: " + name + " still has open touchpoints "
-                        + "(M3/I3 registration findings are expected until the content-audit heuristic bead lands):");
+                System.out.println("content-audit: " + name + " still has open touchpoints:");
                 mine.forEach(f -> System.out.println("  " + f.message()));
             }
         } catch (IOException e) {

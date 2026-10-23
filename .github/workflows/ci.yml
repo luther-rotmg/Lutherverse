@@ -107,15 +107,14 @@ jobs:
             || { echo "::error::deletion-audit found unreviewed removals"; exit 1; }
 
       - name: content-audit (content completeness)
-        # ADVISORY, not blocking: M3/I3 read Bestiary.kt for registration, but CPDU
-        # registers mobs data-driven/reflectively by name rather than by source token,
-        # so the ceiling over-reports (167 of 189 findings are registration noise).
-        # A follow-up bead tracks tuning the heuristic to make this blocking again.
+        # ADVISORY, not blocking. M3 now reads the dungeon.json spawn lists and the
+        # permanent M3/I3 exceptions are allowlisted (cpdu-zpc); the ceiling of 24 parks
+        # mostly M1/M2/I2 heuristic misses (subpackage keys, variant keys, nested sprites).
         # The non-vacuity check stays hard: entities scanned must be non-vacuous, the
         # same failure class as api-diff scanning zero files for weeks while printing PASS.
         run: |
           ./gradlew :services:tools:content-audit:run --quiet \
-            --args="--allowlist services/tools/content-audit/reviewed-exceptions.txt --max-findings 189" \
+            --args="--allowlist services/tools/content-audit/reviewed-exceptions.txt --max-findings 24" \
             | tee /tmp/ca.log || true
           grep -qE "entities scanned" /tmp/ca.log || (echo "content-audit scanned nothing" && exit 1)
           scanned=$(grep -oE "[0-9]+ entities scanned" /tmp/ca.log | grep -oE "[0-9]+")
