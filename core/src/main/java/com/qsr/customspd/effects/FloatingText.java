@@ -21,12 +21,15 @@
 
 package com.qsr.customspd.effects;
 
+import com.qsr.customspd.assets.Asset;
+import com.qsr.customspd.assets.GeneralAsset;
 import com.qsr.customspd.scenes.GameScene;
 import com.qsr.customspd.scenes.PixelScene;
 import com.qsr.customspd.tiles.DungeonTilemap;
 import com.qsr.customspd.ui.RenderedTextBlock;
 import com.watabou.noosa.Camera;
 import com.watabou.noosa.Game;
+import com.watabou.noosa.Image;
 import com.watabou.noosa.RenderedText;
 import com.watabou.utils.Callback;
 import com.watabou.utils.SparseArray;
@@ -37,6 +40,81 @@ public class FloatingText extends RenderedTextBlock {
 
 	private static final float LIFESPAN	= 1f;
 	private static final float DISTANCE	= DungeonTilemap.SIZE;
+
+	public static final int ICON_SIZE = 7;
+
+	public static int NO_ICON   = -1;
+
+	//combat damage icons
+	public static int PHYS_DMG          = 0;
+	public static int PHYS_DMG_NO_BLOCK = 1;
+	public static int MAGIC_DMG         = 2;
+	public static int PICK_DMG          = 3;
+
+	//debuff/dot damage icons
+	public static int HUNGER    = 5;
+	public static int BURNING   = 6;
+	public static int SHOCKING  = 7;
+	public static int FROST     = 8;
+	public static int WATER     = 9;
+	public static int BLEEDING  = 10;
+	public static int TOXIC     = 11;
+	public static int CORROSION = 12;
+	public static int POISON    = 13;
+	public static int OOZE      = 14;
+	public static int DEFERRED  = 15;
+	public static int CORRUPTION= 16;
+	public static int AMULET    = 17;
+
+	//positive icons
+	public static int HEALING   = 18;
+	public static int SHIELDING = 19;
+	public static int EXPERIENCE= 20;
+	public static int STRENGTH  = 21;
+
+	//currency icons
+	public static int GOLD      = 23;
+	public static int ENERGY    = 24;
+
+	//CPDU divergence: upstream slices one text_icons.png sheet at runtime with a TextureFilm
+	//indexed by the constants above. CPDU ships one PNG per icon (effects/text_icons/), so the
+	//indices map to GeneralAsset entries instead (cpdu-cxr).
+	private static final SparseArray<GeneralAsset> ICON_ASSETS = new SparseArray<>();
+	static {
+		ICON_ASSETS.put(PHYS_DMG,          GeneralAsset.TEXT_ICON_PHYS_DMG);
+		ICON_ASSETS.put(PHYS_DMG_NO_BLOCK, GeneralAsset.TEXT_ICON_PHYS_DMG_NO_BLOCK);
+		ICON_ASSETS.put(MAGIC_DMG,         GeneralAsset.TEXT_ICON_MAGIC_DMG);
+		ICON_ASSETS.put(PICK_DMG,          GeneralAsset.TEXT_ICON_PICK_DMG);
+
+		ICON_ASSETS.put(HUNGER,            GeneralAsset.TEXT_ICON_HUNGER);
+		ICON_ASSETS.put(BURNING,           GeneralAsset.TEXT_ICON_BURNING);
+		ICON_ASSETS.put(SHOCKING,          GeneralAsset.TEXT_ICON_SHOCKING);
+		ICON_ASSETS.put(FROST,             GeneralAsset.TEXT_ICON_FROST);
+		ICON_ASSETS.put(WATER,             GeneralAsset.TEXT_ICON_WATER);
+		ICON_ASSETS.put(BLEEDING,          GeneralAsset.TEXT_ICON_BLEEDING);
+		ICON_ASSETS.put(TOXIC,             GeneralAsset.TEXT_ICON_TOXIC);
+		ICON_ASSETS.put(CORROSION,         GeneralAsset.TEXT_ICON_CORROSION);
+		ICON_ASSETS.put(POISON,            GeneralAsset.TEXT_ICON_POISON);
+		ICON_ASSETS.put(OOZE,              GeneralAsset.TEXT_ICON_OOZE);
+		ICON_ASSETS.put(DEFERRED,          GeneralAsset.TEXT_ICON_DEFERRED);
+		ICON_ASSETS.put(CORRUPTION,        GeneralAsset.TEXT_ICON_CORRUPTION);
+		ICON_ASSETS.put(AMULET,            GeneralAsset.TEXT_ICON_AMULET);
+
+		ICON_ASSETS.put(HEALING,           GeneralAsset.TEXT_ICON_HEALING);
+		ICON_ASSETS.put(SHIELDING,         GeneralAsset.TEXT_ICON_SHIELDING);
+		ICON_ASSETS.put(EXPERIENCE,        GeneralAsset.TEXT_ICON_EXPERIENCE);
+		ICON_ASSETS.put(STRENGTH,          GeneralAsset.TEXT_ICON_STRENGTH);
+
+		ICON_ASSETS.put(GOLD,              GeneralAsset.TEXT_ICON_GOLD);
+		ICON_ASSETS.put(ENERGY,            GeneralAsset.TEXT_ICON_ENERGY);
+	}
+
+	public static GeneralAsset iconAsset( int iconIdx ) {
+		return ICON_ASSETS.get(iconIdx);
+	}
+
+	private Image icon;
+	private boolean iconLeft;
 
 	private float timeLeft;
 	
@@ -65,10 +143,38 @@ public class FloatingText extends RenderedTextBlock {
 				for (RenderedText t : words){
 					t.y -= yMove;
 				}
+
+				if (icon != null){
+					icon.alpha(p > 0.5f ? 1 : p * 2);
+					icon.y -= yMove;
+				}
 			}
 		}
 	}
-	
+
+	@Override
+	protected synchronized void layout() {
+		super.layout();
+		if (icon != null){
+			if (iconLeft){
+				icon.x = left();
+			} else {
+				icon.x = left() + width() - icon.width();
+			}
+			icon.y = top();
+			PixelScene.align(icon);
+		}
+	}
+
+	@Override
+	public float width() {
+		float width = super.width();
+		if (icon != null){
+			width += icon.width()-0.5f;
+		}
+		return width;
+	}
+
 	@Override
 	public void kill() {
 		if (key != -1) {
@@ -86,7 +192,7 @@ public class FloatingText extends RenderedTextBlock {
 		super.destroy();
 	}
 	
-	public void reset( float x, float y, String text, int color ) {
+	public void reset( float x, float y, String text, int color, int iconIdx, boolean left ) {
 		
 		revive();
 		
@@ -94,6 +200,19 @@ public class FloatingText extends RenderedTextBlock {
 
 		text( text );
 		hardlight( color );
+
+		//an index with no mapped asset draws no icon, as upstream's blank sheet cell would
+		GeneralAsset asset = iconIdx == NO_ICON ? null : iconAsset(iconIdx);
+		if (asset != null){
+			icon = new Image( Asset.getAssetFilePath(asset) );
+			add(icon);
+			iconLeft = left;
+			if (iconLeft){
+				align(RIGHT_ALIGN);
+			}
+		} else {
+			icon = null;
+		}
 
 		setPos(
 			PixelScene.align( Camera.main, x - width() / 2),
@@ -104,27 +223,23 @@ public class FloatingText extends RenderedTextBlock {
 	}
 	
 	/* STATIC METHODS */
-	
-	public static void show( float x, float y, String text, int color ) {
-		Game.runOnRenderThread(new Callback() {
-			@Override
-			public void call() {
-				FloatingText txt = GameScene.status();
-				if (txt != null){
-					txt.reset(x, y, text, color);
-				}
-			}
-		});
+
+	public static void show( float x, float y, String text, int color) {
+		show(x, y, -1, text, color, -1, false);
 	}
 	
-	public static void show( float x, float y, int key, String text, int color ) {
+	public static void show( float x, float y, int key, String text, int color) {
+		show(x, y, key, text, color, -1, false);
+	}
+	
+	public static void show( float x, float y, int key, String text, int color, int iconIdx, boolean left ) {
 		Game.runOnRenderThread(new Callback() {
 			@Override
 			public void call() {
 				FloatingText txt = GameScene.status();
 				if (txt != null){
-					txt.reset(x, y, text, color);
-					push(txt, key);
+					txt.reset(x, y, text, color, iconIdx, left);
+					if (key != -1) push(txt, key);
 				}
 			}
 		});
