@@ -28,7 +28,8 @@ Adding an **item** (`core/.../items/<category>/YourItem.java`):
 - **I1 Sprite** — set `image = GeneralAsset.YOUR_ITEM`; the PNG exists.
 - **I2 Localization** — `items.<category>.youritem.name`/`.desc`.
 - **I3 Registration** — referenced in a `Generator` `Category` (or a `dungeon.json`
-  `extra_items` type), or allowlisted.
+  `extra_items` type), or allowlisted. For M3 and I3, a name that appears only inside a comment
+  in `Bestiary.kt` / `Generator.java` does not count.
 
 Either kind:
 - **G1 Unique simple name** — no two scanned classes share a simple name. Ancestry is

@@ -103,6 +103,29 @@ class IndexesTest {
     }
 
     @Test
+    void registryIndexIgnoresNamesThatOnlyAppearInComments(@TempDir Path root) throws Exception {
+        // A class named in a comment ("upstream also lists Pickaxe here") is not registered.
+        write(root.resolve("core/src/main/java/com/qsr/customspd/actors/mobs/Bestiary.kt"),
+                "// Ghost spawns from its quest\n/* Wraith is\n   summoned */ fun f() { if (cl == Rat::class.java) {} }");
+        write(root.resolve("core/src/main/java/com/qsr/customspd/items/Generator.java"),
+                "class Generator {\n"
+                        + "  //upstream also lists Pickaxe here\n"
+                        + "  /* Dart: see 6a313b135 */\n"
+                        + "  String url = \"http://x\"; Class c = Ration.class; //trailing Berry\n"
+                        + "  char q = '\"'; Class d = Food.class;\n"
+                        + "}");
+        RegistryIndex r = RegistryIndex.load(root.toFile());
+        assertFalse(r.generatorReferences("Pickaxe"), "a // comment is not a registration");
+        assertFalse(r.generatorReferences("Dart"), "a /* */ comment is not a registration");
+        assertFalse(r.generatorReferences("Berry"), "a trailing comment is not a registration");
+        assertTrue(r.generatorReferences("Ration"), "a // inside a string literal must not hide the rest of the line");
+        assertTrue(r.generatorReferences("Food"), "a quote char literal must not open a string");
+        assertFalse(r.bestiaryReferences("Ghost"));
+        assertFalse(r.bestiaryReferences("Wraith"));
+        assertTrue(r.bestiaryReferences("Rat"));
+    }
+
+    @Test
     void registryIndexCountsDungeonJsonSpawnListsAsRegistration(@TempDir Path root) throws Exception {
         // CPDU's Bestiary.kt resolves each level's "bestiary"/"rare_mob" strings by
         // reflection, and RegularLevel places "extra_mobs"/"extra_items" by "type";

@@ -10,8 +10,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /** References to content classes inside the registries: word tokens in Bestiary.kt /
- *  Generator.java, plus the class names core dungeon.json spawns by reflection.
- *  Loose by design (matching asset-audit); intentional non-registration rides the allowlist. */
+ *  Generator.java code (comments excluded), plus the class names core dungeon.json spawns by
+ *  reflection. Loose by design (matching asset-audit); intentional non-registration rides the
+ *  allowlist. */
 public final class RegistryIndex {
     private static final Pattern SPAWN_LIST =
             Pattern.compile("\"(bestiary|extra_mobs|extra_items)\"\\s*:\\s*\\[([^\\]]*)\\]");
@@ -25,9 +26,41 @@ public final class RegistryIndex {
     private final Set<String> dungeonItems = new TreeSet<>();
 
     private RegistryIndex(String bestiarySource, String generatorSource, String dungeonJson) {
-        this.bestiarySource = bestiarySource;
-        this.generatorSource = generatorSource;
+        this.bestiarySource = stripComments(bestiarySource);
+        this.generatorSource = stripComments(generatorSource);
         indexDungeon(dungeonJson);
+    }
+
+    /** Blanks Java/Kotlin comments so a class named only in a comment does not count as
+     *  registered. String and char literals are copied through, so a "//" inside one is not a
+     *  comment; a literal ends at end of line, so an unterminated or raw string cannot run away. */
+    static String stripComments(String src) {
+        StringBuilder out = new StringBuilder(src.length());
+        int i = 0, n = src.length();
+        while (i < n) {
+            char c = src.charAt(i);
+            char next = i + 1 < n ? src.charAt(i + 1) : '\0';
+            if (c == '/' && next == '/') {
+                while (i < n && src.charAt(i) != '\n') i++;
+            } else if (c == '/' && next == '*') {
+                int end = src.indexOf("*/", i + 2);
+                i = end < 0 ? n : end + 2;
+                out.append(' ');
+            } else if (c == '"' || c == '\'') {
+                int j = i + 1;
+                while (j < n && src.charAt(j) != c && src.charAt(j) != '\n') {
+                    if (src.charAt(j) == '\\') j++;
+                    j++;
+                }
+                j = Math.min(j + 1, n);
+                out.append(src, i, j);
+                i = j;
+            } else {
+                out.append(c);
+                i++;
+            }
+        }
+        return out.toString();
     }
 
     /** Empty index for the -Canary negative control. */
