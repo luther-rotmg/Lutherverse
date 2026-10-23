@@ -23,6 +23,11 @@ Adding an **item** (`core/.../items/<category>/YourItem.java`):
 - **I2 Localization** — `items.<category>.youritem.name`/`.desc`.
 - **I3 Registration** — referenced in a `Generator` `Category`, or allowlisted.
 
+Either kind:
+- **G1 Unique simple name** — no two scanned classes share a simple name. Ancestry is
+  matched on unqualified `extends X`, so subclasses of a duplicated name are excluded
+  from the audit; G1 names the declarations and every class that exclusion drops.
+
 ## Two knobs
 - `reviewed-exceptions.txt` — permanent, correct exceptions (`Type Name#Check`), like
   bosses that legitimately never spawn via Bestiary.

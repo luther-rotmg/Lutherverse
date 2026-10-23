@@ -91,6 +91,15 @@ public final class ContentAuditCli {
                 if (!allowlist.permits(f.key())) findings.add(f);
             }
         }
+        // build() drops anything whose ancestry runs through a duplicated simple name;
+        // a finding keeps that exclusion visible and counted against the ceiling.
+        for (EntityGraph.Ambiguity a : EntityGraph.ambiguities(classes)) {
+            Finding f = new Finding("Class " + a.simpleName() + "#G1",
+                    "G1 ambiguous name: " + a.simpleName() + " declared by "
+                            + String.join(", ", a.declarations()) + " -- excluded from the audit: "
+                            + (a.excluded().isEmpty() ? "none" : String.join(", ", a.excluded())));
+            if (!allowlist.permits(f.key())) findings.add(f);
+        }
         findings.sort((a, b) -> a.key().compareTo(b.key()));
         return new Result(entities.size(), findings);
     }
