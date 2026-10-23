@@ -37,6 +37,36 @@ class IndexesTest {
     }
 
     @Test
+    void spriteIndexResolvesNestedSpriteClasses(@TempDir Path root) throws Exception {
+        write(root.resolve("core/src/main/java/com/qsr/customspd/assets/GeneralAsset.kt"),
+                "enum class GeneralAsset(val path: String) {\n"
+                        + "    MIMIC(\"sprites/mobs/mimic.png\"),\n"
+                        + "    OWN(\"sprites/mobs/own.png\"),\n"
+                        + "    GONE(\"sprites/mobs/gone.png\"),\n}");
+        write(root.resolve("core/src/main/assets/sprites/mobs/mimic.png"), "png");
+        write(root.resolve("core/src/main/assets/sprites/mobs/own.png"), "png");
+        // gone.png deliberately absent
+        write(root.resolve("core/src/main/java/com/qsr/customspd/sprites/MimicSprite.java"),
+                "public class MimicSprite extends MobSprite {\n"
+                        + "  public MimicSprite() { texture(GeneralAsset.MIMIC); }\n"
+                        + "  public static class Golden extends MimicSprite {}\n"          // inherits the outer asset
+                        + "  public static class Crystal extends MimicSprite {}\n"
+                        + "  public static class Own extends MobSprite { Own() { texture(GeneralAsset.OWN); } }\n"
+                        + "  public static class Lost extends MobSprite { Lost() { texture(GeneralAsset.GONE); } }\n"
+                        + "  public static class Orphan extends NoSuchSprite {}\n"          // no asset anywhere
+                        + "}");
+        SpriteIndex s = SpriteIndex.load(root.toFile());
+        assertTrue(s.mobSpriteExists("MimicSprite"));
+        assertTrue(s.mobSpriteExists("MimicSprite.Golden"));   // via MimicSprite -> MIMIC
+        assertTrue(s.mobSpriteExists("MimicSprite.Crystal"));
+        assertTrue(s.mobSpriteExists("MimicSprite.Own"));      // its own texture ref
+        assertFalse(s.mobSpriteExists("MimicSprite.Lost"));    // asset declared, PNG missing
+        assertFalse(s.mobSpriteExists("MimicSprite.Orphan"));  // nothing to resolve to
+        assertFalse(s.mobSpriteExists("MimicSprite.NoSuch"));
+        assertFalse(s.mobSpriteExists("Golden"));              // nested names are qualified by their outer class
+    }
+
+    @Test
     void messageIndexFindsKeysAcrossPropertiesFiles(@TempDir Path root) throws Exception {
         write(root.resolve("core/src/main/assets/messages/actors/actors.properties"),
                 "actors.mobs.rat.name=marsupial rat\nactors.mobs.rat.desc=nasty\n");
@@ -44,6 +74,19 @@ class IndexesTest {
         assertTrue(m.hasKey("actors.mobs.rat.name"));
         assertTrue(m.hasKey("actors.mobs.rat.desc"));
         assertFalse(m.hasKey("actors.mobs.ghost.name"));
+    }
+
+    @Test
+    void messageIndexIgnoresTranslationsSoTheyCannotMaskAMissingEnglishKey(@TempDir Path root) throws Exception {
+        write(root.resolve("core/src/main/assets/messages/actors/actors.properties"),
+                "actors.mobs.rat.name=rat\n");
+        write(root.resolve("core/src/main/assets/messages/actors/actors_ru.properties"),
+                "actors.mobs.rat.name=krysa\nactors.mobs.rat.desc=zlaya\n");
+        write(root.resolve("core/src/main/assets/messages/actors/actors_pt_BR.properties"),
+                "actors.mobs.rat.desc=ruim\n");
+        MessageIndex m = MessageIndex.load(root.toFile());
+        assertTrue(m.hasKey("actors.mobs.rat.name"));
+        assertFalse(m.hasKey("actors.mobs.rat.desc")); // only translated, English players would see the raw key
     }
 
     @Test

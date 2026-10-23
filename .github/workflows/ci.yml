@@ -108,13 +108,15 @@ jobs:
 
       - name: content-audit (content completeness)
         # ADVISORY, not blocking. M3 now reads the dungeon.json spawn lists and the
-        # permanent M3/I3 exceptions are allowlisted (cpdu-zpc); the ceiling of 24 parks
-        # mostly M1/M2/I2 heuristic misses (subpackage keys, variant keys, nested sprites).
+        # permanent M3/I3 exceptions are allowlisted (cpdu-zpc); M2 derives mob keys from the
+        # package and M1 resolves nested sprite classes (cpdu-e7i), and the last base-class /
+        # variant-key cases are allowlisted one by one, so the real count is 0 and the ceiling
+        # is 0: any new finding exceeds it.
         # The non-vacuity check stays hard: entities scanned must be non-vacuous, the
         # same failure class as api-diff scanning zero files for weeks while printing PASS.
         run: |
           ./gradlew :services:tools:content-audit:run --quiet \
-            --args="--allowlist services/tools/content-audit/reviewed-exceptions.txt --max-findings 24" \
+            --args="--allowlist services/tools/content-audit/reviewed-exceptions.txt --max-findings 0" \
             | tee /tmp/ca.log || true
           grep -qE "entities scanned" /tmp/ca.log || (echo "content-audit scanned nothing" && exit 1)
           scanned=$(grep -oE "[0-9]+ entities scanned" /tmp/ca.log | grep -oE "[0-9]+")

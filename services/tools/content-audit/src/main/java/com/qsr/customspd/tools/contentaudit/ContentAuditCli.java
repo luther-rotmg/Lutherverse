@@ -149,11 +149,33 @@ public final class ContentAuditCli {
         EntityGraph.Entity control = new EntityGraph.Entity("Mob",
                 new ContentClass("CanaryControl", "com.qsr.customspd.actors.mobs", "Mob", false, null, null),
                 null, null);
+        // Package-derived localization keys: an NPC's keys live at actors.mobs.npcs.<name>. The
+        // package-derived keys must satisfy M2, while keys only at the flat actors.mobs.<name> path
+        // (where the runtime never looks) or no keys at all must still fire it.
+        EntityGraph.Entity npc = new EntityGraph.Entity("Mob",
+                new ContentClass("CanaryNpc", "com.qsr.customspd.actors.mobs.npcs", "NPC", false, null, null),
+                null, null);
+        boolean npcKeysAccepted = Checks.run(npc, sprites,
+                MessageIndex.of("actors.mobs.npcs.canarynpc.name", "actors.mobs.npcs.canarynpc.desc"), reg).stream()
+                .noneMatch(x -> x.key().equals("Mob CanaryNpc#M2"));
+        boolean npcFlatKeysRejected = Checks.run(npc, sprites,
+                MessageIndex.of("actors.mobs.canarynpc.name", "actors.mobs.canarynpc.desc"), reg).stream()
+                .anyMatch(x -> x.key().equals("Mob CanaryNpc#M2"));
+        boolean npcMissingKeyRejected = Checks.run(npc, sprites,
+                MessageIndex.of("actors.mobs.npcs.canarynpc.name"), reg).stream()
+                .anyMatch(x -> x.key().equals("Mob CanaryNpc#M2"));
+        // A nested sprite class that resolves to no asset must still fire M1.
+        EntityGraph.Entity nestedBroken = new EntityGraph.Entity("Mob",
+                new ContentClass("CanaryNested", "com.qsr.customspd.actors.mobs", "Mob", false, "NoSuchSprite.Inner", null),
+                "NoSuchSprite.Inner", null);
+        boolean nestedFlagged = Checks.run(nestedBroken, sprites, msgs, reg).stream()
+                .anyMatch(x -> x.key().equals("Mob CanaryNested#M1"));
         boolean caught = f.stream().anyMatch(x -> x.key().equals("Mob CanaryMob#M1"))
                 && f.stream().anyMatch(x -> x.key().equals("Mob CanaryMob#M2"))
                 && f.stream().anyMatch(x -> x.key().equals("Mob CanaryMob#M3"))
                 && Checks.run(control, sprites, msgs, reg).stream()
-                        .noneMatch(x -> x.key().equals("Mob CanaryControl#M3"));
+                        .noneMatch(x -> x.key().equals("Mob CanaryControl#M3"))
+                && npcKeysAccepted && npcFlatKeysRejected && npcMissingKeyRejected && nestedFlagged;
         System.out.println(caught
                 ? "CANARY OK (the checks flag a deliberately-broken entity)"
                 : "CANARY FAILED (broken entity not flagged, or registered control flagged -- the tool is not actually checking)");
