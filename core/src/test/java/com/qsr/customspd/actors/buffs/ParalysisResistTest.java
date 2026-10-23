@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * ParalysisResist accumulates the damage a paralysed target has taken (Paralysis.processDamage)
@@ -77,5 +78,38 @@ class ParalysisResistTest {
 		restored.storeInBundle(again);
 		assertEquals(12, SaveRoundtrip.writeRead(again).getInt("damage"),
 				"restoreFromBundle must read the stored damage back");
+	}
+
+	@Test
+	void resistDecaysAfterParalysisEndsInsteadOfDetachingAtOnce() {
+		HeadlessLevel level = HeadlessLevel.install(8, 8);
+		Rat rat = new Rat();
+		rat.HP = rat.HT = 100000;
+		HeadlessLevel.at(rat, 3 * level.width() + 3);
+
+		Paralysis paralysis = Buff.affect(rat, Paralysis.class, Paralysis.DURATION);
+		Random.pushGenerator(20260822L);
+		try {
+			paralysis.processDamage(7);
+			paralysis.processDamage(5);
+		} finally {
+			Random.popGenerator();
+		}
+		paralysis.detach();
+		Paralysis.ParalysisResist resist = rat.buff(Paralysis.ParalysisResist.class);
+		assertNotNull(resist, "test setup: processDamage must attach a ParalysisResist");
+
+		// 12 decays by ceil(damage/10) per tick: 12 -> 10 is still resistance, not zero.
+		resist.act();
+		assertNotNull(rat.buff(Paralysis.ParalysisResist.class),
+				"resist must outlast the first tick after paralysis ends while damage remains");
+
+		int ticks = 1;
+		while (rat.buff(Paralysis.ParalysisResist.class) != null && ticks < 50) {
+			resist.act();
+			ticks++;
+		}
+		assertNull(rat.buff(Paralysis.ParalysisResist.class), "resist must detach once damage decays to zero");
+		assertEquals(11, ticks, "12 decays 12,10,9,...,1,0 - eleven ticks");
 	}
 }
