@@ -25,6 +25,7 @@ import com.qsr.customspd.Assets;
 import com.qsr.customspd.Badges;
 import com.qsr.customspd.Dungeon;
 import com.qsr.customspd.actors.blobs.Electricity;
+import com.qsr.customspd.actors.blobs.StormCloud;
 import com.qsr.customspd.actors.blobs.ToxicGas;
 import com.qsr.customspd.actors.buffs.Adrenaline;
 import com.qsr.customspd.actors.buffs.AllyBuff;
@@ -41,6 +42,7 @@ import com.qsr.customspd.actors.buffs.ChampionEnemy;
 import com.qsr.customspd.actors.buffs.Charm;
 import com.qsr.customspd.actors.buffs.Chill;
 import com.qsr.customspd.actors.buffs.Corrosion;
+import com.qsr.customspd.actors.buffs.Corruption;
 import com.qsr.customspd.actors.buffs.Cripple;
 import com.qsr.customspd.actors.buffs.Daze;
 import com.qsr.customspd.actors.buffs.Doom;
@@ -78,11 +80,13 @@ import com.qsr.customspd.actors.hero.abilities.duelist.Challenge;
 import com.qsr.customspd.actors.hero.abilities.rogue.DeathMark;
 import com.qsr.customspd.actors.hero.abilities.warrior.Endure;
 import com.qsr.customspd.actors.mobs.Brute;
+import com.qsr.customspd.actors.mobs.DwarfKing;
 import com.qsr.customspd.actors.mobs.Elemental;
 import com.qsr.customspd.actors.mobs.Tengu;
 import com.qsr.customspd.actors.mobs.YogDzewa;
 import com.qsr.customspd.actors.mobs.npcs.MirrorImage;
 import com.qsr.customspd.actors.mobs.npcs.PrismaticImage;
+import com.qsr.customspd.effects.FloatingText;
 import com.qsr.customspd.effects.particles.ShadowParticle;
 import com.qsr.customspd.items.Heap;
 import com.qsr.customspd.items.armor.glyphs.AntiMagic;
@@ -90,6 +94,7 @@ import com.qsr.customspd.items.armor.glyphs.Potential;
 import com.qsr.customspd.items.armor.glyphs.Viscosity;
 import com.qsr.customspd.items.artifacts.TimekeepersHourglass;
 import com.qsr.customspd.items.potions.exotic.PotionOfCleansing;
+import com.qsr.customspd.items.quest.Pickaxe;
 import com.qsr.customspd.items.rings.RingOfElements;
 import com.qsr.customspd.items.scrolls.ScrollOfRetribution;
 import com.qsr.customspd.items.scrolls.ScrollOfTeleportation;
@@ -112,6 +117,7 @@ import com.qsr.customspd.items.weapon.missiles.darts.ShockingDart;
 import com.qsr.customspd.levels.Terrain;
 import com.qsr.customspd.levels.features.Chasm;
 import com.qsr.customspd.levels.features.Door;
+import com.qsr.customspd.levels.traps.GeyserTrap;
 import com.qsr.customspd.levels.traps.GrimTrap;
 import com.qsr.customspd.messages.Messages;
 import com.qsr.customspd.plants.Earthroot;
@@ -815,10 +821,37 @@ public abstract class Char extends Actor {
 		}
 		
 		if (sprite != null) {
-			sprite.showStatus(HP > HT / 2 ?
+			//defaults to normal damage icon if no other ones apply
+			int                                                         icon = FloatingText.PHYS_DMG;
+			if (NO_ARMOR_PHYSICAL_SOURCES.contains(src.getClass()))     icon = FloatingText.PHYS_DMG_NO_BLOCK;
+			if (AntiMagic.RESISTS.contains(src.getClass()))             icon = FloatingText.MAGIC_DMG;
+			if (src instanceof Pickaxe)                                 icon = FloatingText.PICK_DMG;
+
+			//special case for sniper when using ranged attacks
+			if (src == Dungeon.hero && Dungeon.hero.subClass == HeroSubClass.SNIPER && Dungeon.hero.belongings.attackingWeapon() instanceof MissileWeapon){
+				icon = FloatingText.PHYS_DMG_NO_BLOCK;
+			}
+
+			if (src instanceof Hunger)                                  icon = FloatingText.HUNGER;
+			if (src instanceof Burning)                                 icon = FloatingText.BURNING;
+			if (src instanceof Chill || src instanceof Frost)        icon = FloatingText.FROST;
+			if (src instanceof GeyserTrap || src instanceof StormCloud) icon = FloatingText.WATER;
+			if (src instanceof Burning)                                 icon = FloatingText.BURNING;
+			if (src instanceof Electricity)                             icon = FloatingText.SHOCKING;
+			if (src instanceof Bleeding)                                icon = FloatingText.BLEEDING;
+			if (src instanceof ToxicGas)                                icon = FloatingText.TOXIC;
+			if (src instanceof Corrosion)                               icon = FloatingText.CORROSION;
+			if (src instanceof Poison)                                  icon = FloatingText.POISON;
+			if (src instanceof Ooze)                                    icon = FloatingText.OOZE;
+			if (src instanceof Viscosity.DeferedDamage)                 icon = FloatingText.DEFERRED;
+			if (src instanceof Corruption)                              icon = FloatingText.CORRUPTION;
+			if (src instanceof AscensionChallenge)                      icon = FloatingText.AMULET;
+
+			sprite.showStatusWithIcon(HP > HT / 2 ?
 							CharSprite.WARNING :
 							CharSprite.NEGATIVE,
-					Integer.toString(dmg + shielded));
+					Integer.toString(dmg + shielded),
+					icon);
 		}
 
 		if (HP < 0) HP = 0;
@@ -829,7 +862,19 @@ public abstract class Char extends Actor {
 			DeathMark.processFearTheReaper(this);
 		}
 	}
-	
+
+	//these are misc. sources of physical damage which do not apply armor, they get a different icon
+	private static HashSet<Class> NO_ARMOR_PHYSICAL_SOURCES = new HashSet<>();
+	{
+		//CPDU: upstream also lists CrystalSpire.SpireSpike and GnollGeomancer.Boulder (classes CPDU
+		//does not have), and WandOfBlastWave.Knockback, Necromancer.SummoningBlockDamage and
+		//DriedRose.GhostHero.NoRoseDamage, which arrive with their call sites in cpdu-ta6.3.
+		NO_ARMOR_PHYSICAL_SOURCES.add(DwarfKing.KingDamager.class);
+		NO_ARMOR_PHYSICAL_SOURCES.add(DwarfKing.Summoning.class);
+		NO_ARMOR_PHYSICAL_SOURCES.add(Chasm.class);
+		NO_ARMOR_PHYSICAL_SOURCES.add(Heap.class); //damage from wraiths attempting to spawn from heaps
+	}
+
 	public void destroy() {
 		HP = 0;
 		Actor.remove( this );
