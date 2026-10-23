@@ -58,6 +58,7 @@ class BonesRemainsTest {
 	private boolean prevAmulet;
 	private int prevDeepest;
 	private Object prevBonesLevel, prevBonesItem, prevBonesClass;
+	private QuickSlot prevQuickslot;
 
 	@BeforeAll
 	static void boot() {
@@ -77,6 +78,9 @@ class BonesRemainsTest {
 		prevBonesLevel = bonesField("level").get(null);
 		prevBonesItem = bonesField("item").get(null);
 		prevBonesClass = bonesField("heroClass").get(null);
+		// Bones.pickItem reads quickslot.randomNonePlaceholder(); other suites leave starter items in it
+		prevQuickslot = Dungeon.quickslot;
+		Dungeon.quickslot = new QuickSlot();
 
 		Dungeon.depth = 3;
 		Dungeon.challenges = 0;
@@ -102,6 +106,7 @@ class BonesRemainsTest {
 		bonesField("level").set(null, prevBonesLevel);
 		bonesField("item").set(null, prevBonesItem);
 		bonesField("heroClass").set(null, prevBonesClass);
+		Dungeon.quickslot = prevQuickslot;
 		FileUtils.deleteFile(BONES_FILE);
 	}
 
