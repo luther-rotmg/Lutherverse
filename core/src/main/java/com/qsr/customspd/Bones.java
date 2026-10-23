@@ -22,10 +22,12 @@
 package com.qsr.customspd;
 
 import com.qsr.customspd.actors.hero.Hero;
+import com.qsr.customspd.actors.hero.HeroClass;
 import com.qsr.customspd.items.Generator;
 import com.qsr.customspd.items.Gold;
 import com.qsr.customspd.items.Item;
 import com.qsr.customspd.items.artifacts.Artifact;
+import com.qsr.customspd.items.remains.RemainsItem;
 import com.qsr.customspd.items.weapon.missiles.MissileWeapon;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.FileUtils;
@@ -42,10 +44,13 @@ public class Bones {
 	
 	private static final String LEVEL	= "level";
 	private static final String ITEM	= "item";
+	private static final String HERO_CLASS	= "hero_class";
 
 	private static String level = "surface";
+
 	private static Item item;
-	
+	private static HeroClass heroClass;
+
 	public static void leave() {
 
 		level = Dungeon.levelName;
@@ -57,10 +62,12 @@ public class Bones {
 		}
 
 		item = pickItem(Dungeon.hero);
+		heroClass = Dungeon.hero.heroClass;
 
 		Bundle bundle = new Bundle();
 		bundle.put( LEVEL, level);
 		bundle.put( ITEM, item );
+		bundle.put( HERO_CLASS, heroClass );
 
 		try {
 			FileUtils.bundleToFile( BONES_FILE, bundle );
@@ -108,28 +115,29 @@ public class Bones {
 			ArrayList<Item> items = new ArrayList<>();
 			while (iterator.hasNext()){
 				curItem = iterator.next();
-				if (curItem.bones)
+				if (curItem.bones) {
 					items.add(curItem);
+				}
 			}
 
+			//if there are few items, there is an increasingly high chance of leaving nothing
 			if (Random.Int(3) < items.size()) {
 				item = Random.element(items);
 				if (item.stackable){
 					item.quantity(Random.NormalIntRange(1, (item.quantity() + 1) / 2));
+					if (item.quantity() > 3){
+						item.quantity(3);
+					}
 				}
 			} else {
-				if (Dungeon.gold > 100) {
-					item = new Gold( Random.NormalIntRange( 50, Dungeon.gold/2 ) );
-				} else {
-					item = new Gold( 50 );
-				}
+				item = null;
 			}
 		}
 		
 		return item;
 	}
 
-	public static Item get() {
+	public static ArrayList<Item> get() {
 		if (level.equals("surface")) {
 
 			try {
@@ -137,7 +145,16 @@ public class Bones {
 
 				level = bundle.getString( LEVEL );
 				if (!level.equals("surface") && !level.equals("0")) {
-					item = (Item) bundle.get(ITEM);
+					if (bundle.contains(ITEM)) {
+						item = (Item) bundle.get(ITEM);
+					} else {
+						item = null;
+					}
+					if (bundle.contains(HERO_CLASS)){
+						heroClass = bundle.getEnum(HERO_CLASS, HeroClass.class);
+					} else {
+						heroClass = null;
+					}
 				}
 
 				return get();
@@ -147,15 +164,11 @@ public class Bones {
 			}
 
 		} else {
-			//heroes who are challenged or on a seeded run can still find bones, but they get gold
 			if (level.equals(Dungeon.levelName) && Dungeon.layout.getBones()) {
 
+				//challenged or seeded runs don't get items from prior runs
 				if (Dungeon.challenges != 0 || !Dungeon.customSeedText.isEmpty()){
-					item = new Gold(10);
-				}
-
-				if (item == null) {
-					item = new Gold(50);
+					item = null;
 				}
 
 				Bundle emptyBones = new Bundle();
@@ -166,8 +179,6 @@ public class Bones {
 					ShatteredPixelDungeon.reportException(e);
 				}
 				level = "0";
-				
-				if (item == null) return null;
 
 				//Enforces artifact uniqueness
 				if (item instanceof Artifact){
@@ -176,37 +187,47 @@ public class Bones {
 						//generates a new artifact of the same type, always +0
 						Artifact artifact = Reflection.newInstance(((Artifact)item).getClass());
 						
-						if (artifact == null){
-							return new Gold(item.value());
+						if (artifact != null){
+							artifact.cursed = true;
+							artifact.cursedKnown = true;
 						}
 
-						artifact.cursed = true;
-						artifact.cursedKnown = true;
-
-						return artifact;
+						item = artifact;
 						
 					} else {
-						return new Gold(item.value());
+						item = new Gold(item.value());
 					}
 				}
-				
-				if (item.isUpgradable() && !(item instanceof MissileWeapon)) {
-					item.cursed = true;
-					item.cursedKnown = true;
-				}
-				
-				if (item.isUpgradable()) {
-					//caps at +3
-					if (item.level() > 3) {
-						item.degrade( item.level() - 3 );
+
+				if (item != null) {
+					if (item.isUpgradable() && !(item instanceof MissileWeapon)) {
+						item.cursed = true;
+						item.cursedKnown = true;
 					}
-					//thrown weapons are always IDed, otherwise set unknown
-					item.levelKnown = item instanceof MissileWeapon;
+
+					if (item.isUpgradable()) {
+						//caps at +3
+						if (item.level() > 3) {
+							item.degrade(item.level() - 3);
+						}
+						//thrown weapons are always IDed, otherwise set unknown
+						item.levelKnown = item instanceof MissileWeapon;
+					}
+
+					item.reset();
 				}
-				
-				item.reset();
-				
-				return item;
+
+				ArrayList<Item> result = new ArrayList<>();
+
+				if (heroClass != null) {
+					result.add(RemainsItem.get(heroClass));
+				}
+
+				if (item != null) {
+					result.add(item);
+				}
+
+				return result.isEmpty() ? null : result;
 			} else {
 				return null;
 			}
