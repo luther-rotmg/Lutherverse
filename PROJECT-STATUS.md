@@ -5,8 +5,8 @@
 and dated design docs, plans and CHANGELOG entries deliberately keep the original name as a
 historical record. Updated in the same commit as any substantive work — treat as ground truth for near-term state.*
 
-**Last update:** 2026-10-22
-**Current tip:** working branch `dev/2026-10-22` (off `main` at `34dfbdf17`), gate-verified locally; not yet merged to `main` or pushed.
+**Last update:** 2026-10-23
+**Current tip:** working branch `dev/2026-10-23` (off `main` at `3144f95da`), gate-verified locally; not yet merged to `main` or pushed.
 
 > The dated sections further down are a **historical log** and are deliberately not rewritten.
 > Where an older entry contradicts this header, the header wins.
@@ -14,6 +14,14 @@ historical record. Updated in the same commit as any substantive work — treat 
 ---
 
 ## Where we are
+
+**2026-10-23: two Slice 1 epics landed, F4 HeadlessRun exists, content-audit is at one real finding.**
+- **RemainsItem + Bones v2.3.0** (`cpdu-bsb`). Remains now carry a hero-class item, and stacks are capped at 3. Every level caller was adapted, and legacy `bones.dat` files still load. The five boss/shop levels now push their own RNG stream around remains, so seeded layouts of those floors from before this change will not reproduce (upstream's own consequence).
+- **Floating-text damage icons** (`cpdu-ta6.2`). The framework is ported, with 23 icons sliced one PNG per icon per `cpdu-cxr`. The call-site hunks are mapped out in `cpdu-ixv`.
+- **Generator.** The `WEP_T3.probs` typo is fixed (upstream `b1d82dee5`), and Dart's lookup entry and the category sub-orderings are ported. 6a313b135's **Pickaxe entry is deliberately held back**: CPDU's old Catalog builds `WEAPONS` from `WEP_T*`, so alone it would make the weapon-identification badges require a Pickaxe, a state upstream never shipped. It waits for the catalog and badge port (`cpdu-y0f`).
+- **content-audit.** Heuristic tuning took the backlog to one finding, `Pickaxe#I3`, parked at ceiling 1. A gate defect was found and fixed along the way: a class named only in a registry *comment* counted as registered.
+- **F4 HeadlessRun** (Slice-2 WS-1). The real `Dungeon.init`/save/load runs headless, with a whole-classpath static snapshot. It pins the save pipeline and same-seed levelgen and connectivity. It also found that levelgen depends on player progress, not just the seed (`cpdu-w3ol`).
+- Core tests: 151 → 181. desktop-smoke boots the real jar.
 
 **2026-10-22: the ready queue is cleared and the upstream bugfix wave is closed out.** Two real
 save/load defects are fixed. `Dungeon.initialVersion` was read back from the wrong bundle key; that
@@ -120,6 +128,18 @@ the gates catch regressions, not a faithfully implemented wrong spec.
 ---
 
 ## Recent activity
+
+**2026-10-23 (wave 2, branch `dev/2026-10-23`):**
+- Closed `cpdu-lr8`, `cpdu-e7i`, `cpdu-3vq` (partial, remainder split out), `cpdu-bsb` + `bsb.2`/`bsb.3`/`bsb.4`, `cpdu-ta6.2`. The F4 HeadlessRun foundation landed without a bead.
+- Review caught several problems before merge:
+  - a Waterskin sub-ordering entry cited to the wrong upstream commit;
+  - a Bomb sub-ordering assertion that could never fail;
+  - the Pickaxe badge regression;
+  - a commit that did not compile on its own (squashed);
+  - a latent test-state leak through `Dungeon.quickslot`;
+  - an unmapped icon index that would crash the render thread.
+- Integration then exposed the content-audit comment blind spot: the ceiling-0 negative control passed when it should have failed.
+- New beads: `cpdu-y0f`, `cpdu-1be`, `cpdu-dwb`, `cpdu-cm0`, `cpdu-5h0` (Generator/catalog parity); `cpdu-ixv` (damage-icon call sites that `cpdu-ta6.3`'s spec does not cover), `cpdu-fhv`; `cpdu-15q`, `cpdu-27j`, `cpdu-jjd` (remains follow-ups); `cpdu-q89z`, `cpdu-co23` (F4 follow-ups, F5); decisions `cpdu-pvf4` and `cpdu-w3ol`.
 
 **2026-10-22 (ready-queue burndown + WS-2 close-out, branch `dev/2026-10-22`):**
 - Closed `cpdu-86k`, `cpdu-tvy`, `cpdu-5js`, `cpdu-6io`, `cpdu-a34`, `cpdu-xxv`, `cpdu-x0z`, `cpdu-zpc`; `cpdu-r18` re-verified (the AFK run had closed it without compiling).
@@ -461,6 +481,8 @@ dispatcher at a time.
 - **Slice 1 scope decision.** The 541 triaged commits mean Slice 1 is roughly an order of magnitude larger than planned. Options: review and integrate them inside Slice 1, split them into a Slice 1b, or push the non-engine areas to a later slice. Task 25's re-estimation should not be the first time this is confronted.
 - **Conditional music as pack config** (`cpdu-15l`). Should amulet-obtained / quest-active track selection become a pack-config surface rather than hardcoded level code? Landing upstream's form would hardcode what CPDU deliberately made configurable, and would not apply to configured dungeons at all. Touches the frozen DSL.
 - **Make CI content-audit blocking?** (`cpdu-wez`). The over-report that justified `|| true` is fixed, and the ceiling (24) equals the real count. Advisory mode is how the ceiling drifted to 189 while the real count was 194.
+- **Seeds vs player progress** (`cpdu-w3ol`). Floors 1–2 entrance doors depend on the intro/guide-page state, so a shared or daily seed differs between new and returning players. Accept that (faithful), or neutralise it for seeded runs (a divergence)?
+- **Keybearer remains item** (`cpdu-pvf4`). Upstream's default arm gives it the Warrior's SealShard. Keep that, or give it its own item?
 - **SpectralNecromancer divergence** (`cpdu-66a`). Upstream left it without the impassable-tile guard. Fix it as a documented CPDU divergence, or leave it faithful?
 - **Balance pass from the 2026-08-14 review.** The recommendations in [2026-08-14-quality-balance-review.md](docs/superpowers/specs/2026-08-14-quality-balance-review.md) cover the keyblade burst, Nova `gridBonus` and its paralysis lock, Insight pricing, and depth-6/7 mob stat bands. They have no beads because each is a design call. Note that ParalysisResist now works (upstream `f3f4ef40f`), which already softens the Nova paralysis lock on repeat casts.
 - Otherwise Slice 1 remains authorized for autonomous execution under the repository's beads-pipeline and review rules.
