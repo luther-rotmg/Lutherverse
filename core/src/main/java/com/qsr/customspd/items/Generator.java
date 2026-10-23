@@ -66,7 +66,6 @@ import com.qsr.customspd.items.potions.PotionOfToxicGas;
 import com.qsr.customspd.items.potions.brews.Brew;
 import com.qsr.customspd.items.potions.elixirs.Elixir;
 import com.qsr.customspd.items.potions.exotic.ExoticPotion;
-import com.qsr.customspd.items.quest.Pickaxe;
 import com.qsr.customspd.items.rings.Ring;
 import com.qsr.customspd.items.rings.RingOfAccuracy;
 import com.qsr.customspd.items.rings.RingOfArcana;
@@ -395,16 +394,19 @@ public class Generator {
 			WEP_T1.defaultProbs = new float[]{ 2, 0, 2, 2, 2 };
 			WEP_T1.probs = WEP_T1.defaultProbs.clone();
 			
+			//upstream 6a313b135 also lists Pickaxe here at weight 0, for its new journal catalog. Not ported
+			// yet: CPDU's old Catalog.WEAPONS is built from WEP_T*.classes, so the entry alone would make
+			// ALL_WEAPONS_IDENTIFIED require a Pickaxe, a state upstream never shipped (b003d1129 redesigned
+			// those badges for the new catalog). Port it together with the catalog rewrite.
 			WEP_T2.classes = new Class<?>[]{
 					Shortsword.class,
 					HandAxe.class,
 					Spear.class,
 					Quarterstaff.class,
 					Dirk.class,
-					Sickle.class,
-					Pickaxe.class
+					Sickle.class
 			};
-			WEP_T2.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2, 0 };
+			WEP_T2.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2 };
 			WEP_T2.probs = WEP_T2.defaultProbs.clone();
 			
 			WEP_T3.classes = new Class<?>[]{
