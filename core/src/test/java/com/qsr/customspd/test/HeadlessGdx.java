@@ -9,6 +9,7 @@ import com.qsr.customspd.Badges;
 import com.qsr.customspd.items.potions.Potion;
 import com.qsr.customspd.items.rings.Ring;
 import com.qsr.customspd.items.scrolls.Scroll;
+import com.watabou.noosa.Game;
 import com.watabou.utils.FileUtils;
 import com.watabou.utils.Random;
 
@@ -50,6 +51,13 @@ public final class HeadlessGdx {
 
 		// External/local file ops (ModManager's enabled-mods scan) -> the same temp dir.
 		FileUtils.setDefaultFileProperties(Files.FileType.Absolute, tmp.getAbsolutePath() + File.separator);
+
+		// Launchers set Game.version before any game class loads; headless it is null, and
+		// DeviceCompat.isDebug() (reached from Document's static init) NPEs on it. Anything
+		// without "INDEV" keeps release-mode behaviour, which is what tests should exercise.
+		if (Game.version == null) {
+			Game.version = "0.0.0-headless-test";
+		}
 
 		// General game state many runtime paths touch (e.g. item.identify() -> Catalog -> Badges).
 		// With no save file in the temp dir, this initialises an empty global badge set.
