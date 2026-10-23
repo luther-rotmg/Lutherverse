@@ -66,4 +66,14 @@ class RemainsItemTest {
 			assertEquals(50, item.value());
 		}
 	}
+
+	@Test
+	void remainsItemsAreNotUpgradable() {
+		// upstream 86c00aba6: Item.isUpgradable() defaults to true, which let scrolls of upgrade,
+		// the blacksmith etc. target these single-use consumables.
+		for (HeroClass cls : HeroClass.values()) {
+			RemainsItem item = RemainsItem.get(cls);
+			assertFalse(item.isUpgradable(), item.getClass().getSimpleName() + " must not be upgradable");
+		}
+	}
 }
