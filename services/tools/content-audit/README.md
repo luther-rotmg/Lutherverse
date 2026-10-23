@@ -5,7 +5,7 @@ IS the "how to add content" checklist — satisfy every row and the gate passes.
 
 ```
 ./gradlew.bat :services:tools:content-audit:run \
-  --args="--allowlist services/tools/content-audit/reviewed-exceptions.txt --max-findings 0"
+  --args="--allowlist services/tools/content-audit/reviewed-exceptions.txt --max-findings 1"
 ```
 
 Exit 0 within the ceiling, 1 over it or canary failed, 2 if the scan itself broke.

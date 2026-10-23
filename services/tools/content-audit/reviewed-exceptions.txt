@@ -411,3 +411,13 @@ Mob Pylon#M2
 Item Pasty#I2
 # SandalsOfNature: name() reads name_<level> and desc() reads desc_<level+1> (as upstream v2.5.4)
 Item SandalsOfNature#I2
+#
+# --- v2.3.0 class remains items, 2026-10-23 (cpdu-bsb) ---
+# Never random loot: Bones.get() creates them through RemainsItem.get(heroClass) for a prior
+# run's remains, exactly as upstream f6054cc89 / v2.5.4, so absence from Generator is correct
+# forever. Sprite (I1) and localization (I2) are wired and pass.
+Item BowFragment#I3
+Item BrokenHilt#I3
+Item BrokenStaff#I3
+Item CloakScrap#I3
+Item SealShard#I3

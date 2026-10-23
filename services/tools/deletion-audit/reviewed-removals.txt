@@ -151,3 +151,13 @@ Talent#onItemIdentified(Hero, Item)
 # as upstream specifies. Deleting the override also restores the inherited
 # Weapon.accuracyFactor, which the old body called through via super.
 MeleeWeapon#accuracyFactor(Char, Char)
+
+# --- FloatingText damage-icon framework (4 entries) ---
+# Reviewed 2026-10-23 (cpdu-ta6.2, upstream 1c8b13fa6). Upstream's own signature refactor:
+# reset/show gained iconIdx + left parameters, the old 4-arg reset became the 6-arg form, and
+# the old show overloads and CharSprite.showStatus now delegate to the icon-aware forms (all
+# present at HEAD). No behaviour is lost; callers without an icon pass NO_ICON.
+FloatingText#reset(float, float, String, int)
+FloatingText#show(float, float, String, int)
+FloatingText#show(float, float, int, String, int)
+CharSprite#showStatus(int, String, Object[])
