@@ -66,9 +66,19 @@ class ContentScaffoldCliItemTest {
         File r = root.toFile();
         ContentScaffoldCli.generateItem(r, "Berry", "FOOD", "1");
         ContentScaffoldCli.GenResult second = ContentScaffoldCli.generateItem(r, "Berry", "FOOD", "1");
-        // class file, PNG, GeneralAsset, properties, and Generator insertions are all
-        // no-ops on the second run.
-        assertTrue(second.skipped().size() >= 5, () -> "expected >=5 skipped, got " + second.skipped());
+        // Every item touchpoint must be a no-op on the second run -- asserting a bare
+        // skipped().size() bound lets one touchpoint silently double-insert while another
+        // compensates on count, so check each touchpoint by name instead.
+        assertTrue(second.skipped().stream().anyMatch(s -> s.endsWith("Berry.java")),
+                () -> "expected class file skipped, got " + second.skipped());
+        assertTrue(second.skipped().stream().anyMatch(s -> s.endsWith("berry.png")),
+                () -> "expected PNG skipped, got " + second.skipped());
+        assertTrue(second.skipped().contains("GeneralAsset:BERRY"),
+                () -> "expected GeneralAsset entry skipped, got " + second.skipped());
+        assertTrue(second.skipped().contains("items.berry"),
+                () -> "expected localization entry skipped, got " + second.skipped());
+        assertTrue(second.skipped().contains("Generator:FOOD:Berry"),
+                () -> "expected Generator registration skipped, got " + second.skipped());
         assertTrue(second.created().isEmpty(), () -> "expected nothing created, got " + second.created());
         assertTrue(second.modified().isEmpty(), () -> "expected nothing modified, got " + second.modified());
     }
